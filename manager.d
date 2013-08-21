@@ -22,6 +22,7 @@ class Manager {
     void enable_glew() {
       import opengl.glew;
 
+      // create OpenGL context before call this
       if (glewInit() != GLEW_OK)
         throw new Exception("glewInit() failed");
     }
