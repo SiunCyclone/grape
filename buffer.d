@@ -2,7 +2,10 @@ module orange.buffer;
 
 import opengl.glew;
 import orange.shader;
+import derelict.sdl2.sdl;
+import derelict.sdl2.image;
 
+import derelict.sdl2.ttf;
 import std.stdio;
 
 class VboHandler {
@@ -59,11 +62,11 @@ class VboHandler {
 
 class IboHandler {
   public:
-    this (in int num) {
+    this(in int num) {
       glGenBuffers(num, &_ibo);
     }
 
-    ~this () {
+    ~this() {
       // num 1
       glDeleteBuffers(1, &_ibo);
     }
@@ -76,4 +79,45 @@ class IboHandler {
   private:
     GLuint _ibo;
 }
+
+class TextureHandler {
+  public:
+    this() {
+      
+    }
+
+    ~this() {
+
+    }
+
+    void load_image(string file) {
+      _image = IMG_Load(cast(char*) file);
+      enforce(_image != null, "create_image() failed");
+      set_draw_mode();
+    }
+
+    void create_texture() {
+      glActiveTexture(GL_TEXTURE0);
+      GLuint tid;
+      glGenTextures(1, &tid);
+      glBindTexture(GL_TEXTURE_2D, tid);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, _image.w, _image.h, 0, _mode, GL_UNSIGNED_BYTE, _image.pixels);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
+  private:
+    void set_draw_mode() {
+      if (_image.format.BytesPerPixel==4)
+        _mode = GL_RGBA;
+      else
+        _mode = GL_RGB;
+    }
+
+    SDL_Surface* _image;
+    int _mode;
+}
+
+
+
 
