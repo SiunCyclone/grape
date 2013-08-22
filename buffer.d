@@ -3,6 +3,8 @@ module orange.buffer;
 import opengl.glew;
 import orange.shader;
 
+import std.stdio;
+
 class VboHandler {
   public:
     this(in int num, in GLuint program) {
@@ -19,7 +21,7 @@ class VboHandler {
       foreach(int i, data; list) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboList[i]);
         // static draw is what?
-        glBufferData(GL_ARRAY_BUFFER, data.sizeof*data.length, data.ptr, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
     }
@@ -57,14 +59,21 @@ class VboHandler {
 
 class IboHandler {
   public:
-    /*
-    void bind(GLuint ibo, int[] index) {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, index.sizeof*index.length, index.ptr, GL_STATIC_DRAW);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      // glDeleteBuffers(1, &ibo); // whre should i write...
+    this (in int num) {
+      glGenBuffers(num, &_ibo);
     }
-    */
+
+    ~this () {
+      // num 1
+      glDeleteBuffers(1, &_ibo);
+    }
+    void create_ibo(int[] index) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, index[0].sizeof*index.length, index.ptr, GL_STATIC_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
   private:
+    GLuint _ibo;
 }
+

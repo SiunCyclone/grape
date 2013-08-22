@@ -8,6 +8,7 @@ enum {
   FragmentShader = GL_FRAGMENT_SHADER 
 }
 
+/*
 auto vShader = q{
 	attribute vec3 pos;
 	attribute vec4 color;
@@ -26,8 +27,8 @@ auto fShader = q{
 		gl_FragColor = vColor;
 	}
 };
+*/
 
-/*
 auto vShader = q{
 	attribute vec3 pos;
 	attribute vec4 color;
@@ -55,7 +56,6 @@ auto fShader = q{
 		//gl_FragColor = vColor * smpColor;
 	}
 };
-*/
 
 class Shader {
   public:
