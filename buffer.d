@@ -82,8 +82,8 @@ class IboHandler {
 
 class TextureHandler {
   public:
-    this() {
-      
+    this(GLuint program) {
+      _program = program; 
     }
 
     ~this() {
@@ -96,7 +96,20 @@ class TextureHandler {
       set_draw_mode();
     }
 
-    void create_texture() {
+    void create_texture(string locName) {
+      bind_texture();
+      set_location(locName);
+    }
+
+  private:
+    void set_draw_mode() {
+      if (_image.format.BytesPerPixel == 4)
+        _mode = GL_RGBA;
+      else
+        _mode = GL_RGB;
+    }
+   
+    void bind_texture() {
       glActiveTexture(GL_TEXTURE0);
       GLuint tid;
       glGenTextures(1, &tid);
@@ -106,18 +119,13 @@ class TextureHandler {
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
-  private:
-    void set_draw_mode() {
-      if (_image.format.BytesPerPixel==4)
-        _mode = GL_RGBA;
-      else
-        _mode = GL_RGB;
+    void set_location(string locName){
+      auto location = glGetUniformLocation(_program, cast(char*)locName);
+      glUniform1i(location, 0); // change last parameter
     }
 
     SDL_Surface* _image;
+    GLuint _program;
     int _mode;
 }
-
-
-
 
