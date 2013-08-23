@@ -122,16 +122,13 @@ class TexHandler {
       set_location(locName);
     }
 
-
   private:
     void set_draw_mode() {
-      if (_image.format.BytesPerPixel == 4)
-        _mode = GL_RGBA;
-      else
-        _mode = GL_RGB;
+      _mode = (_image.format.BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
     }
    
     void bind_texture() {
+      // check here
       glActiveTexture(GL_TEXTURE0);
       GLuint tid;
       glGenTextures(1, &tid);

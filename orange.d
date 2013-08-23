@@ -7,5 +7,6 @@ public import orange.buffer;
 public import orange.keyboard;
 public import orange.joystick;
 public import orange.font;
+public import orange.file;
 
 
