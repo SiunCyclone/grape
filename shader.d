@@ -3,6 +3,7 @@ module orange.shader;
 import std.exception : enforce;
 import opengl.glew;
 
+// name
 enum {
   VertexShader = GL_VERTEX_SHADER,
   FragmentShader = GL_FRAGMENT_SHADER 

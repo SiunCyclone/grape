@@ -2,6 +2,7 @@ module orange.window;
 
 import std.exception : enforce;
 import derelict.sdl2.sdl;
+import opengl.glew;
 
 class Window {
   public:
@@ -16,6 +17,7 @@ class Window {
     
     void update() {
       SDL_GL_SwapWindow(_window);
+      //glClear(GL_COLOR_BUFFER_BIT);
     }
 
     void should_close() {

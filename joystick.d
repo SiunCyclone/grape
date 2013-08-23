@@ -58,7 +58,7 @@ class Joystick {
       }
 
     // rename show_info("num")etc...
-    void show_num() {
+    void show_info() {
       writef("axes:%d buttons:%d balls:%d hats:%d \n", _numAxes, _numButtons, _numBalls, _numHats);
       // writefln
     }

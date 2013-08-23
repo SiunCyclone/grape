@@ -8,6 +8,17 @@ import derelict.sdl2.image;
 import derelict.sdl2.ttf;
 import std.stdio;
 
+enum DrawMode {
+  Points = GL_POINTS,
+  Lines = GL_LINES,
+  LineLoop = GL_LINE_LOOP,
+  LineStrip = GL_LINE_STRIP,
+  Triangles = GL_TRIANGLES,
+  TriangleStrip = GL_TRIANGLE_STRIP,
+  TriangleFan = GL_TRIANGLE_FAN,
+  Quads = GL_QUADS
+}
+
 class VboHandler {
   public:
     this(in int num, in GLuint program) {
@@ -33,6 +44,10 @@ class VboHandler {
       bind_attLoc(locNames);
       get_attLoc(locNames);
       attach_attLoc_to_vbo(strides);
+    }
+
+    void draw(DrawMode mode) {
+      //glDrawArrays(mode, 0, 3);
     }
 
   private:
@@ -71,16 +86,22 @@ class IboHandler {
       glDeleteBuffers(1, &_ibo);
     }
     void create_ibo(int[] index) {
+      _index = index;
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, index[0].sizeof*index.length, index.ptr, GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STATIC_DRAW);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+    
+    void draw(DrawMode mode) {
+      glDrawElements(mode, _index.length, GL_UNSIGNED_INT, _index.ptr);
     }
 
   private:
     GLuint _ibo;
+    int[] _index;
 }
 
-class TextureHandler {
+class TexHandler {
   public:
     this(GLuint program) {
       _program = program; 
@@ -100,6 +121,7 @@ class TextureHandler {
       bind_texture();
       set_location(locName);
     }
+
 
   private:
     void set_draw_mode() {
