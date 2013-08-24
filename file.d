@@ -6,6 +6,7 @@ import std.stdio;
 import std.conv;
 //import std.string;
 
+// obj handler
 class fileHandler {
   public:
     float[] make_mesh(string file) {
@@ -21,17 +22,18 @@ class fileHandler {
       return mesh;
     }
 
-  int[] make_index(string file) {
-    int[] t;
-    auto buf = appender(t);
-    auto f = File(file, "r");
+    int[] make_index(string file) {
+      int[] t;
+      auto buf = appender(t);
+      auto f = File(file, "r");
 
-    foreach (string line; lines(f)) {
-      if (line[0] != 'f') continue;
-      int[] ary = line.split[1..5].map!(x => to!(int)(x)-1).array;
-      buf.put([ary[0], ary[1], ary[2]]);
-      buf.put([ary[0], ary[3], ary[2]]);
+      foreach (string line; lines(f)) {
+        if (line[0] != 'f') continue;
+        int[] ary = line.split[1..5].map!(x => to!(int)(x)-1).array;
+        buf.put([ary[0], ary[1], ary[2]]);
+        buf.put([ary[0], ary[3], ary[2]]);
+      }
+
+      return buf.data;
     }
-    return buf.data;
-  }
 }

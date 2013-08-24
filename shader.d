@@ -9,54 +9,54 @@ enum {
   FragmentShader = GL_FRAGMENT_SHADER 
 }
 
-auto vShader = q{
-	attribute vec3 pos;
-	attribute vec4 color;
-	varying vec4 vColor;
+mixin template ShaderSource() {
+  auto vShader = q{
+    attribute vec3 pos;
+    attribute vec4 color;
+    varying vec4 vColor;
 
-	void main() {
-		vColor = color;
-		gl_Position = vec4(pos, 1.0);
-	}
-};
+    void main() {
+      vColor = color;
+      gl_Position = vec4(pos, 1.0);
+    }
+  };
 
-auto fShader = q{
-	varying vec4 vColor;
+  auto fShader = q{
+    varying vec4 vColor;
 
-	void main() {
-		gl_FragColor = vColor;
-	}
-};
+    void main() {
+      gl_FragColor = vColor;
+    }
+  };
 
-/*
-auto vShader = q{
-	attribute vec3 pos;
-	attribute vec4 color;
-  attribute vec2 texCoord;
-	varying vec4 vColor;
-  varying vec2 vTexCoord;
+  auto vTexShader = q{
+    attribute vec3 pos;
+    attribute vec4 color;
+    attribute vec2 texCoord;
+    varying vec4 vColor;
+    varying vec2 vTexCoord;
 
-	void main() {
-		vColor = color;
-    vTexCoord = texCoord;
-		gl_Position = vec4(pos, 1.0);
-	}
-};
+    void main() {
+      vColor = color;
+      vTexCoord = texCoord;
+      gl_Position = vec4(pos, 1.0);
+    }
+  };
 
-auto fShader = q{
-  uniform sampler2D tex;
-	varying vec4 vColor;
-  varying vec2 vTexCoord;
+  auto fTexShader = q{
+    uniform sampler2D tex;
+    varying vec4 vColor;
+    varying vec2 vTexCoord;
 
-	void main() {
-    vec4 smpColor = texture2D(tex, vTexCoord);
-    // What's the difference between texture and texture2D ?????
-    // vec4 smpColor = texture(tex, vTexCoord);
-		gl_FragColor = smpColor;
-		//gl_FragColor = vColor * smpColor;
-	}
-};
-*/
+    void main() {
+      vec4 smpColor = texture2D(tex, vTexCoord);
+      // What's the difference between texture and texture2D ?????
+      // vec4 smpColor = texture(tex, vTexCoord);
+      gl_FragColor = smpColor;
+      //gl_FragColor = vColor * smpColor;
+    }
+  };
+}
 
 class Shader {
   public:
@@ -69,6 +69,10 @@ class Shader {
       glDeleteShader(_shader); 
     }
 
+		alias _shader this;
+		GLuint _shader;
+
+  private:
 		void create_shader(T)(T type) {
 			_shader = glCreateShader(type);
 			enforce(_shader, "glCreateShader() faild");
@@ -84,31 +88,70 @@ class Shader {
 			glGetShaderiv(_shader, GL_COMPILE_STATUS, &result);
 			enforce(result != GL_FALSE, "glCompileShader() faild");
 		}
-
-		alias _shader this;
-		GLuint _shader;
 }
 
-class ShaderProgram {
+enum ShaderProgramType {
+  Normal = 0,
+  Texture = 1
+}
+
+class ShaderProgramHandler {
 	public:
-		this(T)(T vs, T fs) {
-			_program = glCreateProgram();
-			enforce(_program, "glCreateProgram() faild");
+    this(string type) {
+      if (type == "default")
+        create_default_program();
+    }
 
-			glAttachShader(_program, vs);
-			glAttachShader(_program, fs);
-		}	
+    ~this() {
+      foreach (program; _list)
+        glDeleteProgram(program);
+    }
 
-		void use() {
-			glLinkProgram(_program);
+		void enable(ShaderProgramType type) {
+      _current = type;
+    }
 
-			int linked;
-			glGetProgramiv(_program, GL_LINK_STATUS, &linked);
-			enforce(linked != GL_FALSE, "glLinkProgram() faild");
-
-			glUseProgram(_program);
+		void activate() {
+			glUseProgram(_list[_current]);
 		}
 
-		alias _program this;
-		GLuint _program;
+    @property {
+      GLuint curProgram() {
+        return _list[_current];
+      }
+    }
+
+  private:
+    mixin ShaderSource;
+
+    void create_default_program() {
+      Shader vs;
+      Shader fs;
+
+      vs = new Shader(VertexShader, vShader);
+      fs = new Shader(FragmentShader, fShader);
+      _list ~= create_program(vs, fs);
+
+      vs = new Shader(VertexShader, vTexShader);
+      fs = new Shader(FragmentShader, fTexShader);
+      _list ~= create_program(vs, fs);
+    }
+
+    GLuint create_program(T)(T vs, T fs) {
+			GLuint program = glCreateProgram();
+			enforce(program, "glCreateProgram() faild");
+
+			glAttachShader(program, vs);
+			glAttachShader(program, fs);
+			glLinkProgram(program);
+
+			int linked;
+			glGetProgramiv(program, GL_LINK_STATUS, &linked);
+			enforce(linked != GL_FALSE, "glLinkProgram() faild");
+
+      return program;
+    }
+
+    ShaderProgramType _current;
+    GLuint[] _list;
 }
