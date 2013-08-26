@@ -7,7 +7,7 @@ import std.conv;
 //import std.string;
 
 // obj handler
-class fileHandler {
+class FileHandler {
   public:
     float[] make_mesh(string file) {
       float[] mesh;
@@ -29,9 +29,11 @@ class fileHandler {
 
       foreach (string line; lines(f)) {
         if (line[0] != 'f') continue;
-        int[] ary = line.split[1..5].map!(x => to!(int)(x)-1).array;
+
+        int[] ary = line.split[1..$].map!(x => to!(int)(x)-1).array;
         buf.put([ary[0], ary[1], ary[2]]);
-        buf.put([ary[0], ary[3], ary[2]]);
+        if (ary.length > 3)
+          buf.put([ary[0], ary[3], ary[2]]);
       }
 
       return buf.data;
