@@ -63,6 +63,10 @@ class Joystick {
       // writefln
     }
 
+    void mapping(string file) {
+
+    }
+
     @property {
       int numAxes() {
         return _numAxes;

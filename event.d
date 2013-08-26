@@ -83,4 +83,12 @@ mixin template JoyEvent() {
   Uint8 button() {
     return _event.jbutton.button;
   }
+
+  Uint8 hat() {
+    return _event.jhat.hat;
+  }
+
+  Uint8 axis() {
+    return _event.jaxis.axis;
+  }
 }
