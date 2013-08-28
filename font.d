@@ -4,49 +4,39 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 import std.exception : enforce;
 import orange.buffer;
-import opengl.glew;
-
-import std.stdio;
-import derelict.sdl2.image;
 import orange.window;
+import opengl.glew;
 
 class FontHandler {
   public:
     this(GLuint program) {
-      _program = program;
-
-      _vboHandler = new VboHandler(2, _program);
+      _vboHandler = new VboHandler(2, program);
       _iboHandler = new IboHandler(1);
-      _texHandler = new TexHandler(_program);
+      _texHandler = new TexHandler(program);
 
       _drawMode = DrawMode.Triangles;
     }
 
     ~this() {
-      // opened?
-      // TTF_CloseFont(font);
+      if (_font != null)
+        TTF_CloseFont(_font);
     }
 
     void load(string file, int size) {
       _font = TTF_OpenFont(cast(char*)file, size);
-      enforce(_font != null, "FontHandler.load() failed");
+      enforce(_font != null, "FontHandler._font is null");
     }
 
-    // it's not rgb. i guess grb
     void set_color(ubyte r, ubyte g, ubyte b) {
       _color = SDL_Color(r, g, b);
     }
 
     void draw(float x, float y, string text) {
-      /*
-      _surf = IMG_Load("./resource/alpha.png");
-      if (_surf == null)
-        throw new Exception("_surf null");
-        */
       SDL_Surface* surfBase = TTF_RenderUTF8_Solid(_font, cast(char*)text, _color);
       enforce(surfBase != null, "FontHandler.surfBase is null");
+      scope(exit) SDL_FreeSurface(surfBase);
+
       _surf = SDL_ConvertSurfaceFormat(surfBase, SDL_PIXELFORMAT_ABGR8888, 0);
-      SDL_FreeSurface(surfBase);
 
       float[12] pos = set_pos(x, y);
       float[8] tex = [ 0.0, 0.0,
@@ -62,8 +52,9 @@ class FontHandler {
 
       // "tex"
       _texHandler.create_texture(_surf, "tex");
+      scope(exit) _texHandler.delete_texture();
+
       _iboHandler.draw(_drawMode);
-      _texHandler.delete_texture();
     }
 
   private:
@@ -79,7 +70,6 @@ class FontHandler {
                startX, startY-h, 0.0 ];
     }
 
-    GLuint _program;
     TTF_Font* _font;
     SDL_Color _color;
     SDL_Surface* _surf;
