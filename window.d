@@ -4,10 +4,15 @@ import std.exception : enforce;
 import derelict.sdl2.sdl;
 import opengl.glew;
 
+shared int WINDOW_X;
+shared int WINDOW_Y;
+
 class Window {
   public:
     this(string name, int x, int y, int w, int h) {
       create_window(name, x, y, w, h);
+      WINDOW_X = w;
+      WINDOW_Y = h;
     }
 
     ~this() {

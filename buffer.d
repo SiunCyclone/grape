@@ -111,29 +111,31 @@ class TexHandler {
 
     }
 
-    void load_image(string file) {
-      _image = IMG_Load(cast(char*) file);
-      enforce(_image != null, "create_image() failed");
-      set_draw_mode();
-    }
-
-    void create_texture(string locName) {
+    // args is weird
+    void create_texture(SDL_Surface* surf, string locName) {
+      _surf = surf;
       bind_texture();
       set_location(locName);
     }
 
+    void delete_texture() {
+      SDL_FreeSurface(_surf);
+      glDeleteTextures(1, &_tid);
+    }
+
   private:
     void set_draw_mode() {
-      _mode = (_image.format.BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
+      _mode = (_surf.format.BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
     }
    
     void bind_texture() {
+      set_draw_mode();
+
       // check here
       glActiveTexture(GL_TEXTURE0);
-      GLuint tid;
-      glGenTextures(1, &tid);
-      glBindTexture(GL_TEXTURE_2D, tid);
-      glTexImage2D(GL_TEXTURE_2D, 0, _mode, _image.w, _image.h, 0, _mode, GL_UNSIGNED_BYTE, _image.pixels);
+      glGenTextures(1, &_tid);
+      glBindTexture(GL_TEXTURE_2D, _tid);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, _surf.w, _surf.h, 0, _mode, GL_UNSIGNED_BYTE, _surf.pixels);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
@@ -143,8 +145,9 @@ class TexHandler {
       glUniform1i(location, 0); // change last parameter
     }
 
-    SDL_Surface* _image;
+    SDL_Surface* _surf;
     GLuint _program;
+    GLuint _tid;
     int _mode;
 }
 

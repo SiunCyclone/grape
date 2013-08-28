@@ -13,6 +13,70 @@ class Camera {
 }
 
 /*
+class Camera {
+	public:
+		this() {
+			axis_rad = [0.0, PI_2]; //TODO
+			quat = new Quaternion;
+			quat.set([0.0, 0.0, 3.0, 0.0]);
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluPerspective(45.0, DISPLAY_X/cast(float)DISPLAY_Y, 0.1, 100.0);
+			glGetFloatv(GL_PROJECTION_MATRIX, proj_);
+		}
+
+		void main() {
+			clear;
+			rotate;
+			zoom_up_out;
+			set_view;
+		}
+
+		@property {
+			GLfloat[16] projView() { 
+				GLfloat[16] projView_;
+			
+				projView_ = mul(proj_, view_);
+				return projView_;
+			}
+		}
+	private:
+		void clear() {
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+
+		void rotate() {
+			if (glfwGetKey('H')) quat.rotate([0.0, 1.0, 0.0], PI/180);	
+			if (glfwGetKey('L')) quat.rotate([0.0, 1.0, 0.0], -PI/180);	
+			if (glfwGetKey('J')) {
+				//quat.rotate([axis_rad[0]], PI/180);		
+			}
+			if (glfwGetKey('K')) {
+				//quat.rotate([axis[0], axis[1], axis[2]], -PI/180);		
+			}
+		}
+		
+		void zoom_up_out() {
+			float t1 = 0.994, t2  = 1.006;
+			if (glfwGetKey('Z')) quat.set([quat.pos[0]*t1, quat.pos[1]*t1, quat.pos[2]*t1, quat.w]);
+			if (glfwGetKey('X')) quat.set([quat.pos[0]*t2, quat.pos[1]*t2, quat.pos[2]*t2, quat.w]);
+		}
+
+		void set_view() {
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			gluLookAt(quat.pos[0],quat.pos[1],quat.pos[2], 0.0,0.0,0.0, 0.0,1.0,0.0);
+			glGetFloatv(GL_MODELVIEW_MATRIX, view_);
+		}
+
+		GLfloat[16] view_, proj_;
+		Quaternion quat;
+		float[2] axis_rad;
+}
+*/
+
+/*
 class Quaternion {
 	public:
 		void set(float[] elem) {

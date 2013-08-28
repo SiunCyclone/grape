@@ -10,6 +10,7 @@ enum {
 }
 
 mixin template ShaderSource() {
+  // Normal
   auto vShader = q{
     attribute vec3 pos;
     attribute vec4 color;
@@ -29,6 +30,7 @@ mixin template ShaderSource() {
     }
   };
 
+  // Texture
   auto vTexShader = q{
     attribute vec3 pos;
     attribute vec4 color;
@@ -53,7 +55,29 @@ mixin template ShaderSource() {
       // What's the difference between texture and texture2D ?????
       // vec4 smpColor = texture(tex, vTexCoord);
       gl_FragColor = smpColor;
-      //gl_FragColor = vColor * smpColor;
+      //gl_FragColor = vColor;
+    }
+  };
+
+  // Font
+  auto vFontShader = q{
+    attribute vec3 pos;
+    attribute vec2 texCoord;
+    varying vec2 vTexCoord;
+
+    void main() {
+      vTexCoord = texCoord;
+      gl_Position = vec4(pos, 1.0);
+    }
+  };
+
+  auto fFontShader = q{
+    uniform sampler2D tex;
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec4 smpColor = texture2D(tex, vTexCoord);
+      gl_FragColor = smpColor;
     }
   };
 }
@@ -92,7 +116,8 @@ class Shader {
 
 enum ShaderProgramType {
   Normal = 0,
-  Texture = 1
+  Texture = 1,
+  Font = 2
 }
 
 class ShaderProgramHandler {
@@ -134,6 +159,10 @@ class ShaderProgramHandler {
 
       vs = new Shader(VertexShader, vTexShader);
       fs = new Shader(FragmentShader, fTexShader);
+      _list ~= create_program(vs, fs);
+
+      vs = new Shader(VertexShader, vFontShader);
+      fs = new Shader(FragmentShader, fFontShader);
       _list ~= create_program(vs, fs);
     }
 
