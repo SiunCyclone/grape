@@ -22,7 +22,8 @@ class Window {
     
     void update() {
       SDL_GL_SwapWindow(_window);
-      //glClear(GL_COLOR_BUFFER_BIT);
+      // other
+      glClear(GL_COLOR_BUFFER_BIT);
     }
 
     void should_close() {

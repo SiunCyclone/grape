@@ -7,6 +7,8 @@ import orange.buffer;
 import orange.window;
 import opengl.glew;
 
+import std.stdio;
+
 class FontHandler {
   public:
     this(GLuint program) {
@@ -18,21 +20,31 @@ class FontHandler {
     }
 
     ~this() {
-      if (_font != null)
-        TTF_CloseFont(_font);
+      foreach(font; _font)
+        TTF_CloseFont(font);
     }
 
-    void load(string file, int size) {
-      _font = TTF_OpenFont(cast(char*)file, size);
-      enforce(_font != null, "FontHandler._font is null");
+    void load(string file, int[] sizeList...) {
+      if (sizeList.length == 0) {
+        sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                     15, 16, 17, 18, 20, 22, 24, 26,
+                     28, 32, 36, 40, 48, 56, 64, 72 ];
+      }
+      foreach (size; sizeList) {
+        _font[size] = TTF_OpenFont(cast(char*)file, size);
+        enforce(_font != null, "FontHandler._font is null");
+      }
     }
 
     void set_color(ubyte r, ubyte g, ubyte b) {
       _color = SDL_Color(r, g, b);
     }
 
-    void draw(float x, float y, string text) {
-      SDL_Surface* surfBase = TTF_RenderUTF8_Solid(_font, cast(char*)text, _color);
+    //void draw(float x, float y, string text, int size = _font.keys[0]) {
+    void draw(float x, float y, string text, int size) {
+      enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
+
+      SDL_Surface* surfBase = TTF_RenderUTF8_Solid(_font[size], cast(char*)text, _color);
       enforce(surfBase != null, "FontHandler.surfBase is null");
       scope(exit) SDL_FreeSurface(surfBase);
 
@@ -70,7 +82,7 @@ class FontHandler {
                startX, startY-h, 0.0 ];
     }
 
-    TTF_Font* _font;
+    TTF_Font*[int] _font;
     SDL_Color _color;
     SDL_Surface* _surf;
 
