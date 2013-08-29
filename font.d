@@ -7,16 +7,22 @@ import orange.buffer;
 import orange.window;
 import opengl.glew;
 
-import std.stdio;
-
 class FontHandler {
   public:
     this(GLuint program) {
       _vboHandler = new VboHandler(2, program);
-      _iboHandler = new IboHandler(1);
       _texHandler = new TexHandler(program);
+      _iboHandler = new IboHandler(1);
+      _iboHandler.create_ibo([0, 1, 2, 2, 3, 0]);
 
       _drawMode = DrawMode.Triangles;
+
+      _tex = [ 0.0, 0.0,
+               1.0, 0.0,
+               1.0, 1.0,
+               0.0, 1.0 ];        
+      _locNames = ["pos", "texCoord"];
+      _strides = [ 3, 2 ]; 
     }
 
     ~this() {
@@ -51,16 +57,9 @@ class FontHandler {
       _surf = SDL_ConvertSurfaceFormat(surfBase, SDL_PIXELFORMAT_ABGR8888, 0);
 
       float[12] pos = set_pos(x, y);
-      float[8] tex = [ 0.0, 0.0,
-                       1.0, 0.0,
-                       1.0, 1.0,
-                       0.0, 1.0 ];        
-      auto locNames = ["pos", "texCoord"];
-      auto strides = [ 3, 2 ]; 
 
-      _vboHandler.create_vbo(pos, tex);
-      _vboHandler.enable_vbo(locNames, strides);
-      _iboHandler.create_ibo([0,1,2,2,3,0]);
+      _vboHandler.create_vbo(pos, _tex);
+      _vboHandler.enable_vbo(_locNames, _strides);
 
       // "tex"
       _texHandler.create_texture(_surf, "tex");
@@ -85,6 +84,10 @@ class FontHandler {
     TTF_Font*[int] _font;
     SDL_Color _color;
     SDL_Surface* _surf;
+
+    float[8] _tex;
+    string[2] _locNames;
+    int[2] _strides;
 
     VboHandler _vboHandler;
     IboHandler _iboHandler;

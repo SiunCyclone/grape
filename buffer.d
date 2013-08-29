@@ -28,10 +28,12 @@ class VboHandler {
     }
 
     ~this() {
-      glDeleteBuffers(_vboList.length, _vboList.ptr);
+      delete_vbo();
     }
 
     void create_vbo(T...)(T list) {
+      delete_vbo();
+
       foreach(int i, data; list) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboList[i]);
         // static draw is what?
@@ -70,6 +72,11 @@ class VboHandler {
       }
     }
 
+    void delete_vbo() {
+      if (_vboList.length > 0)
+        glDeleteBuffers(_vboList.length, _vboList.ptr);
+    }
+
     GLuint[] _vboList;
     GLint[] _attLoc;
     GLuint _program;
@@ -82,10 +89,11 @@ class IboHandler {
     }
 
     ~this() {
-      // num 1
-      glDeleteBuffers(1, &_ibo);
+      delete_ibo();
     }
     void create_ibo(int[] index) {
+      delete_ibo();
+
       _index = index;
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STATIC_DRAW);
@@ -97,6 +105,11 @@ class IboHandler {
     }
 
   private:
+    void delete_ibo() {
+      // num 1
+      glDeleteBuffers(1, &_ibo);
+    }
+
     GLuint _ibo;
     int[] _index;
 }

@@ -132,13 +132,10 @@ class ShaderProgramHandler {
         glDeleteProgram(program);
     }
 
-		void enable(ShaderProgramType type) {
+		void use(ShaderProgramType type) {
       _current = type;
-    }
-
-		void activate() {
 			glUseProgram(_list[_current]);
-		}
+    }
 
     @property {
       GLuint curProgram() {
