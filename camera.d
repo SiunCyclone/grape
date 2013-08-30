@@ -1,6 +1,10 @@
 module orange.camera;
 
 import opengl.glew;
+import std.math;
+import orange.math;
+
+import std.stdio;
 
 class Camera {
   public :
@@ -8,8 +12,70 @@ class Camera {
 
     }
 
-  private:
+    void translate() {
 
+    }
+
+    void rotate() {
+
+    }
+
+    void ortho() {
+    }
+
+    void perspective(float fovy, float aspect, float znear, float zfar) {
+      // translate to orange.math
+      auto cot = delegate float(float x){ return 1 / tan(x); };
+      auto f = cot(fovy/2);
+
+      /*
+      _proj.set( f/aspect, 0, 0, 0,
+                 0, f, 0, 0,
+                 0, 0, (zfar+znear)/(znear-zfar), (2*zfar*znear)/(znear-zfar),
+                 0, 0, -1, 0 );
+                 */
+      _proj.set( f/aspect, 0, 0, 0,
+                 0, f, 0, 0,
+                 0, 0, (zfar+znear)/(znear-zfar), -1,
+                 0, 0, (2*zfar*znear)/(znear-zfar), 0 );
+    }
+
+    void look_at(Vec3 eye, Vec3 center, Vec3 up) {
+      Vec3 f = Vec3(center.x-eye.x, center.y-eye.y, center.z-eye.z);
+
+      f.normalize;
+      up.normalize;
+
+      Vec3 s = f.cross(up);
+      Vec3 u = s.cross(f);
+
+      /*
+      _view.set( s.x, s.y, s.z, 0,
+                 u.x, u.y, u.z, 0,
+                 -f.x, -f.y, -f.z, 0,
+                 0, 0, 0, 1 );
+                 */
+      _view = Mat4( s.x, u.x, -f.x, 0,
+                    s.y, u.y, -f.y, 0,
+                    s.z, u.z, -f.z, 0,
+                    0, 0, 0, 1 ).translate(-eye.x, -eye.y, -eye.z);
+    }
+
+    @property {
+      Mat4 pvMat4() {
+        return _proj.multiply(_view);
+      }
+    }
+
+  private:
+    Quaternion _quat;
+    Mat4 _proj, _view;
+}
+
+struct Quaternion {
+  public:
+
+  private:
 }
 
 /*

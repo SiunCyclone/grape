@@ -10,8 +10,7 @@ enum {
 }
 
 mixin template ShaderSource() {
-  // Normal
-  auto vShader = q{
+  auto vClassicNormal = q{
     attribute vec3 pos;
     attribute vec4 color;
     varying vec4 vColor;
@@ -22,7 +21,7 @@ mixin template ShaderSource() {
     }
   };
 
-  auto fShader = q{
+  auto fClassicNormal = q{
     varying vec4 vColor;
 
     void main() {
@@ -30,8 +29,7 @@ mixin template ShaderSource() {
     }
   };
 
-  // Texture
-  auto vTexShader = q{
+  auto vClassicTex = q{
     attribute vec3 pos;
     attribute vec4 color;
     attribute vec2 texCoord;
@@ -45,7 +43,7 @@ mixin template ShaderSource() {
     }
   };
 
-  auto fTexShader = q{
+  auto fClassicTex = q{
     uniform sampler2D tex;
     varying vec4 vColor;
     varying vec2 vTexCoord;
@@ -55,12 +53,11 @@ mixin template ShaderSource() {
       // What's the difference between texture and texture2D ?????
       // vec4 smpColor = texture(tex, vTexCoord);
       gl_FragColor = smpColor;
-      //gl_FragColor = vColor;
+      //gl_FragColor = vColor * smpColor;
     }
   };
 
-  // Font
-  auto vFontShader = q{
+  auto vFont = q{
     attribute vec3 pos;
     attribute vec2 texCoord;
     varying vec2 vTexCoord;
@@ -71,13 +68,33 @@ mixin template ShaderSource() {
     }
   };
 
-  auto fFontShader = q{
+  auto fFont = q{
     uniform sampler2D tex;
     varying vec2 vTexCoord;
 
     void main() {
       vec4 smpColor = texture2D(tex, vTexCoord);
       gl_FragColor = smpColor;
+    }
+  };
+
+  auto vNormal = q{
+    attribute vec3 pos;
+    attribute vec4 color;
+    uniform mat4 pvmMatrix;
+    varying vec4 vColor;
+
+    void main() {
+      vColor = color;
+      gl_Position = pvmMatrix * vec4(pos, 1.0);
+    }
+  };
+
+  auto fNormal = q{
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
     }
   };
 }
@@ -115,14 +132,16 @@ class Shader {
 }
 
 enum ShaderProgramType {
-  Normal = 0,
-  Texture = 1,
-  Font = 2
+  ClassicNormal = 0,
+  ClassicTexture = 1,
+  Font = 2,
+  Normal = 3
 }
 
 class ShaderProgramHandler {
 	public:
     this(string type) {
+      // change
       if (type == "default")
         create_default_program();
     }
@@ -144,22 +163,19 @@ class ShaderProgramHandler {
     }
 
   private:
+    // switch
     mixin ShaderSource;
 
     void create_default_program() {
-      Shader vs;
-      Shader fs;
+      add_program(vClassicNormal, fClassicNormal);
+      add_program(vClassicTex, fClassicTex);
+      add_program(vFont, fFont);
+      add_program(vNormal, fNormal);
+    }
 
-      vs = new Shader(VertexShader, vShader);
-      fs = new Shader(FragmentShader, fShader);
-      _list ~= create_program(vs, fs);
-
-      vs = new Shader(VertexShader, vTexShader);
-      fs = new Shader(FragmentShader, fTexShader);
-      _list ~= create_program(vs, fs);
-
-      vs = new Shader(VertexShader, vFontShader);
-      fs = new Shader(FragmentShader, fFontShader);
+    void add_program(T)(T vShaderSource, T fShaderSource) {
+      Shader vs = new Shader(VertexShader, vShaderSource);
+      Shader fs = new Shader(FragmentShader, fShaderSource);
       _list ~= create_program(vs, fs);
     }
 

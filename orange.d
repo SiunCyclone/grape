@@ -10,4 +10,5 @@ public import orange.font;
 public import orange.file;
 public import orange.camera;
 public import orange.event;
+public import orange.math;
 
