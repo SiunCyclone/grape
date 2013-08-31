@@ -6,8 +6,8 @@ import std.stdio;
 import std.conv;
 //import std.string;
 
-// obj handler
-class FileHandler {
+// obj hdr
+class FileHdr {
   public:
     float[] make_mesh(string file) {
       float[] mesh;

@@ -28,12 +28,6 @@ class Camera {
       auto cot = delegate float(float x){ return 1 / tan(x); };
       auto f = cot(fovy/2);
 
-      /*
-      _proj.set( f/aspect, 0, 0, 0,
-                 0, f, 0, 0,
-                 0, 0, (zfar+znear)/(znear-zfar), (2*zfar*znear)/(znear-zfar),
-                 0, 0, -1, 0 );
-                 */
       _proj.set( f/aspect, 0, 0, 0,
                  0, f, 0, 0,
                  0, 0, (zfar+znear)/(znear-zfar), -1,
@@ -49,12 +43,6 @@ class Camera {
       Vec3 s = f.cross(up);
       Vec3 u = s.cross(f);
 
-      /*
-      _view.set( s.x, s.y, s.z, 0,
-                 u.x, u.y, u.z, 0,
-                 -f.x, -f.y, -f.z, 0,
-                 0, 0, 0, 1 );
-                 */
       _view = Mat4( s.x, u.x, -f.x, 0,
                     s.y, u.y, -f.y, 0,
                     s.z, u.z, -f.z, 0,

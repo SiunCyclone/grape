@@ -138,7 +138,7 @@ enum ShaderProgramType {
   Normal = 3
 }
 
-class ShaderProgramHandler {
+class ShaderProgramHdr {
 	public:
     this(string type) {
       // change

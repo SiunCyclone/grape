@@ -19,7 +19,7 @@ enum DrawMode {
   Quads = GL_QUADS
 }
 
-class VboHandler {
+class VboHdr {
   public:
     this(in int num, in GLuint program) {
       _vboList.length = num;
@@ -82,7 +82,7 @@ class VboHandler {
     GLuint _program;
 }
 
-class IboHandler {
+class IboHdr {
   public:
     this(in int num) {
       glGenBuffers(num, &_ibo);
@@ -114,7 +114,7 @@ class IboHandler {
     int[] _index;
 }
 
-class TexHandler {
+class TexHdr {
   public:
     this(GLuint program) {
       _program = program; 

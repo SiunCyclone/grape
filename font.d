@@ -7,13 +7,13 @@ import orange.buffer;
 import orange.window;
 import opengl.glew;
 
-class FontHandler {
+class FontHdr {
   public:
     this(GLuint program) {
-      _vboHandler = new VboHandler(2, program);
-      _texHandler = new TexHandler(program);
-      _iboHandler = new IboHandler(1);
-      _iboHandler.create_ibo([0, 1, 2, 2, 3, 0]);
+      _vboHdr = new VboHdr(2, program);
+      _texHdr = new TexHdr(program);
+      _iboHdr = new IboHdr(1);
+      _iboHdr.create_ibo([0, 1, 2, 2, 3, 0]);
 
       _drawMode = DrawMode.Triangles;
 
@@ -38,7 +38,7 @@ class FontHandler {
       }
       foreach (size; sizeList) {
         _font[size] = TTF_OpenFont(cast(char*)file, size);
-        enforce(_font != null, "FontHandler._font is null");
+        enforce(_font != null, "FontHdr._font is null");
       }
     }
 
@@ -51,21 +51,21 @@ class FontHandler {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
       SDL_Surface* surfBase = TTF_RenderUTF8_Solid(_font[size], cast(char*)text, _color);
-      enforce(surfBase != null, "FontHandler.surfBase is null");
+      enforce(surfBase != null, "FontHdr.surfBase is null");
       scope(exit) SDL_FreeSurface(surfBase);
 
       _surf = SDL_ConvertSurfaceFormat(surfBase, SDL_PIXELFORMAT_ABGR8888, 0);
 
       float[12] pos = set_pos(x, y);
 
-      _vboHandler.create_vbo(pos, _tex);
-      _vboHandler.enable_vbo(_locNames, _strides);
+      _vboHdr.create_vbo(pos, _tex);
+      _vboHdr.enable_vbo(_locNames, _strides);
 
       // "tex"
-      _texHandler.create_texture(_surf, "tex");
-      scope(exit) _texHandler.delete_texture();
+      _texHdr.create_texture(_surf, "tex");
+      scope(exit) _texHdr.delete_texture();
 
-      _iboHandler.draw(_drawMode);
+      _iboHdr.draw(_drawMode);
     }
 
   private:
@@ -89,9 +89,9 @@ class FontHandler {
     string[2] _locNames;
     int[2] _strides;
 
-    VboHandler _vboHandler;
-    IboHandler _iboHandler;
-    TexHandler _texHandler;
+    VboHdr _vboHdr;
+    IboHdr _iboHdr;
+    TexHdr _texHdr;
     DrawMode _drawMode;
 }
 
