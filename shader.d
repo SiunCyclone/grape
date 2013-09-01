@@ -97,6 +97,33 @@ mixin template ShaderSource() {
       gl_FragColor = vColor;
     }
   };
+
+  auto vDiffuse = q{
+    attribute vec3 pos;
+    attribute vec3 normal;
+    attribute vec4 color;
+
+    uniform vec3 lightPosition;
+    uniform mat4 pvmMatrix;
+    uniform mat4 invMatrix;
+
+    varying vec4 vColor;
+    
+    void main() {
+      vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
+      float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
+      vColor = color * vec4(vec3(diffuse), 1.0);
+      gl_Position = pvmMatrix * vec4(pos, 1.0); 
+    }
+  };
+
+  auto fDiffuse = q{
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
+    }
+  };
 }
 
 class Shader {
@@ -135,7 +162,8 @@ enum ShaderProgramType {
   ClassicNormal = 0,
   ClassicTexture = 1,
   Font = 2,
-  Normal = 3
+  Normal = 3,
+  Diffuse = 4
 }
 
 class ShaderProgramHdr {
@@ -171,6 +199,7 @@ class ShaderProgramHdr {
       add_program(vClassicTex, fClassicTex);
       add_program(vFont, fFont);
       add_program(vNormal, fNormal);
+      add_program(vDiffuse, fDiffuse);
     }
 
     void add_program(T)(T vShaderSource, T fShaderSource) {

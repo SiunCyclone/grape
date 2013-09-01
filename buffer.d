@@ -22,7 +22,8 @@ enum DrawMode {
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
-      _vboList.length = num;
+      _num = num;
+      _vboList.length = _num;
       _program = program;
       glGenBuffers(num, _vboList.ptr);
     }
@@ -32,6 +33,7 @@ class VboHdr {
     }
 
     void create_vbo(T...)(T list) {
+      assert(list.length == _num);
       delete_vbo();
 
       foreach(int i, data; list) {
@@ -43,6 +45,8 @@ class VboHdr {
     }
 
     void enable_vbo(string[] locNames, int[] strides) {
+      assert(locNames.length == _num);
+      assert(strides.length == _num);
       bind_attLoc(locNames);
       get_attLoc(locNames);
       attach_attLoc_to_vbo(strides);
@@ -77,6 +81,7 @@ class VboHdr {
         glDeleteBuffers(_vboList.length, _vboList.ptr);
     }
 
+    int _num;
     GLuint[] _vboList;
     GLint[] _attLoc;
     GLuint _program;
