@@ -103,14 +103,15 @@ mixin template ShaderSource() {
     attribute vec3 normal;
     attribute vec4 color;
 
-    uniform vec3 lightPosition;
+    uniform vec3 lightPos;
+
     uniform mat4 pvmMatrix;
     uniform mat4 invMatrix;
 
     varying vec4 vColor;
     
     void main() {
-      vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
+      vec3 invLight = normalize(invMatrix * vec4(lightPos, 0.0));
       float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
       vColor = color * vec4(vec3(diffuse), 1.0);
       gl_Position = pvmMatrix * vec4(pos, 1.0); 
@@ -118,6 +119,40 @@ mixin template ShaderSource() {
   };
 
   auto fDiffuse = q{
+    varying vec4 vColor;
+
+    void main() {
+      gl_FragColor = vColor;
+    }
+  };
+
+  auto vADS = q{
+    attribute vec3 pos;
+    attribute vec3 normal;
+    attribute vec4 color;
+
+    uniform vec3 lightPos;
+    uniform vec3 eyePos;
+    uniform vec4 ambientColor;
+
+    uniform mat4 pvmMatrix;
+    uniform mat4 invMatrix;
+
+    varying vec4 vColor;
+    
+    void main() {
+      vec3 invLight = normalize(invMatrix * vec4(lightPos, 0.0));
+      vec3 invEye = normalize(invMatrix * vec4(eyePos, 0.0));
+      vec3 halfLE = normalize(invLight + invEye);
+      float diffuse = clamp(dot(normal, invLight), 0.0, 1.0);
+      float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0);
+      vec4 light = color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
+      vColor = light + ambientColor;
+      gl_Position = pvmMatrix * vec4(pos, 1.0); 
+    }
+  };
+
+  auto fADS = q{
     varying vec4 vColor;
 
     void main() {
@@ -163,7 +198,8 @@ enum ShaderProgramType {
   ClassicTexture = 1,
   Font = 2,
   Normal = 3,
-  Diffuse = 4
+  Diffuse = 4,
+  ADS = 5,
 }
 
 class ShaderProgramHdr {
@@ -200,6 +236,7 @@ class ShaderProgramHdr {
       add_program(vFont, fFont);
       add_program(vNormal, fNormal);
       add_program(vDiffuse, fDiffuse);
+      add_program(vADS, fADS);
     }
 
     void add_program(T)(T vShaderSource, T fShaderSource) {
