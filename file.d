@@ -15,7 +15,7 @@ class FileHdr {
 
       foreach (string line; lines(f)) {
         if (line.split[0] != "v") continue;
-        foreach (float coord; line.split[1..4].map!(x => to!(float)(x)).array)
+        foreach (float coord; line.split[1..$].map!(x => to!(float)(x)).array)
           mesh ~= coord;
       }
 
@@ -23,50 +23,29 @@ class FileHdr {
     }
 
     float[] make_normal(string file) {
-      float[][] normalBase;
+      float[][] randomNormal;
       float[] normal;
       auto f = File(file, "r");
+      // optimize create normal
+      auto memorize = delegate void() {
+      };
 
       foreach (string line; lines(f)) {
         if (line.split[0] == "vn") {
-          normalBase ~= line.split[1..4].map!(x => to!(float)(x)).array;
-        } else if (line[0] == 'f') {
-          /*
-          auto k = line.split[1..$].map!(x => x.split("//"));
-          int[] index = k.map!(x => x[1]).map!(y => to!(int)(y)-1).array;
-          */
+          randomNormal ~= [line.split[1..$].map!(x => to!(float)(x)).array];
+        }
 
-          /*
-          int l = line.split[1..$].length;
-          int index = to!(int)(line.split[1].split("//")[1])-1;
-
-          if (l > 3) {
-            for (int i; i<6; ++i)
-              normal ~= normalBase[index];
-          } else {
+        if (line.split[0] == "f" ) {
+          if (normal.length == 0)
+            normal.length = randomNormal.length * 3;
+          foreach (index; line.split[1..$].map!(x => x.split("//")).map!(y => [to!(int)(y[0])-1, to!(int)(y[1])-1])) {
             for (int i; i<3; ++i)
-              normal ~= normalBase[index];
+              normal[index[0]*3+i] = randomNormal[index[1]][i];
           }
-          */
-
-          /*
-          normal ~= [normalBase[index[0]], normalBase[index[1]], normalBase[index[2]]];
-          if (index.length > 3)
-            normal ~= [normalBase[index[0]], normalBase[index[3]], normalBase[index[2]]];
-            */
         }
       }
 
-      //return normal;
-      return [ 1.000000, -1.000000, -1.000000,
-               1.000000, -1.000000, 1.000000,
-               -1.000000, -1.000000, 1.000000,
-               -1.000000, -1.000000, -1.000000,
-               1.000000, 1.000000, -0.999999,
-               0.999999, 1.000000, 1.000001,
-               -1.000000, 1.000000, 1.000000,
-               -1.000000, 1.000000, -1.000000 
-             ];
+      return normal;
     }
 
     int[] make_index(string file) {
