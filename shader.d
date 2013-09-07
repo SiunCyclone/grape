@@ -3,6 +3,15 @@ module orange.shader;
 import std.exception : enforce;
 import opengl.glew;
 
+enum ShaderProgramType {
+  ClassicNormal = 0,
+  ClassicTexture = 1,
+  Font = 2,
+  Normal = 3,
+  Texture = 4,
+  Diffuse = 5,
+  ADS = 6,
+}
 // name
 enum {
   VertexShader = GL_VERTEX_SHADER,
@@ -29,6 +38,7 @@ mixin template ShaderSource() {
     }
   };
 
+  // need pvmMatrix?
   auto vClassicTex = q{
     attribute vec3 pos;
     attribute vec4 color;
@@ -95,6 +105,34 @@ mixin template ShaderSource() {
 
     void main() {
       gl_FragColor = vColor;
+    }
+  };
+
+  auto vTex = q{
+    attribute vec3 pos;
+    attribute vec4 color;
+    attribute vec2 texCoord;
+    varying vec4 vColor;
+    varying vec2 vTexCoord;
+    uniform mat4 pvmMatrix;
+
+    void main() {
+      vColor = color;
+      vTexCoord = texCoord;
+      gl_Position = pvmMatrix * vec4(pos, 1.0); 
+    }
+  };
+
+  auto fTex = q{
+    uniform sampler2D tex;
+    varying vec4 vColor;
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec4 smpColor = texture2D(tex, vTexCoord);
+      //gl_FragColor = vColor;
+      gl_FragColor = smpColor;
+      //gl_FragColor = vColor + smpColor;
     }
   };
 
@@ -193,15 +231,6 @@ class Shader {
 		}
 }
 
-enum ShaderProgramType {
-  ClassicNormal = 0,
-  ClassicTexture = 1,
-  Font = 2,
-  Normal = 3,
-  Diffuse = 4,
-  ADS = 5,
-}
-
 class ShaderProgramHdr {
 	public:
     this(string type) {
@@ -235,6 +264,7 @@ class ShaderProgramHdr {
       add_program(vClassicTex, fClassicTex);
       add_program(vFont, fFont);
       add_program(vNormal, fNormal);
+      add_program(vTex, fTex);
       add_program(vDiffuse, fDiffuse);
       add_program(vADS, fADS);
     }

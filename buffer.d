@@ -7,6 +7,11 @@ import derelict.sdl2.image;
 
 import derelict.sdl2.ttf;
 import std.stdio;
+import orange.window;
+import orange.shader;
+import orange.file;
+import orange.math;
+import orange.camera;
 
 enum DrawMode {
   Points = GL_POINTS,
@@ -169,3 +174,99 @@ class TexHdr {
     int _mode;
 }
 
+class UniHdr {
+  public:
+
+
+  private:
+}
+
+class FboHdr {
+  public:
+    this() {
+      glGenFramebuffers(1, &_fbo);
+      glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    }
+
+    ~this() {
+    }
+
+    void set(GLuint program) {
+      _program = program;
+
+      FileHdr _fileHdr = new FileHdr;
+      string fileName = "./resource/box.obj";
+      _mesh = _fileHdr.make_mesh(fileName);
+      _index = _fileHdr.make_index(fileName);
+      _locNames = ["pos", "color"];
+      _strides = [ 3, 4 ]; 
+
+      for (int i; i<_mesh.length/3; ++i)
+        _color ~= [ 0.5, 0.8, 0.0, 1.0 ];
+
+      _vboHdr = new VboHdr(2, _program);
+      _iboHdr = new IboHdr(1);
+      _iboHdr.create_ibo(_index);
+    }
+
+    void init() {
+      GLuint renderTex;
+      glGenTextures(1, &renderTex);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, renderTex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex, 0);
+
+      GLuint depthBuf;
+      glGenRenderbuffers(1, &depthBuf);
+      glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
+
+      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+      glDrawBuffers(1, drawBufs.ptr);
+
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    void draw() {
+      glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+      glViewport(0, 0, 512, 512);
+      Camera camera = new Camera;
+      camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
+
+      Vec3 eye = Vec3(2, 2, 2);
+      Vec3 center = Vec3(0, 0, 0);
+      Vec3 up = Vec3(0, 1, 0);
+      camera.look_at(eye, center, up);
+      auto loc = glGetUniformLocation(_program, "pvmMatrix");
+      glUniformMatrix4fv(loc, 1, GL_FALSE, camera.pvMat4.mat.ptr);
+
+      _vboHdr.create_vbo(_mesh, _color);
+      _vboHdr.enable_vbo(_locNames, _strides);
+      auto drawMode = DrawMode.Triangles;
+      _iboHdr.draw(drawMode);
+
+      quit();
+    }
+
+    void quit() {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glViewport(0, 0, WINDOW_X, WINDOW_Y);
+    }
+
+  private:
+    GLuint _fbo;
+
+    GLuint _program;
+    float[] _mesh;
+    float[] _color;
+    int[] _index;
+    string[] _locNames;
+    int[] _strides;
+    VboHdr _vboHdr;
+    IboHdr _iboHdr;
+}

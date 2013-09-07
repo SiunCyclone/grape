@@ -61,7 +61,7 @@ class FontHdr {
       _vboHdr.create_vbo(pos, _tex);
       _vboHdr.enable_vbo(_locNames, _strides);
 
-      // "tex"
+      // "tex" not create here
       _texHdr.create_texture(_surf, "tex");
       scope(exit) _texHdr.delete_texture();
 
