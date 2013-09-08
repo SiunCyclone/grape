@@ -3,6 +3,8 @@ module orange.shader;
 import std.exception : enforce;
 import opengl.glew;
 
+import std.stdio;
+
 enum ShaderProgramType {
   ClassicNormal = 0,
   ClassicTexture = 1,
@@ -19,7 +21,7 @@ enum {
   FragmentShader = GL_FRAGMENT_SHADER 
 }
 
-mixin template ShaderSource() {
+mixin template ClassicNormalShader() {
   auto vClassicNormal = q{
     attribute vec3 pos;
     attribute vec4 color;
@@ -38,9 +40,10 @@ mixin template ShaderSource() {
       gl_FragColor = vColor;
     }
   };
+}
 
-  // need pvmMatrix?
-  auto vClassicTex = q{
+mixin template ClassicTextureShader() {
+  auto vClassicTexture = q{
     attribute vec3 pos;
     attribute vec4 color;
     attribute vec2 texCoord;
@@ -54,7 +57,7 @@ mixin template ShaderSource() {
     }
   };
 
-  auto fClassicTex = q{
+  auto fClassicTexture = q{
     uniform sampler2D tex;
     varying vec4 vColor;
     varying vec2 vTexCoord;
@@ -67,7 +70,9 @@ mixin template ShaderSource() {
       //gl_FragColor = vColor * smpColor;
     }
   };
+}
 
+mixin template FontShader() {
   auto vFont = q{
     attribute vec3 pos;
     attribute vec2 texCoord;
@@ -88,7 +93,9 @@ mixin template ShaderSource() {
       gl_FragColor = smpColor;
     }
   };
+}
 
+mixin template NormalShader() {
   auto vNormal = q{
     attribute vec3 pos;
     attribute vec4 color;
@@ -108,8 +115,10 @@ mixin template ShaderSource() {
       gl_FragColor = vColor;
     }
   };
+}
 
-  auto vTex = q{
+mixin template TextureShader() {
+  auto vTexture = q{
     attribute vec3 pos;
     attribute vec4 color;
     attribute vec2 texCoord;
@@ -124,7 +133,7 @@ mixin template ShaderSource() {
     }
   };
 
-  auto fTex = q{
+  auto fTexture = q{
     uniform sampler2D tex;
     varying vec4 vColor;
     varying vec2 vTexCoord;
@@ -137,7 +146,9 @@ mixin template ShaderSource() {
       //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
     }
   };
+}
 
+mixin template DiffuseShader() {
   auto vDiffuse = q{
     attribute vec3 pos;
     attribute vec3 normal;
@@ -165,7 +176,9 @@ mixin template ShaderSource() {
       gl_FragColor = vColor;
     }
   };
+}
 
+mixin template ADSShader() {
   auto vADS = q{
     attribute vec3 pos;
     attribute vec3 normal;
@@ -199,7 +212,9 @@ mixin template ShaderSource() {
       gl_FragColor = vColor;
     }
   };
+}
 
+mixin template GaussianShader() {
   auto vGaussian = q{
     attribute vec2 pos;
     attribute vec2 texCoord;
@@ -275,15 +290,65 @@ class Shader {
 
 class ShaderProgramHdr {
 	public:
-    this(string type) {
-      // change
-      if (type == "default")
-        create_default_program();
+    this(ShaderProgramType[] typeList...) {
+      if (typeList.length == 0)
+        typeList = [ ShaderProgramType.ClassicNormal,
+                     ShaderProgramType.ClassicTexture,
+                     ShaderProgramType.Font,
+                     ShaderProgramType.Normal,
+                     ShaderProgramType.Texture,
+                     ShaderProgramType.Diffuse,
+                     ShaderProgramType.ADS,
+                     ShaderProgramType.Gaussian ];
+
+      enable_program(typeList);
+      //writeln(_list.length);
     }
 
     ~this() {
       foreach (program; _list)
         glDeleteProgram(program);
+    }
+
+    // delegate
+    void enable_program(ShaderProgramType[] typeList...) {
+      foreach (type; typeList) {
+        switch (type) {
+          case ShaderProgramType.ClassicNormal:
+            mixin ClassicNormalShader;
+            add_program(type, vClassicNormal, fClassicNormal);
+            break;
+          case ShaderProgramType.ClassicTexture:
+            mixin ClassicTextureShader;
+            add_program(type, vClassicTexture, fClassicTexture);
+            break;
+          case ShaderProgramType.Font:
+            mixin FontShader;
+            add_program(type, vFont, fFont);
+            break;
+          case ShaderProgramType.Normal:
+            mixin NormalShader;
+            add_program(type, vNormal, fNormal);
+            break;
+          case ShaderProgramType.Texture:
+            mixin TextureShader;
+            add_program(type, vTexture, fTexture);
+            break;
+          case ShaderProgramType.Diffuse:
+            mixin DiffuseShader;
+            add_program(type, vDiffuse, fDiffuse);
+            break;
+          case ShaderProgramType.ADS:
+            mixin ADSShader;
+            add_program(type, vADS, fADS);
+            break;
+          case ShaderProgramType.Gaussian:
+            mixin GaussianShader;
+            add_program(type, vGaussian, fGaussian);
+            break;
+          default:
+        }
+      } 
     }
 
 		void use(ShaderProgramType type) {
@@ -298,24 +363,10 @@ class ShaderProgramHdr {
     }
 
   private:
-    // switch
-    mixin ShaderSource;
-
-    void create_default_program() {
-      add_program(vClassicNormal, fClassicNormal);
-      add_program(vClassicTex, fClassicTex);
-      add_program(vFont, fFont);
-      add_program(vNormal, fNormal);
-      add_program(vTex, fTex);
-      add_program(vDiffuse, fDiffuse);
-      add_program(vADS, fADS);
-      add_program(vGaussian, fGaussian);
-    }
-
-    void add_program(T)(T vShaderSource, T fShaderSource) {
+    void add_program(T)(ShaderProgramType type, T vShaderSource, T fShaderSource) {
       Shader vs = new Shader(VertexShader, vShaderSource);
       Shader fs = new Shader(FragmentShader, fShaderSource);
-      _list ~= create_program(vs, fs);
+      _list[type] = create_program(vs, fs);
     }
 
     GLuint create_program(T)(T vs, T fs) {
@@ -334,5 +385,5 @@ class ShaderProgramHdr {
     }
 
     ShaderProgramType _current;
-    GLuint[] _list;
+    GLuint[ShaderProgramType] _list;
 }
