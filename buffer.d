@@ -164,8 +164,8 @@ class TexHdr {
     }
 
     void set_location(string locName){
-      auto location = glGetUniformLocation(_program, cast(char*)locName);
-      glUniform1i(location, 0); // change last parameter
+      auto loc = glGetUniformLocation(_program, cast(char*)locName);
+      glUniform1i(loc, 0); // change last parameter
     }
 
     SDL_Surface* _surf;
@@ -186,6 +186,8 @@ class FboHdr {
     this() {
       glGenFramebuffers(1, &_fbo);
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+      _camera = new Camera;
     }
 
     ~this() {
@@ -195,14 +197,14 @@ class FboHdr {
       _program = program;
 
       FileHdr _fileHdr = new FileHdr;
-      string fileName = "./resource/box.obj";
+      string fileName = "./resource/sphere.obj";
       _mesh = _fileHdr.make_mesh(fileName);
       _index = _fileHdr.make_index(fileName);
       _locNames = ["pos", "color"];
       _strides = [ 3, 4 ]; 
 
       for (int i; i<_mesh.length/3; ++i)
-        _color ~= [ 0.5, 0.8, 0.0, 1.0 ];
+        _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
 
       _vboHdr = new VboHdr(2, _program);
       _iboHdr = new IboHdr(1);
@@ -233,17 +235,16 @@ class FboHdr {
 
     void draw() {
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
       glViewport(0, 0, 512, 512);
-      Camera camera = new Camera;
-      camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
 
-      Vec3 eye = Vec3(2, 2, 2);
+      _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
+
+      Vec3 eye = Vec3(3, 3, 3);
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
-      camera.look_at(eye, center, up);
+      _camera.look_at(eye, center, up);
       auto loc = glGetUniformLocation(_program, "pvmMatrix");
-      glUniformMatrix4fv(loc, 1, GL_FALSE, camera.pvMat4.mat.ptr);
+      glUniformMatrix4fv(loc, 1, GL_FALSE, _camera.pvMat4.mat.ptr);
 
       _vboHdr.create_vbo(_mesh, _color);
       _vboHdr.enable_vbo(_locNames, _strides);
@@ -261,6 +262,7 @@ class FboHdr {
   private:
     GLuint _fbo;
 
+    Camera _camera;
     GLuint _program;
     float[] _mesh;
     float[] _color;
@@ -270,3 +272,4 @@ class FboHdr {
     VboHdr _vboHdr;
     IboHdr _iboHdr;
 }
+

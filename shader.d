@@ -11,6 +11,7 @@ enum ShaderProgramType {
   Texture = 4,
   Diffuse = 5,
   ADS = 6,
+  Gaussian = 7,
 }
 // name
 enum {
@@ -132,7 +133,8 @@ mixin template ShaderSource() {
       vec4 smpColor = texture2D(tex, vTexCoord);
       //gl_FragColor = vColor;
       gl_FragColor = smpColor;
-      //gl_FragColor = vColor + smpColor;
+      //gl_FragColor = smpColor * vColor;
+      //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
     }
   };
 
@@ -195,6 +197,46 @@ mixin template ShaderSource() {
 
     void main() {
       gl_FragColor = vColor;
+    }
+  };
+
+  auto vGaussian = q{
+    attribute vec2 pos;
+    attribute vec2 texCoord;
+    uniform mat4 pvmMatrix;
+    varying vec2 vTexCoord;
+
+    void main() {
+      gl_Position = pvmMatrix * vec4(pos, 0.0, 1.0); 
+      vTexCoord = texCoord;
+    }
+  };
+
+  auto fGaussian = q{
+    uniform sampler2D tex;
+    uniform int type;
+    uniform float weight[10];
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec2 t = vTexCoord / gl_FragCoord.xy;
+      vec4 color = texture2D(tex, vTexCoord);
+
+      int i;
+      if (type == 1) {
+        color *= weight[0];
+        for (i=1; i<weight.length(); ++i) {
+          color += texture2D(tex, (vTexCoord + vec2(-float(i), 0.0)) * t) * weight[i];
+          color += texture2D(tex, (vTexCoord + vec2(float(i), 0.0)) * t) * weight[i];
+        }
+      } else if (type == 2) {
+        color*= weight[0];
+        for (i=1; i<weight.length(); ++i) {
+          color += texture2D(tex, (vTexCoord + vec2(0.0, -float(i))) * t) * weight[i];
+          color += texture2D(tex, (vTexCoord + vec2(0.0, float(i))) * t) * weight[i];
+        }
+      }
+      gl_FragColor = color;
     }
   };
 }
@@ -267,6 +309,7 @@ class ShaderProgramHdr {
       add_program(vTex, fTex);
       add_program(vDiffuse, fDiffuse);
       add_program(vADS, fADS);
+      add_program(vGaussian, fGaussian);
     }
 
     void add_program(T)(T vShaderSource, T fShaderSource) {
