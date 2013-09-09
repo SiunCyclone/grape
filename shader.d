@@ -288,6 +288,7 @@ class Shader {
 		}
 }
 
+// 軽量化
 class ShaderProgramHdr {
 	public:
     this(ShaderProgramType[] typeList...) {
@@ -357,7 +358,7 @@ class ShaderProgramHdr {
     }
 
     @property {
-      GLuint curProgram() {
+      GLuint current() {
         return _list[_current];
       }
     }
