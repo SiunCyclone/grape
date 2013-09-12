@@ -12,6 +12,7 @@ import orange.shader;
 import orange.file;
 import orange.math;
 import orange.camera;
+import orange.surface;
 
 enum DrawMode {
   Points = GL_POINTS,
@@ -58,7 +59,7 @@ class VboHdr {
     }
 
     void draw(DrawMode mode) {
-      //glDrawArrays(mode, 0, 3);
+      //glDrawArrays(mode, 0, 3); // TODO
     }
 
   private:
@@ -101,6 +102,7 @@ class IboHdr {
     ~this() {
       delete_ibo();
     }
+
     void create_ibo(int[] index) {
       delete_ibo();
 
@@ -130,45 +132,36 @@ class TexHdr {
       _program = program; 
     }
 
-    ~this() {
-
-    }
-
-    // args is weird
-    void create_texture(SDL_Surface* surf, string locName) {
-      _surf = surf;
-      bind_texture();
+    void create_texture(Surface surf, string locName) {
+      set_draw_mode(surf);
+      bind_texture(surf);
       set_location(locName);
     }
 
+    // TODO destructor
     void delete_texture() {
-      SDL_FreeSurface(_surf);
       glDeleteTextures(1, &_tid);
     }
 
   private:
-    void set_draw_mode() {
-      _mode = (_surf.format.BytesPerPixel == 4) ? GL_RGBA : GL_RGB;
+    void set_draw_mode(Surface surf) {
+      _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
     }
    
-    void bind_texture() {
-      set_draw_mode();
-
-      // check here
-      glActiveTexture(GL_TEXTURE0);
+    void bind_texture(Surface surf) {
+      glActiveTexture(GL_TEXTURE0); // TODO check here
       glGenTextures(1, &_tid);
       glBindTexture(GL_TEXTURE_2D, _tid);
-      glTexImage2D(GL_TEXTURE_2D, 0, _mode, _surf.w, _surf.h, 0, _mode, GL_UNSIGNED_BYTE, _surf.pixels);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     void set_location(string locName){
       auto loc = glGetUniformLocation(_program, cast(char*)locName);
-      glUniform1i(loc, 0); // change last parameter
+      glUniform1i(loc, 0); // TODO change last parameter
     }
 
-    SDL_Surface* _surf;
     GLuint _program;
     GLuint _tid;
     int _mode;
@@ -193,24 +186,6 @@ class FboHdr {
     ~this() {
     }
 
-    void set(GLuint program) {
-      _program = program;
-
-      FileHdr _fileHdr = new FileHdr;
-      string fileName = "./resource/sphere.obj";
-      _mesh = _fileHdr.make_mesh(fileName);
-      _index = _fileHdr.make_index(fileName);
-      _locNames = ["pos", "color"];
-      _strides = [ 3, 4 ]; 
-
-      for (int i; i<_mesh.length/3; ++i)
-        _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
-
-      _vboHdr = new VboHdr(2, _program);
-      _iboHdr = new IboHdr(1);
-      _iboHdr.create_ibo(_index);
-    }
-
     void init() {
       GLuint renderTex;
       glGenTextures(1, &renderTex);
@@ -233,6 +208,24 @@ class FboHdr {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void set(GLuint program) {
+      _program = program;
+
+      FileHdr _fileHdr = new FileHdr;
+      string fileName = "./resource/sphere.obj";
+      _mesh = _fileHdr.make_mesh(fileName);
+      _index = _fileHdr.make_index(fileName);
+      _locNames = ["pos", "color"];
+      _strides = [ 3, 4 ]; 
+
+      for (int i; i<_mesh.length/3; ++i)
+        _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
+
+      _vboHdr = new VboHdr(2, _program);
+      _iboHdr = new IboHdr(1);
+      _iboHdr.create_ibo(_index);
+    }
+
     void draw() {
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
       glViewport(0, 0, 512, 512);
@@ -249,7 +242,7 @@ class FboHdr {
       _vboHdr.create_vbo(_mesh, _color);
       _vboHdr.enable_vbo(_locNames, _strides);
       auto drawMode = DrawMode.Triangles;
-      _iboHdr.draw(drawMode);
+      _iboHdr.draw(drawMode); // FIXME configからtopに戻るとsegvる
 
       quit();
     }

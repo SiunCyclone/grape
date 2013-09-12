@@ -6,6 +6,9 @@ import std.exception : enforce;
 import orange.buffer;
 import orange.window;
 import opengl.glew;
+import orange.surface;
+
+import std.stdio;
 
 class FontHdr {
   public:
@@ -46,34 +49,31 @@ class FontHdr {
       _color = SDL_Color(r, g, b);
     }
 
-    //void draw(float x, float y, string text, int size = _font.keys[0]) {
+    //void draw(float x, float y, string text, int size = _font.keys[0]) { /XXX
     void draw(float x, float y, string text, int size) {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
-      SDL_Surface* surfBase = TTF_RenderUTF8_Solid(_font[size], cast(char*)text, _color);
-      enforce(surfBase != null, "FontHdr.surfBase is null");
-      scope(exit) SDL_FreeSurface(surfBase);
+      Surface surf = new Surface;
+      surf.create_ttf(_font[size], text, _color);
+      surf.convert();
 
-      _surf = SDL_ConvertSurfaceFormat(surfBase, SDL_PIXELFORMAT_ABGR8888, 0);
-
-      float[12] pos = set_pos(x, y);
-
+      float[12] pos = set_pos(x, y, surf);
       _vboHdr.create_vbo(pos, _tex);
       _vboHdr.enable_vbo(_locNames, _strides);
 
-      // "tex" not create here
-      _texHdr.create_texture(_surf, "tex");
+      // TODO "tex" not create here
+      _texHdr.create_texture(surf, "tex");
       scope(exit) _texHdr.delete_texture();
 
       _iboHdr.draw(_drawMode);
     }
 
   private:
-    float[12] set_pos(float x, float y) {
+    float[12] set_pos(float x, float y, Surface surf) {
       auto startX = x / (WINDOW_X/2.0);
       auto startY = y / (WINDOW_Y/2.0);
-      auto w = _surf.w / (WINDOW_X/2.0);
-      auto h = _surf.h / (WINDOW_Y/2.0);
+      auto w = surf.w / (WINDOW_X/2.0);
+      auto h = surf.h / (WINDOW_Y/2.0);
 
       return [ startX, startY, 0.0,
                startX+w, startY, 0.0,
@@ -83,7 +83,6 @@ class FontHdr {
 
     TTF_Font*[int] _font;
     SDL_Color _color;
-    SDL_Surface* _surf;
 
     float[8] _tex;
     string[2] _locNames;
@@ -94,4 +93,3 @@ class FontHdr {
     TexHdr _texHdr;
     DrawMode _drawMode;
 }
-

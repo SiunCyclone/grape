@@ -15,7 +15,7 @@ enum ShaderProgramType {
   ADS = 6,
   Gaussian = 7,
 }
-// name
+// TODO name
 enum {
   VertexShader = GL_VERTEX_SHADER,
   FragmentShader = GL_FRAGMENT_SHADER 
@@ -141,8 +141,8 @@ mixin template TextureShader() {
     void main() {
       vec4 smpColor = texture2D(tex, vTexCoord);
       //gl_FragColor = vColor;
-      gl_FragColor = smpColor;
-      //gl_FragColor = smpColor * vColor;
+      //gl_FragColor = smpColor;
+      gl_FragColor = smpColor + vColor;
       //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
     }
   };
@@ -267,7 +267,7 @@ class Shader {
       glDeleteShader(_shader); 
     }
 
-		alias _shader this;
+		alias _shader this; // XXX
 		GLuint _shader;
 
   private:
@@ -288,7 +288,7 @@ class Shader {
 		}
 }
 
-// 軽量化
+// TODO 軽量化
 class ShaderProgramHdr {
 	public:
     this(ShaderProgramType[] typeList...) {
