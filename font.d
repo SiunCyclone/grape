@@ -29,28 +29,22 @@ class FontHdr {
       _strides = [ 3, 2 ]; 
     }
 
-    ~this() {
-      foreach(font; _font)
-        TTF_CloseFont(font);
-    }
-
     void load(string file, int[] sizeList...) {
       if (sizeList.length == 0) {
         sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
                      15, 16, 17, 18, 20, 22, 24, 26,
                      28, 32, 36, 40, 48, 56, 64, 72 ];
       }
-      foreach (size; sizeList) {
-        _font[size] = TTF_OpenFont(cast(char*)file, size);
-        enforce(_font != null, "FontHdr._font is null");
-      }
+
+      foreach (size; sizeList)
+        _font[size] = new Font(file, size);
     }
 
     void set_color(ubyte r, ubyte g, ubyte b) {
       _color = SDL_Color(r, g, b);
     }
 
-    //void draw(float x, float y, string text, int size = _font.keys[0]) { /XXX
+    //void draw(float x, float y, string text, int size = _font.keys[0]) { // XXX
     void draw(float x, float y, string text, int size) {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
@@ -82,7 +76,7 @@ class FontHdr {
     }
 
     Surface _surf;
-    TTF_Font*[int] _font;
+    Font[int] _font;
     SDL_Color _color;
 
     float[8] _tex;
@@ -94,3 +88,19 @@ class FontHdr {
     TexHdr _texHdr;
     DrawMode _drawMode;
 }
+
+class Font {
+  public:
+    this(string file, int size) {
+      _font = TTF_OpenFont(cast(char*)file, size);
+      enforce(_font != null, "_font is null");
+    }
+
+    ~this() {
+      TTF_CloseFont(_font);
+    }
+
+    alias _font this;
+    TTF_Font* _font; // XXX privateにできないのか
+}
+

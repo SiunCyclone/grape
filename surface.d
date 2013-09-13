@@ -5,6 +5,7 @@ import derelict.sdl2.ttf;
 import std.exception : enforce;
 
 import std.stdio;
+import orange.font;
 
 // TODO メモリ食ってる
 class Surface {
@@ -15,8 +16,7 @@ class Surface {
       SDL_FreeSurface(_surf);
     }
 
-    void create_ttf(TTF_Font* font, string text, SDL_Color color) {
-      // TODO きもい
+    void create_ttf(Font font, string text, SDL_Color color) {
       if (_surf != null) {
         SDL_FreeSurface(_surf);
       }
