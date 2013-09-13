@@ -7,17 +7,14 @@ import std.exception : enforce;
 import std.stdio;
 import orange.font;
 
-// TODO メモリ食ってる
 class Surface {
   public:
     ~this() {
-      if (_surf != null)
-        SDL_FreeSurface(_surf);
+      free(_surf);
     }
 
     void create_ttf(Font font, string text, SDL_Color color) {
-      if (_surf != null)
-        SDL_FreeSurface(_surf);
+      free(_surf);
 
       _surf = TTF_RenderUTF8_Solid(font, cast(char*)text, color);
       enforce(_surf != null, "_surf is null");
@@ -26,7 +23,7 @@ class Surface {
     void convert() {
       // TODO 一般化
       auto tmp = SDL_ConvertSurfaceFormat(_surf, SDL_PIXELFORMAT_ABGR8888, 0);
-      SDL_FreeSurface(_surf);
+      free(_surf);
       _surf = tmp;
     }
 
@@ -49,6 +46,11 @@ class Surface {
     }
 
   private:
+    void free(SDL_Surface* surf) {
+      if (surf != null)
+        SDL_FreeSurface(surf);
+    }
+
     SDL_Surface* _surf;
 }
 

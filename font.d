@@ -10,6 +10,7 @@ import orange.surface;
 
 import std.stdio;
 
+// TODO 複数扱う, free
 class Font {
   public:
     this(string file, int size) {

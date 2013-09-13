@@ -32,14 +32,20 @@ class BufferObject {
     }
 
     ~this() {
-      glDeleteBuffers(1, &_buffer);
+      free();
     }
 
     void bind(T)(T type) { //TODO typeの型
+      free();
       glBindBuffer(type, _buffer);
     }
 
   private:
+    void free() {
+      if (&_buffer != null)
+        glDeleteBuffers(1, &_buffer);
+    }
+
     GLuint _buffer;
 }
 
@@ -50,24 +56,22 @@ class VBO {
     }
 
     void create(T)(T data) {
-      bind();
+      _vbo.bind(GL_ARRAY_BUFFER);
       glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
     }
 
     void attach(GLuint location, int stride) {
+      _vbo.bind(GL_ARRAY_BUFFER);
       glEnableVertexAttribArray(location);
       glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, null);
     }
 
   private:
-    void bind() {
-      _vbo.bind(GL_ARRAY_BUFFER);
-    }
-
     BufferObject _vbo;
 }
 
-// TODO name
+// TODO naame
+// XXX VBO class使うと表示されない。謎。
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
@@ -88,7 +92,6 @@ class VboHdr {
       foreach(int i, data; list) {
         //_vboList[i].create(data);
         glBindBuffer(GL_ARRAY_BUFFER, _vboList[i]);
-        // static draw is what?
         glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
@@ -110,12 +113,12 @@ class VboHdr {
 
   private:
     void bind_attLoc(string[] locNames) {
-      foreach(int i, name; locNames) 
+      foreach (int i, name; locNames) 
         glBindAttribLocation(_program, i, cast(char*)name);
     }
 
     void get_attLoc(string[] locNames) {
-      foreach(name; locNames)
+      foreach (name; locNames)
         _attLoc ~= glGetAttribLocation(_program, cast(char*)name);
     }
 
@@ -181,24 +184,32 @@ class Texture {
     }
 
     ~this() {
-      glDeleteTextures(1, &_tid);
+      free();
     }
 
     void create(Surface surf) {
+      free();
       set_draw_mode(surf);
-
-      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
-
-      // TODO FBOに対応
-      glBindTexture(GL_TEXTURE_2D, _tid);
-      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      bind(surf);
     }
 
   private:
     void set_draw_mode(Surface surf) {
       _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
+    }
+    
+    void free() {
+      if (&_tid != null)
+        glDeleteTextures(1, &_tid);
+    }
+
+    void bind(Surface surf) {
+      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
+      // TODO FBOに対応
+      glBindTexture(GL_TEXTURE_2D, _tid);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     GLuint _tid;
@@ -250,7 +261,7 @@ class FboHdr {
     void init() {
       GLuint renderTex;
       glGenTextures(1, &renderTex);
-      glActiveTexture(GL_TEXTURE0);
+      glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, renderTex);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -303,7 +314,7 @@ class FboHdr {
       _vboHdr.create_vbo(_mesh, _color);
       _vboHdr.enable_vbo(_locNames, _strides);
       auto drawMode = DrawMode.Triangles;
-      _iboHdr.draw(drawMode); // FIXME configからtopに戻るとsegvる
+      _iboHdr.draw(drawMode); 
 
       quit();
     }
