@@ -130,24 +130,15 @@ class TexHdr {
   public:
     this(GLuint program) {
       _program = program; 
+      _texture = new Texture;
     }
 
     void create_texture(Surface surf, string locName) {
-      set_draw_mode(surf);
-      bind_texture(surf);
+      _texture.create(surf);
       set_location(locName);
     }
 
-    // TODO destructor
-    void delete_texture() {
-      glDeleteTextures(1, &_tid);
-    }
-
   private:
-    void set_draw_mode(Surface surf) {
-      _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
-    }
-   
     void bind_texture(Surface surf) {
       glActiveTexture(GL_TEXTURE0); // TODO check here
       glGenTextures(1, &_tid);
@@ -164,6 +155,38 @@ class TexHdr {
 
     GLuint _program;
     GLuint _tid;
+    int _mode;
+    Texture _texture;
+}
+
+class Texture {
+  public:
+    this() {
+      glGenTextures(1, &_tid);
+    }
+
+    ~this() {
+      glDeleteTextures(1, &_tid);
+    }
+
+    void create(Surface surf) {
+      set_draw_mode(surf);
+
+      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
+
+      // TODO FBOに対応
+      glBindTexture(GL_TEXTURE_2D, _tid);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
+  private:
+    void set_draw_mode(Surface surf) {
+      _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
+    }
+
+    uint _tid;
     int _mode;
 }
 

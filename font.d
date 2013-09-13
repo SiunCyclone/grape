@@ -31,7 +31,7 @@ class FontHdr {
 
     void load(string file, int[] sizeList...) {
       if (sizeList.length == 0) {
-        sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+        sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14, // TODO immutableにする
                      15, 16, 17, 18, 20, 22, 24, 26,
                      28, 32, 36, 40, 48, 56, 64, 72 ];
       }
@@ -56,7 +56,6 @@ class FontHdr {
       _vboHdr.enable_vbo(_locNames, _strides);
 
       _texHdr.create_texture(_surf, "tex");
-      scope(exit) _texHdr.delete_texture();
 
       _iboHdr.draw(_drawMode);
     }
@@ -101,6 +100,6 @@ class Font {
     }
 
     alias _font this;
-    TTF_Font* _font; // TODO privateにできないのか
+    TTF_Font* _font; // TODO privateにしたほうがいいか
 }
 
