@@ -6,20 +6,30 @@ import std.exception : enforce;
 
 import std.stdio;
 
+// TODO メモリ食ってる
 class Surface {
   public:
     ~this() {
+      // 最後まで呼ばれてない
+      writeln("Surface destructor");
       SDL_FreeSurface(_surf);
     }
 
     void create_ttf(TTF_Font* font, string text, SDL_Color color) {
+      // TODO きもい
+      if (_surf != null) {
+        SDL_FreeSurface(_surf);
+      }
+
       _surf = TTF_RenderUTF8_Solid(font, cast(char*)text, color);
       enforce(_surf != null, "_surf is null");
     }
 
     void convert() {
       // TODO 一般化
-      _surf = SDL_ConvertSurfaceFormat(_surf, SDL_PIXELFORMAT_ABGR8888, 0);
+      auto tmp = SDL_ConvertSurfaceFormat(_surf, SDL_PIXELFORMAT_ABGR8888, 0);
+      SDL_FreeSurface(_surf);
+      _surf = tmp;
     }
 
     @property {

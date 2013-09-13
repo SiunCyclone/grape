@@ -17,6 +17,7 @@ class FontHdr {
       _texHdr = new TexHdr(program);
       _iboHdr = new IboHdr(1);
       _iboHdr.create_ibo([0, 1, 2, 2, 3, 0]);
+      _surf = new Surface;
 
       _drawMode = DrawMode.Triangles;
 
@@ -53,16 +54,15 @@ class FontHdr {
     void draw(float x, float y, string text, int size) {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
-      Surface surf = new Surface;
-      surf.create_ttf(_font[size], text, _color);
-      surf.convert();
+      _surf.create_ttf(_font[size], text, _color);
+      _surf.convert();
 
-      float[12] pos = set_pos(x, y, surf);
+      float[12] pos = set_pos(x, y, _surf);
       _vboHdr.create_vbo(pos, _tex);
       _vboHdr.enable_vbo(_locNames, _strides);
 
       // TODO "tex" not create here
-      _texHdr.create_texture(surf, "tex");
+      _texHdr.create_texture(_surf, "tex");
       scope(exit) _texHdr.delete_texture();
 
       _iboHdr.draw(_drawMode);
@@ -81,6 +81,7 @@ class FontHdr {
                startX, startY-h, 0.0 ];
     }
 
+    Surface _surf;
     TTF_Font*[int] _font;
     SDL_Color _color;
 
