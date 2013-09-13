@@ -10,6 +10,21 @@ import orange.surface;
 
 import std.stdio;
 
+class Font {
+  public:
+    this(string file, int size) {
+      _font = TTF_OpenFont(cast(char*)file, size);
+      enforce(_font != null, "_font is null");
+    }
+
+    ~this() {
+      TTF_CloseFont(_font);
+    }
+
+    alias _font this;
+    TTF_Font* _font; // TODO privateにしたほうがいいか
+}
+
 class FontHdr {
   public:
     this(GLuint program) {
@@ -76,7 +91,6 @@ class FontHdr {
     Surface _surf;
     Font[int] _font;
     SDL_Color _color;
-    Surface _surf;
 
     float[8] _tex;
     string[2] _locNames;
@@ -86,20 +100,5 @@ class FontHdr {
     IboHdr _iboHdr;
     TexHdr _texHdr;
     DrawMode _drawMode;
-}
-
-class Font {
-  public:
-    this(string file, int size) {
-      _font = TTF_OpenFont(cast(char*)file, size);
-      enforce(_font != null, "_font is null");
-    }
-
-    ~this() {
-      TTF_CloseFont(_font);
-    }
-
-    alias _font this;
-    TTF_Font* _font; // TODO privateにしたほうがいいか
 }
 

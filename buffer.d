@@ -25,17 +25,60 @@ enum DrawMode {
   Quads = GL_QUADS
 }
 
-class VboHdr {
+class BufferObject {
   public:
-    this(in int num, in GLuint program) {
-      _num = num;
-      _vboList.length = _num;
-      _program = program;
-      glGenBuffers(num, _vboList.ptr);
+    this() {
+      glGenBuffers(1, &_buffer);
     }
 
     ~this() {
-      delete_vbo();
+      glDeleteBuffers(1, &_buffer);
+    }
+
+    void bind(T)(T type) { //TODO typeの型
+      glBindBuffer(type, _buffer);
+    }
+
+  private:
+    GLuint _buffer;
+}
+
+class VBO {
+  public:
+    this() {
+      _vbo = new BufferObject;
+    }
+
+    void create(T)(T data) {
+      bind();
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
+    }
+
+    void attach(GLuint location, int stride) {
+      glEnableVertexAttribArray(location);
+      glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+
+  private:
+    void bind() {
+      _vbo.bind(GL_ARRAY_BUFFER);
+    }
+
+    BufferObject _vbo;
+}
+
+// TODO name
+class VboHdr {
+  public:
+    this(in int num, in GLuint program) {
+      _program = program;
+      _num = num;
+      _vboList.length = _num;
+      glGenBuffers(num, _vboList.ptr);
+      /*
+      for (int i; i<_num; ++i)
+        _vboList[i] = new VBO;
+        */
     }
 
     void create_vbo(T...)(T list) {
@@ -43,6 +86,7 @@ class VboHdr {
       delete_vbo();
 
       foreach(int i, data; list) {
+        //_vboList[i].create(data);
         glBindBuffer(GL_ARRAY_BUFFER, _vboList[i]);
         // static draw is what?
         glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW);
@@ -58,9 +102,11 @@ class VboHdr {
       attach_attLoc_to_vbo(strides);
     }
 
+    /*
     void draw(DrawMode mode) {
-      //glDrawArrays(mode, 0, 3); // TODO
+      //glDrawArrays(mode, 0, 3);
     }
+    */
 
   private:
     void bind_attLoc(string[] locNames) {
@@ -74,14 +120,15 @@ class VboHdr {
     }
 
     void attach_attLoc_to_vbo(int[] strides) {
-      foreach (int i, GLuint vbo; _vboList) {
+      foreach (int i, vbo; _vboList) {
+        //vbo.attach(_attLoc[i], strides[i]);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glEnableVertexAttribArray(_attLoc[i]);
         glVertexAttribPointer(_attLoc[i], strides[i], GL_FLOAT, GL_FALSE, 0, null);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
       }
     }
-
+    
     void delete_vbo() {
       if (_vboList.length > 0)
         glDeleteBuffers(_vboList.length, _vboList.ptr);
@@ -89,6 +136,7 @@ class VboHdr {
 
     int _num;
     GLuint[] _vboList;
+    //VBO[] _vboList;
     GLint[] _attLoc;
     GLuint _program;
 }
@@ -126,39 +174,6 @@ class IboHdr {
     int[] _index;
 }
 
-class TexHdr {
-  public:
-    this(GLuint program) {
-      _program = program; 
-      _texture = new Texture;
-    }
-
-    void create_texture(Surface surf, string locName) {
-      _texture.create(surf);
-      set_location(locName);
-    }
-
-  private:
-    void bind_texture(Surface surf) {
-      glActiveTexture(GL_TEXTURE0); // TODO check here
-      glGenTextures(1, &_tid);
-      glBindTexture(GL_TEXTURE_2D, _tid);
-      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-
-    void set_location(string locName){
-      auto loc = glGetUniformLocation(_program, cast(char*)locName);
-      glUniform1i(loc, 0); // TODO change last parameter
-    }
-
-    GLuint _program;
-    GLuint _tid;
-    int _mode;
-    Texture _texture;
-}
-
 class Texture {
   public:
     this() {
@@ -186,9 +201,32 @@ class Texture {
       _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
     }
 
-    uint _tid;
+    GLuint _tid;
     int _mode;
 }
+
+class TexHdr {
+  public:
+    this(GLuint program) {
+      _program = program; 
+      _texture = new Texture;
+    }
+
+    void create_texture(Surface surf, string locName) {
+      _texture.create(surf);
+      set_location(locName);
+    }
+
+  private:
+    void set_location(string locName){
+      auto loc = glGetUniformLocation(_program, cast(char*)locName);
+      glUniform1i(loc, 0); // TODO change last parameter
+    }
+
+    GLuint _program;
+    Texture _texture;
+}
+
 
 class UniHdr {
   public:

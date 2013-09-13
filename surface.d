@@ -16,9 +16,8 @@ class Surface {
     }
 
     void create_ttf(Font font, string text, SDL_Color color) {
-      if (_surf != null) {
+      if (_surf != null)
         SDL_FreeSurface(_surf);
-      }
 
       _surf = TTF_RenderUTF8_Solid(font, cast(char*)text, color);
       enforce(_surf != null, "_surf is null");
