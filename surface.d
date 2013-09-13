@@ -11,9 +11,8 @@ import orange.font;
 class Surface {
   public:
     ~this() {
-      // 最後まで呼ばれてない
-      writeln("Surface destructor");
-      SDL_FreeSurface(_surf);
+      if (_surf != null)
+        SDL_FreeSurface(_surf);
     }
 
     void create_ttf(Font font, string text, SDL_Color color) {

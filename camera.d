@@ -70,7 +70,7 @@ struct Quaternion {
 class Camera {
 	public:
 		this() {
-			axis_rad = [0.0, PI_2]; //TODO
+			axis_rad = [0.0, PI_2];
 			quat = new Quaternion;
 			quat.set([0.0, 0.0, 3.0, 0.0]);
 

@@ -267,7 +267,7 @@ class Shader {
       glDeleteShader(_shader); 
     }
 
-		alias _shader this; // XXX
+		alias _shader this; // TODO
 		GLuint _shader;
 
   private:

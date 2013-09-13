@@ -44,7 +44,7 @@ class FontHdr {
       _color = SDL_Color(r, g, b);
     }
 
-    //void draw(float x, float y, string text, int size = _font.keys[0]) { // XXX
+    //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
     void draw(float x, float y, string text, int size) {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
@@ -55,7 +55,6 @@ class FontHdr {
       _vboHdr.create_vbo(pos, _tex);
       _vboHdr.enable_vbo(_locNames, _strides);
 
-      // TODO "tex" not create here
       _texHdr.create_texture(_surf, "tex");
       scope(exit) _texHdr.delete_texture();
 
@@ -78,6 +77,7 @@ class FontHdr {
     Surface _surf;
     Font[int] _font;
     SDL_Color _color;
+    Surface _surf;
 
     float[8] _tex;
     string[2] _locNames;
@@ -101,6 +101,6 @@ class Font {
     }
 
     alias _font this;
-    TTF_Font* _font; // XXX privateにできないのか
+    TTF_Font* _font; // TODO privateにできないのか
 }
 
