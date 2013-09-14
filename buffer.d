@@ -273,9 +273,8 @@ class FboHdr {
       glGenFramebuffers(1, &_fbo);
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-      glGenTextures(1, &renderTex);
       glGenRenderbuffers(1, &depthBuf);
-      //_texture = new Texture;
+      _texture = new Texture;
       _camera = new Camera;
     }
 
@@ -283,14 +282,8 @@ class FboHdr {
     }
 
     void init() {
-      //_texture.bind(512, 512, null, GL_RGBA);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, renderTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex, 0);
-      //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
+      _texture.create(512, 512, null, GL_RGBA);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
 
       glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
@@ -336,6 +329,8 @@ class FboHdr {
       _vboHdr.create_vbo(_mesh, _color);
       _vboHdr.enable_vbo(_locNames, _strides);
       auto drawMode = DrawMode.Triangles;
+
+      _texture.enable();
       _iboHdr.draw(drawMode); 
 
       quit();
@@ -349,7 +344,6 @@ class FboHdr {
   private:
     GLuint _fbo;
     GLuint depthBuf;
-    GLuint renderTex;
 
     Texture _texture;
 
