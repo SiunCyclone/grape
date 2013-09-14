@@ -72,8 +72,8 @@ class FontHdr {
       _vboHdr.enable_vbo(_locNames, _strides);
 
       _texHdr.create_texture(_surf, "tex");
-
       _iboHdr.draw(_drawMode);
+      _texHdr.delete_texture();
     }
 
   private:

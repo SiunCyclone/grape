@@ -71,7 +71,7 @@ class VBO {
 }
 
 // TODO naame
-// XXX VBO class使うと表示されない。謎。
+// XXX VBO class使うと表示されない
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
@@ -184,35 +184,36 @@ class Texture {
     }
 
     ~this() {
-      free();
+      glDeleteTextures(1, &_tid);
     }
 
-    void create(Surface surf) {
-      free();
-      set_draw_mode(surf);
-      bind(surf);
+    // TODO name
+    void bind(int w, int h, void* pixels, int bytesPerPixel) {
+      set_draw_mode(bytesPerPixel);
+      create(w, h, pixels);
     }
+
+    void unbind() {
+      glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    GLuint _tid;
+    alias _tid this;
 
   private:
-    void set_draw_mode(Surface surf) {
-      _mode = (surf.bytes_per_pixel == 4) ? GL_RGBA : GL_RGB;
-    }
-    
-    void free() {
-      if (&_tid != null)
-        glDeleteTextures(1, &_tid);
+    void set_draw_mode(int bytesPerPixel) {
+      _mode = (bytesPerPixel == 4) ? GL_RGBA : GL_RGB;
     }
 
-    void bind(Surface surf) {
+    void create(int w, int h, void* pixels) {
       glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
-      // TODO FBOに対応
+
       glBindTexture(GL_TEXTURE_2D, _tid);
-      glTexImage2D(GL_TEXTURE_2D, 0, _mode, surf.w, surf.h, 0, _mode, GL_UNSIGNED_BYTE, surf.pixels);
+      glTexImage2D(GL_TEXTURE_2D, 0, _mode, w, h, 0, _mode, GL_UNSIGNED_BYTE, pixels);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
-    GLuint _tid;
     int _mode;
 }
 
@@ -224,8 +225,12 @@ class TexHdr {
     }
 
     void create_texture(Surface surf, string locName) {
-      _texture.create(surf);
+      _texture.bind(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
       set_location(locName);
+    }
+
+    void delete_texture() {
+      _texture.unbind();
     }
 
   private:
@@ -252,6 +257,7 @@ class FboHdr {
       glGenFramebuffers(1, &_fbo);
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
+      _texture = new Texture;
       _camera = new Camera;
     }
 
@@ -259,14 +265,8 @@ class FboHdr {
     }
 
     void init() {
-      GLuint renderTex;
-      glGenTextures(1, &renderTex);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, renderTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex, 0);
+      _texture.bind(512, 512, null, GL_RGBA);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
 
       GLuint depthBuf;
       glGenRenderbuffers(1, &depthBuf);
@@ -320,12 +320,15 @@ class FboHdr {
     }
 
     void quit() {
+      _texture.unbind();
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glViewport(0, 0, WINDOW_X, WINDOW_Y);
     }
 
   private:
     GLuint _fbo;
+
+    Texture _texture;
 
     Camera _camera;
     GLuint _program;
