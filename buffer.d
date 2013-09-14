@@ -187,14 +187,21 @@ class Texture {
       glDeleteTextures(1, &_tid);
     }
 
-    // TODO name
-    void bind(int w, int h, void* pixels, int bytesPerPixel) {
+    // TODO 分ける
+    void create(int w, int h, void* pixels, int bytesPerPixel) {
       set_draw_mode(bytesPerPixel);
-      create(w, h, pixels);
+
+      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
+      unbind();
+      bind();
+      attach(w, h, pixels);
+      filter();
+      unbind();
     }
 
-    void unbind() {
-      glBindTexture(GL_TEXTURE_2D, 0);
+    void enable() {
+      glActiveTexture(GL_TEXTURE0);
+      bind();
     }
 
     GLuint _tid;
@@ -205,11 +212,19 @@ class Texture {
       _mode = (bytesPerPixel == 4) ? GL_RGBA : GL_RGB;
     }
 
-    void create(int w, int h, void* pixels) {
-      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
-
+    void bind() {
       glBindTexture(GL_TEXTURE_2D, _tid);
+    }
+
+    void unbind() {
+      glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    void attach(int w, int h, void* pixels) {
       glTexImage2D(GL_TEXTURE_2D, 0, _mode, w, h, 0, _mode, GL_UNSIGNED_BYTE, pixels);
+    }
+
+    void filter() {
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
@@ -217,6 +232,7 @@ class Texture {
     int _mode;
 }
 
+// TODO 必要あるのか
 class TexHdr {
   public:
     this(GLuint program) {
@@ -224,13 +240,13 @@ class TexHdr {
       _texture = new Texture;
     }
 
-    void create_texture(Surface surf, string locName) {
-      _texture.bind(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
+    void create(Surface surf, string locName) {
+      _texture.create(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
       set_location(locName);
     }
 
-    void delete_texture() {
-      _texture.unbind();
+    void enable() {
+      _texture.enable();
     }
 
   private:
@@ -257,7 +273,9 @@ class FboHdr {
       glGenFramebuffers(1, &_fbo);
       glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-      _texture = new Texture;
+      glGenTextures(1, &renderTex);
+      glGenRenderbuffers(1, &depthBuf);
+      //_texture = new Texture;
       _camera = new Camera;
     }
 
@@ -265,11 +283,15 @@ class FboHdr {
     }
 
     void init() {
-      _texture.bind(512, 512, null, GL_RGBA);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
+      //_texture.bind(512, 512, null, GL_RGBA);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, renderTex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex, 0);
+      //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
 
-      GLuint depthBuf;
-      glGenRenderbuffers(1, &depthBuf);
       glBindRenderbuffer(GL_RENDERBUFFER, depthBuf);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuf);
@@ -320,13 +342,14 @@ class FboHdr {
     }
 
     void quit() {
-      _texture.unbind();
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glViewport(0, 0, WINDOW_X, WINDOW_Y);
     }
 
   private:
     GLuint _fbo;
+    GLuint depthBuf;
+    GLuint renderTex;
 
     Texture _texture;
 
