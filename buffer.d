@@ -25,53 +25,105 @@ enum DrawMode {
   Quads = GL_QUADS
 }
 
-class BufferObject {
+class BufferObject(T) {
   public:
-    this() {
-      glGenBuffers(1, &_buffer);
+    this(string type) {
+      switch (type) {
+        case "vbo":
+          init_as_vbo();
+          break;
+        case "ibo":
+          init_as_ibo();
+          break;
+        case "rbo":
+          init_as_rbo();
+          break;
+        case "fbo":
+          init_as_fbo();
+          break;
+        default:
+      }
+
+      _generate();
     }
 
     ~this() {
-      glDeleteBuffers(1, &_buffer);
+      _eliminate();
     }
 
-    void bind(T)(T type) { // TODO GL_ARRAY_BUFFER の enum作る
-      glBindBuffer(type, _buffer);
+    void bind() {
+      _bind();
     }
 
-    void attach(T, S)(T type, S data) {
-      glBufferData(type, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
+    void unbind() {
+      _unbind();
     }
 
-    void unbind(T)(T type) {
-      glBindBuffer(type, 0);
+    void attach(S)(S data) {
+      _attach(data);
     }
 
   private:
+    void init_as_vbo() {
+      _generate = { glGenBuffers(1, &_buffer); };
+      _eliminate = { glDeleteBuffers(1, &_buffer); };
+      _bind = { glBindBuffer(GL_ARRAY_BUFFER, _buffer); };
+      _unbind = { glBindBuffer(GL_ARRAY_BUFFER, 0); };
+      _attach = (T data) { glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW); };
+    }
+
+    void init_as_ibo() {
+      _generate = { glGenBuffers(1, &_buffer); };
+      _eliminate = { glDeleteBuffers(1, &_buffer); };
+      _bind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer); };
+      _unbind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); };
+      _attach = (T index) { glBufferData(GL_ELEMENT_ARRAY_BUFFER, index[0].sizeof*index.length, index.ptr, GL_STREAM_DRAW); };
+
+    }
+
+    void init_as_rbo() {
+      _generate = { glGenRenderbuffers(1, &_buffer); };
+      _eliminate = { glDeleteRenderbuffers(1, &_buffer); };
+      _bind = { glBindRenderbuffer(GL_RENDERBUFFER, _buffer); };
+      _unbind = { glBindRenderbuffer(GL_RENDERBUFFER, 0); };
+    }
+
+    void init_as_fbo() {
+      _generate = { glGenFramebuffers(1, &_buffer); };
+      _eliminate = { glDeleteFramebuffers(1, &_buffer); };
+      _bind = { glBindFramebuffer(GL_FRAMEBUFFER, _buffer); };
+      _unbind = { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
+    }
+
     GLuint _buffer;
+    void delegate() _generate;
+    void delegate() _eliminate;
+    void delegate() _bind;
+    void delegate() _unbind;
+    void delegate(T) _attach;
 }
 
 class VBO {
   public:
     this() {
-      _vbo = new BufferObject;
+      _bufObj = new BufferObject!(float[])("vbo");
     }
 
     void create(T)(T data) {
-      _vbo.bind(GL_ARRAY_BUFFER);
-      _vbo.attach(GL_ARRAY_BUFFER, data);
-      _vbo.unbind(GL_ARRAY_BUFFER);
+      _bufObj.bind();
+      _bufObj.attach(data);
+      _bufObj.unbind();
     }
 
     void attach(GLuint location, int stride) {
-      _vbo.bind(GL_ARRAY_BUFFER);
+      _bufObj.bind();
       glEnableVertexAttribArray(location);
       glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, null);
-      _vbo.unbind(GL_ARRAY_BUFFER);
+      _bufObj.unbind();
     }
 
   private:
-    BufferObject _vbo;
+    BufferObject!(float[]) _bufObj;
 }
 
 // TODO name
@@ -131,17 +183,17 @@ class VboHdr {
 class IBO {
   public:
     this() {
-      _ibo = new BufferObject;
+      _bufObj = new BufferObject!(int[])("ibo");
     }
 
     void create(T)(T data) {
-      _ibo.bind(GL_ELEMENT_ARRAY_BUFFER);
-      _ibo.attach(GL_ELEMENT_ARRAY_BUFFER, data);
-      _ibo.unbind(GL_ELEMENT_ARRAY_BUFFER);
+      _bufObj.bind();
+      _bufObj.attach(data);
+      _bufObj.unbind();
     }
 
   private:
-    BufferObject _ibo;
+    BufferObject!(int[]) _bufObj;
 }
 
 class IboHdr {
