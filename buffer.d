@@ -74,7 +74,7 @@ class VBO {
     BufferObject _vbo;
 }
 
-// TODO naame
+// TODO name
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
@@ -261,6 +261,51 @@ class UniHdr {
 
 
   private:
+}
+
+class FBO {
+  public:
+    this() {
+      glGenFramebuffers(1, &_fbo);
+    }
+
+    ~this() {
+      glDeleteFramebuffers(1, &_fbo);
+    }
+
+    void bind() {
+      glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    }
+
+    void unbind() {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+  private:
+    GLuint _fbo;
+}
+
+class RBO {
+  public:
+    this() {
+      glGenRenderbuffers(1, &_rbo);
+    }
+
+    ~this() {
+      glDeleteFramebuffers(1, &_rbo);
+    }
+    
+    void bind() {
+      glBindRenderbuffer(GL_RENDERBUFFER, _rbo);
+    }
+
+    void nanikore() {
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+    }
+
+  private:
+    GLuint _rbo;
+
 }
 
 class FboHdr {

@@ -4,6 +4,8 @@ import std.exception : enforce;
 import derelict.sdl2.sdl;
 import opengl.glew;
 
+import std.stdio;
+
 shared int WINDOW_X;
 shared int WINDOW_Y;
 

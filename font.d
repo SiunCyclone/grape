@@ -10,7 +10,7 @@ import orange.surface;
 
 import std.stdio;
 
-// TODO 複数扱う, free
+// TODO 複数扱う
 class Font {
   public:
     this(string file, int size) {
@@ -18,7 +18,7 @@ class Font {
       enforce(_font != null, "_font is null");
     }
 
-    ~this() {
+    void free() {
       TTF_CloseFont(_font);
     }
 
@@ -43,6 +43,12 @@ class FontHdr {
                0.0, 1.0 ];        
       _locNames = ["pos", "texCoord"];
       _strides = [ 3, 2 ]; 
+    }
+
+    ~this() {
+      // ここで開放してくれないとTTFが先にQuitしてしまう
+      foreach (font; _font)
+        font.free();
     }
 
     void load(string file, int[] sizeList...) {
