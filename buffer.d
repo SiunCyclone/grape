@@ -35,11 +35,15 @@ class BufferObject {
       glDeleteBuffers(1, &_buffer);
     }
 
-    void bind(T)(T type) { //TODO typeの型
+    void bind(T)(T type) { // TODO GL_ARRAY_BUFFER の enum作る
       glBindBuffer(type, _buffer);
     }
 
-    void unbind(T)(T type) { //TODO typeの型
+    void attach(T, S)(T type, S data) {
+      glBufferData(type, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
+    }
+
+    void unbind(T)(T type) {
       glBindBuffer(type, 0);
     }
 
@@ -55,7 +59,7 @@ class VBO {
 
     void create(T)(T data) {
       _vbo.bind(GL_ARRAY_BUFFER);
-      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
+      _vbo.attach(GL_ARRAY_BUFFER, data);
       _vbo.unbind(GL_ARRAY_BUFFER);
     }
 
@@ -124,36 +128,39 @@ class VboHdr {
     GLuint _program;
 }
 
-class IboHdr {
+class IBO {
   public:
-    this(in int num) {
-      glGenBuffers(num, &_ibo);
+    this() {
+      _ibo = new BufferObject;
     }
 
-    ~this() {
-      delete_ibo();
+    void create(T)(T data) {
+      _ibo.bind(GL_ELEMENT_ARRAY_BUFFER);
+      _ibo.attach(GL_ELEMENT_ARRAY_BUFFER, data);
+      _ibo.unbind(GL_ELEMENT_ARRAY_BUFFER);
+    }
+
+  private:
+    BufferObject _ibo;
+}
+
+class IboHdr {
+  public:
+    this(in int num) { // TODO numいらないかも
+      _ibo = new IBO;
     }
 
     void create_ibo(int[] index) {
-      delete_ibo();
-
       _index = index;
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STATIC_DRAW);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      _ibo.create(_index);
     }
     
-    void draw(DrawMode mode) {
+    void draw(DrawMode mode) { 
       glDrawElements(mode, _index.length, GL_UNSIGNED_INT, _index.ptr);
     }
 
   private:
-    void delete_ibo() {
-      // num 1
-      glDeleteBuffers(1, &_ibo);
-    }
-
-    GLuint _ibo;
+    IBO _ibo;
     int[] _index;
 }
 
