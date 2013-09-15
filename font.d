@@ -74,6 +74,7 @@ class FontHdr {
       _texHdr.create(_surf, "tex");
       _texHdr.enable();
       _iboHdr.draw(_drawMode);
+      _texHdr.disable();
     }
 
   private:

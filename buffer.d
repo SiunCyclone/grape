@@ -32,20 +32,18 @@ class BufferObject {
     }
 
     ~this() {
-      free();
+      glDeleteBuffers(1, &_buffer);
     }
 
     void bind(T)(T type) { //TODO typeの型
-      free();
       glBindBuffer(type, _buffer);
     }
 
-  private:
-    void free() {
-      if (&_buffer != null)
-        glDeleteBuffers(1, &_buffer);
+    void unbind(T)(T type) { //TODO typeの型
+      glBindBuffer(type, 0);
     }
 
+  private:
     GLuint _buffer;
 }
 
@@ -58,12 +56,14 @@ class VBO {
     void create(T)(T data) {
       _vbo.bind(GL_ARRAY_BUFFER);
       glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW); //TODO static
+      _vbo.unbind(GL_ARRAY_BUFFER);
     }
 
     void attach(GLuint location, int stride) {
       _vbo.bind(GL_ARRAY_BUFFER);
       glEnableVertexAttribArray(location);
       glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, null);
+      _vbo.unbind(GL_ARRAY_BUFFER);
     }
 
   private:
@@ -71,30 +71,21 @@ class VBO {
 }
 
 // TODO naame
-// XXX VBO class使うと表示されない
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
       _program = program;
       _num = num;
       _vboList.length = _num;
-      glGenBuffers(num, _vboList.ptr);
-      /*
       for (int i; i<_num; ++i)
         _vboList[i] = new VBO;
-        */
     }
 
     void create_vbo(T...)(T list) {
       assert(list.length == _num);
-      delete_vbo();
 
-      foreach(int i, data; list) {
-        //_vboList[i].create(data);
-        glBindBuffer(GL_ARRAY_BUFFER, _vboList[i]);
-        glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-      }
+      foreach(int i, data; list)
+        _vboList[i].create(data);
     }
 
     void enable_vbo(string[] locNames, int[] strides) {
@@ -123,23 +114,12 @@ class VboHdr {
     }
 
     void attach_attLoc_to_vbo(int[] strides) {
-      foreach (int i, vbo; _vboList) {
-        //vbo.attach(_attLoc[i], strides[i]);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glEnableVertexAttribArray(_attLoc[i]);
-        glVertexAttribPointer(_attLoc[i], strides[i], GL_FLOAT, GL_FALSE, 0, null);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-      }
-    }
-    
-    void delete_vbo() {
-      if (_vboList.length > 0)
-        glDeleteBuffers(_vboList.length, _vboList.ptr);
+      foreach (int i, vbo; _vboList)
+        vbo.attach(_attLoc[i], strides[i]);
     }
 
     int _num;
-    GLuint[] _vboList;
-    //VBO[] _vboList;
+    VBO[] _vboList;
     GLint[] _attLoc;
     GLuint _program;
 }
@@ -192,7 +172,7 @@ class Texture {
       set_draw_mode(bytesPerPixel);
 
       glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
-      unbind();
+      unbind(); // TODO diableがちゃんと呼ばれていれば必要ない。が、つけておくべきか
       bind();
       attach(w, h, pixels);
       filter();
@@ -204,8 +184,13 @@ class Texture {
       bind();
     }
 
+    void disable() {
+      glActiveTexture(GL_TEXTURE0);
+      unbind();
+    }
+
     GLuint _tid;
-    alias _tid this;
+    alias _tid this; // TODO private
 
   private:
     void set_draw_mode(int bytesPerPixel) {
@@ -247,6 +232,10 @@ class TexHdr {
 
     void enable() {
       _texture.enable();
+    }
+
+    void disable() {
+      _texture.disable();
     }
 
   private:
