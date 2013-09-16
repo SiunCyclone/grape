@@ -103,6 +103,55 @@ class IBO : BufferObject {
   private:
 }
 
+class RBO : BufferObject {
+  public:
+    this() {
+      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+        generate = { glGenRenderbuffers(1, &_buffer); };
+        eliminate = { glDeleteRenderbuffers(1, &_buffer); };
+        bind = { glBindRenderbuffer(GL_RENDERBUFFER, _buffer); };
+        unbind = { glBindRenderbuffer(GL_RENDERBUFFER, 0); };
+      };
+      super(init);
+    }
+
+    void create() {
+      _bufObj.bind();
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+      _bufObj.unbind();
+    }
+
+  private:
+    BufferObject _bufObj;
+}
+
+class FBO : BufferObject {
+  public:
+    this() {
+      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+        generate = { glGenFramebuffers(1, &_buffer); };
+        eliminate = { glDeleteFramebuffers(1, &_buffer); };
+        bind = { glBindFramebuffer(GL_FRAMEBUFFER, _buffer); };
+        unbind = { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
+      };
+      super(init);
+    }
+
+    void create(T)(T texture) {
+      _bufObj.bind();
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+      _bufObj.unbind();
+    }
+
+    void attach(T)(T rbo) {
+      _bufObj.bind();
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+      _bufObj.unbind();
+    }
+
+  private:
+    BufferObject _bufObj;
+}
 
 // TODO name
 class VboHdr {
@@ -276,46 +325,6 @@ class UniHdr {
 
   private:
 }
-
-/*
-class FBO {
-  public:
-    this() {
-      _bufObj = new BufferObject("fbo");
-    }
-
-    void create(T)(T texture) {
-      _bufObj.bind();
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-      _bufObj.unbind();
-    }
-
-    void attach(T)(T rbo) {
-      _bufObj.bind();
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
-      _bufObj.unbind();
-    }
-
-  private:
-    BufferObject _bufObj;
-}
-
-class RBO {
-  public:
-    this() {
-      _bufObj = new BufferObject("rbo");
-    }
-
-    void create() {
-      _bufObj.bind();
-      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
-      _bufObj.unbind();
-    }
-
-  private:
-    BufferObject _bufObj;
-}
-*/
 
 class FboHdr {
   public:
