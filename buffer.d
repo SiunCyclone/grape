@@ -25,25 +25,12 @@ enum DrawMode {
   Quads = GL_QUADS
 }
 
-class BufferObject(T) {
-  public:
-    this(string type) {
-      switch (type) {
-        case "vbo":
-          init_as_vbo();
-          break;
-        case "ibo":
-          init_as_ibo();
-          break;
-        case "rbo":
-          init_as_rbo();
-          break;
-        case "fbo":
-          init_as_fbo();
-          break;
-        default:
-      }
+alias void delegate() dg;
 
+class BufferObject {
+  public:
+    this(void delegate(ref dg, ref dg, ref dg, ref dg) init) {
+      init(_generate, _eliminate, _bind, _unbind);
       _generate();
     }
 
@@ -59,72 +46,63 @@ class BufferObject(T) {
       _unbind();
     }
 
-    void attach(S)(S data) {
-      _attach(data);
-    }
-
   private:
-    void init_as_vbo() {
-      _generate = { glGenBuffers(1, &_buffer); };
-      _eliminate = { glDeleteBuffers(1, &_buffer); };
-      _bind = { glBindBuffer(GL_ARRAY_BUFFER, _buffer); };
-      _unbind = { glBindBuffer(GL_ARRAY_BUFFER, 0); };
-      _attach = (T data) { glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW); };
-    }
-
-    void init_as_ibo() {
-      _generate = { glGenBuffers(1, &_buffer); };
-      _eliminate = { glDeleteBuffers(1, &_buffer); };
-      _bind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer); };
-      _unbind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); };
-      _attach = (T index) { glBufferData(GL_ELEMENT_ARRAY_BUFFER, index[0].sizeof*index.length, index.ptr, GL_STREAM_DRAW); };
-
-    }
-
-    void init_as_rbo() {
-      _generate = { glGenRenderbuffers(1, &_buffer); };
-      _eliminate = { glDeleteRenderbuffers(1, &_buffer); };
-      _bind = { glBindRenderbuffer(GL_RENDERBUFFER, _buffer); };
-      _unbind = { glBindRenderbuffer(GL_RENDERBUFFER, 0); };
-    }
-
-    void init_as_fbo() {
-      _generate = { glGenFramebuffers(1, &_buffer); };
-      _eliminate = { glDeleteFramebuffers(1, &_buffer); };
-      _bind = { glBindFramebuffer(GL_FRAMEBUFFER, _buffer); };
-      _unbind = { glBindFramebuffer(GL_FRAMEBUFFER, 0); };
-    }
-
     GLuint _buffer;
-    void delegate() _generate;
-    void delegate() _eliminate;
-    void delegate() _bind;
-    void delegate() _unbind;
-    void delegate(T) _attach;
+    dg _generate;
+    dg _eliminate;
+    dg _bind;
+    dg _unbind;
 }
 
-class VBO {
+class VBO : BufferObject {
   public:
     this() {
-      _bufObj = new BufferObject!(float[])("vbo");
+      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+        generate = { glGenBuffers(1, &_buffer); };
+        eliminate = { glDeleteBuffers(1, &_buffer); };
+        bind = { glBindBuffer(GL_ARRAY_BUFFER, _buffer); };
+        unbind = { glBindBuffer(GL_ARRAY_BUFFER, 0); };
+      };
+      super(init);
     }
 
     void create(T)(T data) {
-      _bufObj.bind();
-      _bufObj.attach(data);
-      _bufObj.unbind();
+      bind();
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
+      unbind();
     }
 
     void attach(GLuint location, int stride) {
-      _bufObj.bind();
+      bind();
       glEnableVertexAttribArray(location);
       glVertexAttribPointer(location, stride, GL_FLOAT, GL_FALSE, 0, null);
-      _bufObj.unbind();
+      unbind();
     }
 
   private:
-    BufferObject!(float[]) _bufObj;
 }
+
+class IBO : BufferObject {
+  public:
+    this() {
+      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+        generate = { glGenBuffers(1, &_buffer); };
+        eliminate = { glDeleteBuffers(1, &_buffer); };
+        bind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer); };
+        unbind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); };
+      };
+      super(init);
+    }
+
+    void create(T)(T index) {
+      bind();
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, index[0].sizeof*index.length, index.ptr, GL_STREAM_DRAW);
+      unbind();
+    }
+
+  private:
+}
+
 
 // TODO name
 class VboHdr {
@@ -178,22 +156,6 @@ class VboHdr {
     VBO[] _vboList;
     GLint[] _attLoc;
     GLuint _program;
-}
-
-class IBO {
-  public:
-    this() {
-      _bufObj = new BufferObject!(int[])("ibo");
-    }
-
-    void create(T)(T data) {
-      _bufObj.bind();
-      _bufObj.attach(data);
-      _bufObj.unbind();
-    }
-
-  private:
-    BufferObject!(int[]) _bufObj;
 }
 
 class IboHdr {
@@ -315,50 +277,45 @@ class UniHdr {
   private:
 }
 
+/*
 class FBO {
   public:
     this() {
-      glGenFramebuffers(1, &_fbo);
+      _bufObj = new BufferObject("fbo");
     }
 
-    ~this() {
-      glDeleteFramebuffers(1, &_fbo);
+    void create(T)(T texture) {
+      _bufObj.bind();
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+      _bufObj.unbind();
     }
 
-    void bind() {
-      glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    }
-
-    void unbind() {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    void attach(T)(T rbo) {
+      _bufObj.bind();
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+      _bufObj.unbind();
     }
 
   private:
-    GLuint _fbo;
+    BufferObject _bufObj;
 }
 
 class RBO {
   public:
     this() {
-      glGenRenderbuffers(1, &_rbo);
+      _bufObj = new BufferObject("rbo");
     }
 
-    ~this() {
-      glDeleteFramebuffers(1, &_rbo);
-    }
-    
-    void bind() {
-      glBindRenderbuffer(GL_RENDERBUFFER, _rbo);
-    }
-
-    void nanikore() {
+    void create() {
+      _bufObj.bind();
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+      _bufObj.unbind();
     }
 
   private:
-    GLuint _rbo;
-
+    BufferObject _bufObj;
 }
+*/
 
 class FboHdr {
   public:
