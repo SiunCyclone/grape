@@ -116,13 +116,12 @@ class RBO : BufferObject {
     }
 
     void create() {
-      _bufObj.bind();
+      bind();
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
-      _bufObj.unbind();
+      unbind();
     }
 
   private:
-    BufferObject _bufObj;
 }
 
 class FBO : BufferObject {
@@ -138,19 +137,18 @@ class FBO : BufferObject {
     }
 
     void create(T)(T texture) {
-      _bufObj.bind();
+      bind();
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-      _bufObj.unbind();
+      unbind();
     }
 
     void attach(T)(T rbo) {
-      _bufObj.bind();
+      bind();
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
-      _bufObj.unbind();
+      unbind();
     }
 
   private:
-    BufferObject _bufObj;
 }
 
 // TODO name
