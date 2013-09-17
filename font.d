@@ -31,8 +31,8 @@ class FontHdr {
     this(GLuint program) {
       _vboHdr = new VboHdr(2, program);
       _texHdr = new TexHdr(program);
-      _iboHdr = new IboHdr(1);
-      _iboHdr.create_ibo([0, 1, 2, 2, 3, 0]);
+      _ibo = new IBO;
+      _ibo.create([0, 1, 2, 2, 3, 0]);
       _surf = new Surface;
 
       _drawMode = DrawMode.Triangles;
@@ -79,7 +79,7 @@ class FontHdr {
 
       _texHdr.create(_surf, "tex");
       _texHdr.enable();
-      _iboHdr.draw(_drawMode);
+      _ibo.draw(_drawMode);
       _texHdr.disable();
     }
 
@@ -105,7 +105,7 @@ class FontHdr {
     int[2] _strides;
 
     VboHdr _vboHdr;
-    IboHdr _iboHdr;
+    IBO _ibo;
     TexHdr _texHdr;
     DrawMode _drawMode;
 }

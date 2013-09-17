@@ -141,8 +141,8 @@ mixin template TextureShader() {
     void main() {
       vec4 smpColor = texture2D(tex, vTexCoord);
       //gl_FragColor = vColor;
-      //gl_FragColor = smpColor;
-      gl_FragColor = smpColor + vColor;
+      gl_FragColor = smpColor;
+      //gl_FragColor = smpColor + vColor;
       //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
     }
   };
