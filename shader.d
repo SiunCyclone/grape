@@ -63,8 +63,7 @@ mixin template ClassicTextureShader() {
     varying vec2 vTexCoord;
 
     void main() {
-      vec4 smpColor = texture2D(tex, vTexCoord);
-      // What's the difference between texture and texture2D ?????
+      vec4 smpColor = texture(tex, vTexCoord);
       // vec4 smpColor = texture(tex, vTexCoord);
       gl_FragColor = smpColor;
       //gl_FragColor = vColor * smpColor;
@@ -89,7 +88,7 @@ mixin template FontShader() {
     varying vec2 vTexCoord;
 
     void main() {
-      vec4 smpColor = texture2D(tex, vTexCoord);
+      vec4 smpColor = texture(tex, vTexCoord);
       gl_FragColor = smpColor;
     }
   };
@@ -139,7 +138,7 @@ mixin template TextureShader() {
     varying vec2 vTexCoord;
 
     void main() {
-      vec4 smpColor = texture2D(tex, vTexCoord);
+      vec4 smpColor = texture(tex, vTexCoord);
       //gl_FragColor = vColor;
       gl_FragColor = smpColor;
       //gl_FragColor = smpColor + vColor;
@@ -218,11 +217,10 @@ mixin template GaussianShader() {
   auto vGaussian = q{
     attribute vec2 pos;
     attribute vec2 texCoord;
-    uniform mat4 pvmMatrix;
     varying vec2 vTexCoord;
 
     void main() {
-      gl_Position = pvmMatrix * vec4(pos, 0.0, 1.0); 
+      gl_Position = vec4(pos, 0.0, 1.0); 
       vTexCoord = texCoord;
     }
   };
@@ -230,25 +228,43 @@ mixin template GaussianShader() {
   auto fGaussian = q{
     uniform sampler2D tex;
     uniform int type;
-    uniform float weight[10];
+    uniform float weight[40];
     varying vec2 vTexCoord;
 
+    /*
     void main() {
       vec2 t = vTexCoord / gl_FragCoord.xy;
-      vec4 color = texture2D(tex, vTexCoord);
+      vec4 color = texture(tex, vTexCoord) * weight[0];
 
       int i;
       if (type == 1) {
-        color *= weight[0];
         for (i=1; i<weight.length(); ++i) {
-          color += texture2D(tex, (vTexCoord + vec2(-float(i), 0.0)) * t) * weight[i];
-          color += texture2D(tex, (vTexCoord + vec2(float(i), 0.0)) * t) * weight[i];
+          color += texture(tex, (vTexCoord + vec2(-float(i), 0.0)) * t) * weight[i];
+          color += texture(tex, (vTexCoord + vec2(float(i), 0.0)) * t) * weight[i];
         }
       } else if (type == 2) {
-        color*= weight[0];
         for (i=1; i<weight.length(); ++i) {
-          color += texture2D(tex, (vTexCoord + vec2(0.0, -float(i))) * t) * weight[i];
-          color += texture2D(tex, (vTexCoord + vec2(0.0, float(i))) * t) * weight[i];
+          color += texture(tex, (vTexCoord + vec2(0.0, -float(i))) * t) * weight[i];
+          color += texture(tex, (vTexCoord + vec2(0.0, float(i))) * t) * weight[i];
+        }
+      }
+      gl_FragColor = color;
+    }
+    */
+    void main() {
+      vec2 t = vec2(1.0) / vec2(512.0);
+      vec4 color = texture(tex, vTexCoord) * weight[0];
+
+      int i;
+      if (type == 1) {
+        for (i=1; i<weight.length(); ++i) {
+          color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0)) * t) * weight[i];
+          color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0)) * t) * weight[i];
+        }
+      } else if (type == 2) {
+        for (i=1; i<weight.length(); ++i) {
+          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i)) * t) * weight[i];
+          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i)) * t) * weight[i];
         }
       }
       gl_FragColor = color;

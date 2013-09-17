@@ -14,6 +14,8 @@ import orange.math;
 import orange.camera;
 import orange.surface;
 
+import std.math;
+
 enum DrawMode {
   Points = GL_POINTS,
   Lines = GL_LINES,
@@ -293,13 +295,6 @@ class TexHdr {
     Texture _texture;
 }
 
-class UniHdr {
-  public:
-
-
-  private:
-}
-
 class FboHdr {
   public:
     this() {
@@ -328,6 +323,47 @@ class FboHdr {
       _program = program;
 
       FileHdr _fileHdr = new FileHdr;
+
+      string fileName = "./resource/ball.obj";
+      _mesh = _fileHdr.make_mesh(fileName);
+      _index = _fileHdr.make_index(fileName);
+      _normal = _fileHdr.make_normal(fileName);
+
+      _locNames = ["pos", "color", "normal"];
+      _strides = [ 3, 4, 3 ]; 
+
+      for (int i; i<_mesh.length/3; ++i)
+        _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
+
+      _vboHdr = new VboHdr(3, _program);
+      _ibo = new IBO;
+      _ibo.create(_index);
+
+      auto loc = glGetUniformLocation(program, "lightPos");
+      float[] lightPos = [3, 3, 3];
+      glUniform3fv(loc, 1, lightPos.ptr);
+
+      loc = glGetUniformLocation(program, "eyePos");
+      float[] eyePos = [0, 0, 3]; // _camera.eye
+      glUniform3fv(loc, 1, eyePos.ptr);
+
+      loc = glGetUniformLocation(program, "ambientColor");
+      float[] ambientColor = [0.1, 0.1, 0.1, 1.0];
+      glUniform4fv(loc, 1, ambientColor.ptr);
+
+      Mat4 invMat4 = Mat4( 1, 0, 0, 0,
+                           0, 1, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1 ).inverse;
+      loc = glGetUniformLocation(program, "invMatrix");
+      glUniformMatrix4fv(loc, 1, GL_FALSE, invMat4.mat.ptr);
+    }
+
+    /*
+    void set(GLuint program) {
+      _program = program;
+
+      FileHdr _fileHdr = new FileHdr;
       string fileName = "./resource/sphere.obj";
       _mesh = _fileHdr.make_mesh(fileName);
       _index = _fileHdr.make_index(fileName);
@@ -341,6 +377,7 @@ class FboHdr {
       _ibo = new IBO;
       _ibo.create(_index);
     }
+    */
 
     void draw() {
       _fbo.bind();
@@ -348,14 +385,15 @@ class FboHdr {
 
       _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
 
-      Vec3 eye = Vec3(3, 3, 3);
+      Vec3 eye = Vec3(0, 0, 3);
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
       _camera.look_at(eye, center, up);
       auto loc = glGetUniformLocation(_program, "pvmMatrix");
       glUniformMatrix4fv(loc, 1, GL_FALSE, _camera.pvMat4.mat.ptr);
 
-      _vboHdr.create_vbo(_mesh, _color);
+      //_vboHdr.create_vbo(_mesh, _color);
+      _vboHdr.create_vbo(_mesh, _color, _normal);
       _vboHdr.enable_vbo(_locNames, _strides);
       auto drawMode = DrawMode.Triangles;
 
@@ -373,6 +411,8 @@ class FboHdr {
     RBO _rbo;
     FBO _fbo;
 
+    float[] _normal;
+
     Camera _camera;
     GLuint _program;
     float[] _mesh;
@@ -384,3 +424,96 @@ class FboHdr {
     IBO _ibo;
 }
 
+class GaussHdr {
+  public:
+    this() {
+      _rbo = new RBO;
+      _fbo = new FBO;
+    }
+
+    void init(Texture texture) {
+      _fbo.create(texture);
+
+      _fbo.bind();
+      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+      glDrawBuffers(1, drawBufs.ptr);
+      _fbo.unbind();
+    }
+
+    float[40] gauss_weight(float eRange) {
+      float[40] weight;
+      float t = 0.0;
+      float d = eRange^^2 / 100;
+      for (int i=0; i<weight.length; ++i) {
+        float r = 1.0 + 2.0*i;
+        float w = exp(-0.5 * r^^2 / d);
+        weight[i] = w;
+        if (i > 0) w *= 2.0;
+          t += w;
+      }
+      for (int i=0; i<weight.length; ++i){
+        weight[i] /= t;
+      }
+      return weight;
+    }
+
+    void set(GLuint program) {
+      _mesh = [ -1.0, 1.0,
+                1.0, 1.0,
+                1.0, -1.0,
+                -1.0, -1.0 ];
+      _index = [ 0, 1, 2,
+                 0, 2, 3 ];
+      _texCoord = [ 0.0, 1.0,
+                    1.0, 1.0,
+                    1.0, 0.0,
+                    0.0, 0.0 ];
+      _strides = [ 2, 2 ]; 
+      _locNames = ["pos", "texCoord"];
+
+      _vboHdr = new VboHdr(2, program);
+      _ibo = new IBO;
+      _ibo.create(_index);
+
+      auto loc = glGetUniformLocation(program, "tex");
+      glUniform1i(loc, 0);
+
+      loc = glGetUniformLocation(program, "type");
+      glUniform1i(loc, 1);
+
+      float[40] weight = gauss_weight(1000.0);
+      writeln(weight);
+      loc = glGetUniformLocation(program, "weight");
+      glUniform1fv(loc, 40, weight.ptr);
+    }
+
+    void draw() {
+      _fbo.bind();
+      glViewport(0, 0, 512, 512);
+
+      _vboHdr.create_vbo(_mesh, _texCoord);
+      _vboHdr.enable_vbo(_locNames, _strides);
+      auto drawMode = DrawMode.Triangles;
+
+      _ibo.draw(drawMode); 
+
+      quit();
+    }
+
+    void quit() {
+      _fbo.unbind();
+      glViewport(0, 0, WINDOW_X, WINDOW_Y);
+    }
+
+  private:
+    RBO _rbo;
+    FBO _fbo;
+
+    float[] _mesh;
+    float[] _texCoord;
+    int[] _index;
+    string[] _locNames;
+    int[] _strides;
+    VboHdr _vboHdr;
+    IBO _ibo;
+}
