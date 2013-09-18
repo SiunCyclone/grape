@@ -333,18 +333,20 @@ class FboHdr {
       _strides = [ 3, 4, 3 ]; 
 
       for (int i; i<_mesh.length/3; ++i)
-        _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
+        _color ~= [ 0.2, 0.5, 1.0, 1.0 ];
+        //_color ~= [ 0.2, 0.4, 0.9, 1.0 ];
+        //_color ~= [ 0.6, 0.8, 1.0, 1.0 ];
 
       _vboHdr = new VboHdr(3, _program);
       _ibo = new IBO;
       _ibo.create(_index);
 
       auto loc = glGetUniformLocation(program, "lightPos");
-      float[] lightPos = [3, 3, 3];
+      float[] lightPos = [0, 0, 1];
       glUniform3fv(loc, 1, lightPos.ptr);
 
       loc = glGetUniformLocation(program, "eyePos");
-      float[] eyePos = [0, 0, 3]; // _camera.eye
+      float[] eyePos = [0, 0, 6]; // _camera.eye
       glUniform3fv(loc, 1, eyePos.ptr);
 
       loc = glGetUniformLocation(program, "ambientColor");
@@ -385,7 +387,7 @@ class FboHdr {
 
       _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
 
-      Vec3 eye = Vec3(0, 0, 3);
+      Vec3 eye = Vec3(0, 0, 6);
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
       _camera.look_at(eye, center, up);
@@ -452,7 +454,7 @@ class GaussHdr {
           t += w;
       }
       for (int i=0; i<weight.length; ++i){
-        weight[i] /= t;
+        weight[i] /= t / 2.3;
       }
       return weight;
     }
@@ -483,7 +485,7 @@ class GaussHdr {
       loc = glGetUniformLocation(_program, "type");
       glUniform1i(loc, type);
 
-      float[40] weight = gauss_weight(500.0);
+      float[40] weight = gauss_weight(300.0);
       writeln(weight);
       loc = glGetUniformLocation(_program, "weight");
       glUniform1fv(loc, 40, weight.ptr);
