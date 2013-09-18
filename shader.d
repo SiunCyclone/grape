@@ -13,7 +13,8 @@ enum ShaderProgramType {
   Texture = 4,
   Diffuse = 5,
   ADS = 6,
-  Gaussian = 7,
+  GaussianX = 7,
+  GaussianY = 8,
 }
 // TODO name
 enum {
@@ -213,8 +214,8 @@ mixin template ADSShader() {
   };
 }
 
-mixin template GaussianShader() {
-  auto vGaussian = q{
+mixin template GaussianXShader() {
+  auto vGaussianX = q{
     attribute vec2 pos;
     attribute vec2 texCoord;
     varying vec2 vTexCoord;
@@ -225,48 +226,52 @@ mixin template GaussianShader() {
     }
   };
 
-  auto fGaussian = q{
+  auto fGaussianX = q{
+    uniform sampler2D tex;
+    uniform float weight[40];
+    varying vec2 vTexCoord;
+
+    void main() {
+      vec2 t = vec2(1.0) / vec2(512.0);
+      vec4 color = texture(tex, vTexCoord) * weight[0];
+
+      for (int i=1; i<weight.length(); ++i) {
+        color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0)) * t) * weight[i];
+        color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0)) * t) * weight[i];
+      }
+
+      gl_FragColor = color;
+    }
+  };
+}
+
+mixin template GaussianYShader() {
+  auto vGaussianY = q{
+    attribute vec2 pos;
+    attribute vec2 texCoord;
+    varying vec2 vTexCoord;
+
+    void main() {
+      gl_Position = vec4(pos, 0.0, 1.0); 
+      vTexCoord = texCoord;
+    }
+  };
+
+  auto fGaussianY = q{
     uniform sampler2D tex;
     uniform int type;
     uniform float weight[40];
     varying vec2 vTexCoord;
 
-    /*
-    void main() {
-      vec2 t = vTexCoord / gl_FragCoord.xy;
-      vec4 color = texture(tex, vTexCoord) * weight[0];
-
-      int i;
-      if (type == 1) {
-        for (i=1; i<weight.length(); ++i) {
-          color += texture(tex, (vTexCoord + vec2(-float(i), 0.0)) * t) * weight[i];
-          color += texture(tex, (vTexCoord + vec2(float(i), 0.0)) * t) * weight[i];
-        }
-      } else if (type == 2) {
-        for (i=1; i<weight.length(); ++i) {
-          color += texture(tex, (vTexCoord + vec2(0.0, -float(i))) * t) * weight[i];
-          color += texture(tex, (vTexCoord + vec2(0.0, float(i))) * t) * weight[i];
-        }
-      }
-      gl_FragColor = color;
-    }
-    */
     void main() {
       vec2 t = vec2(1.0) / vec2(512.0);
       vec4 color = texture(tex, vTexCoord) * weight[0];
 
-      int i;
-      if (type == 1) {
-        for (i=1; i<weight.length(); ++i) {
-          color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0)) * t) * weight[i];
-          color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0)) * t) * weight[i];
-        }
-      } else if (type == 2) {
-        for (i=1; i<weight.length(); ++i) {
-          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i)) * t) * weight[i];
-          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i)) * t) * weight[i];
-        }
+      for (int i=1; i<weight.length(); ++i) {
+        color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i)) * t) * weight[i];
+        color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i)) * t) * weight[i];
       }
+
       gl_FragColor = color;
     }
   };
@@ -316,7 +321,9 @@ class ShaderProgramHdr {
                      ShaderProgramType.Texture,
                      ShaderProgramType.Diffuse,
                      ShaderProgramType.ADS,
-                     ShaderProgramType.Gaussian ];
+                     ShaderProgramType.GaussianX,
+                     ShaderProgramType.GaussianY ];
+
 
       enable_program(typeList);
       //writeln(_list.length);
@@ -328,7 +335,7 @@ class ShaderProgramHdr {
     }
 
     // delegate
-    void enable_program(ShaderProgramType[] typeList...) {
+    void enable_program(ShaderProgramType[] typeList) {
       foreach (type; typeList) {
         switch (type) {
           case ShaderProgramType.ClassicNormal:
@@ -359,9 +366,13 @@ class ShaderProgramHdr {
             mixin ADSShader;
             add_program(type, vADS, fADS);
             break;
-          case ShaderProgramType.Gaussian:
-            mixin GaussianShader;
-            add_program(type, vGaussian, fGaussian);
+          case ShaderProgramType.GaussianX:
+            mixin GaussianXShader;
+            add_program(type, vGaussianX, fGaussianX);
+            break;
+          case ShaderProgramType.GaussianY:
+            mixin GaussianYShader;
+            add_program(type, vGaussianY, fGaussianY);
             break;
           default:
         }

@@ -457,7 +457,9 @@ class GaussHdr {
       return weight;
     }
 
-    void set(GLuint program) {
+    void set(GLuint program, int type) {
+      _program = program;
+
       _mesh = [ -1.0, 1.0,
                 1.0, 1.0,
                 1.0, -1.0,
@@ -471,19 +473,19 @@ class GaussHdr {
       _strides = [ 2, 2 ]; 
       _locNames = ["pos", "texCoord"];
 
-      _vboHdr = new VboHdr(2, program);
+      _vboHdr = new VboHdr(2, _program);
       _ibo = new IBO;
       _ibo.create(_index);
 
-      auto loc = glGetUniformLocation(program, "tex");
+      auto loc = glGetUniformLocation(_program, "tex");
       glUniform1i(loc, 0);
 
-      loc = glGetUniformLocation(program, "type");
-      glUniform1i(loc, 1);
+      loc = glGetUniformLocation(_program, "type");
+      glUniform1i(loc, type);
 
-      float[40] weight = gauss_weight(1000.0);
+      float[40] weight = gauss_weight(500.0);
       writeln(weight);
-      loc = glGetUniformLocation(program, "weight");
+      loc = glGetUniformLocation(_program, "weight");
       glUniform1fv(loc, 40, weight.ptr);
     }
 
@@ -508,6 +510,8 @@ class GaussHdr {
   private:
     RBO _rbo;
     FBO _fbo;
+
+    GLuint _program;
 
     float[] _mesh;
     float[] _texCoord;
