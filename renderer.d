@@ -1,15 +1,20 @@
-module orange.drawer;
+module orange.renderer;
 
 import orange.buffer;
 import orange.shader;
 
-class Drawer {
+class Renderer {
   public:
     this() {
 
     }
 
-    void load() {
+    void set() {
+
+    }
+
+    void render() {
+
     }
 
     void use() {
@@ -17,3 +22,4 @@ class Drawer {
 
   private:
 }
+

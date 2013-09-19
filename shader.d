@@ -228,11 +228,13 @@ mixin template GaussianXShader() {
 
   auto fGaussianX = q{
     uniform sampler2D tex;
-    uniform float weight[40];
+    uniform float weight[8];
     varying vec2 vTexCoord;
 
     void main() {
-      vec2 t = vec2(1.0) / vec2(512.0);
+      //vec2 t = vec2(1.0) / vec2(128.0);
+      vec2 t = vec2(1.0) / vec2(256.0);
+      //vec2 t = vec2(1.0) / vec2(512.0);
       vec4 color = texture(tex, vTexCoord) * weight[0];
 
       for (int i=1; i<weight.length(); ++i) {
@@ -260,11 +262,13 @@ mixin template GaussianYShader() {
   auto fGaussianY = q{
     uniform sampler2D tex;
     uniform int type;
-    uniform float weight[40];
+    uniform float weight[8];
     varying vec2 vTexCoord;
 
     void main() {
-      vec2 t = vec2(1.0) / vec2(512.0);
+      //vec2 t = vec2(1.0) / vec2(128.0);
+      vec2 t = vec2(1.0) / vec2(256.0);
+      //vec2 t = vec2(1.0) / vec2(512.0);
       vec4 color = texture(tex, vTexCoord) * weight[0];
 
       for (int i=1; i<weight.length(); ++i) {

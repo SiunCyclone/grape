@@ -60,11 +60,10 @@ class Binder {
 class VboHdr {
   public:
     this(in int num, in GLuint program) {
-      _program = program;
       _num = num;
       _vboList.length = _num;
       for (int i; i<_num; ++i)
-        _vboList[i] = new VBO;
+        _vboList[i] = new VBO(program);
     }
 
     void create_vbo(T...)(T list) {
@@ -78,38 +77,59 @@ class VboHdr {
       assert(locNames.length == _num);
       assert(strides.length == _num);
       foreach (int i, vbo; _vboList)
-        vbo.locate(_program, strides[i], i, locNames[i]);
+        vbo.attach(strides[i], i, locNames[i]);
     }
 
   private:
     int _num;
     VBO[] _vboList;
-    GLuint _program;
 }
 
-class AttributeLocation {
+class Location {
   public:
-    void bind(GLuint program, int num, string name) {
-      glBindAttribLocation(program, num, cast(char*)name);
+    this(GLuint program, void delegate(string) get) {
+      _get = get;
+      init(program);
     }
 
-    void get(GLuint program, string name) {
-      _location = glGetAttribLocation(program, cast(char*)name);
-    }
-
-    void attach(int stride) {
-      glEnableVertexAttribArray(_location);
-      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    void init(GLuint program) {
+      _program = program;
     }
 
   private:
+    GLuint _program;
     GLint _location;
+    void delegate(string) _get;
+}
+
+class AttributeLocation : Location {
+  public:
+    this(GLuint program) {
+      auto get = (string name) { _location = glGetAttribLocation(_program, cast(char*)name); };
+      super(program, get);
+    }
+
+    void attach(int stride, int num, string name) {
+      bind(num, name);
+      _get(name);
+      locate(stride);
+    }
+
+  private:
+    void bind(int num, string name) {
+      glBindAttribLocation(_program, num, cast(char*)name);
+    }
+
+    void locate(int stride) {
+      glEnableVertexAttribArray(_location);
+      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
 }
 
 class VBO : Binder {
   public:
-    this() {
-      _attLoc = new AttributeLocation;
+    this(GLuint program) {
+      _attLoc = new AttributeLocation(program);
       auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
         generate = { glGenBuffers(1, &_id); };
         eliminate = { glDeleteBuffers(1, &_id); };
@@ -125,11 +145,9 @@ class VBO : Binder {
       unbind();
     }
 
-    void locate(GLuint program, int stride, int num, string name) {
+    void attach(int stride, int num, string name) {
       bind();
-      _attLoc.bind(program, num, name);
-      _attLoc.get(program, name);
-      _attLoc.attach(stride);
+      _attLoc.attach(stride, num, name);
       unbind();
     }
 
@@ -209,6 +227,8 @@ class FBO : Binder {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
     unbind();
   }
+  
+  // glCheckFramebufferStatus TODO fboがちゃんとコンパイルされているかチェック
 }
 
 class Texture : Binder {
@@ -295,6 +315,28 @@ class TexHdr {
     Texture _texture;
 }
 
+class UniformLocation : Location {
+  public:
+    this(GLuint program) {
+      auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
+      super(program, get);
+    }
+
+    void attach(T)(T value, string name, int num=1) {
+      _get(name);
+      locate(value, num);
+    }
+
+  private:
+    void locate(T)(T value, int num) {
+      glUniform1i(_location, value);
+      glUniform1fv(_location, num, value.ptr);
+      glUniform3fv(_location, num, value.ptr);
+      glUniform4fv(_location, num, value.ptr);
+      glUniformMatrix4fv(_location, num, GL_FALSE, value.ptr);
+    }
+}
+
 class FboHdr {
   public:
     this() {
@@ -310,7 +352,7 @@ class FboHdr {
       _fbo.create(texture);
 
       _fbo.bind();
-      _rbo.create(GL_DEPTH_COMPONENT, 512, 512);
+      _rbo.create(GL_DEPTH_COMPONENT, 1024, 1024);
       _rbo.attach(GL_DEPTH_ATTACHMENT);
 
       GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
@@ -333,8 +375,8 @@ class FboHdr {
       _strides = [ 3, 4, 3 ]; 
 
       for (int i; i<_mesh.length/3; ++i)
-        _color ~= [ 0.2, 0.5, 1.0, 1.0 ];
-        //_color ~= [ 0.2, 0.4, 0.9, 1.0 ];
+        _color ~= [ 0.3, 0.4, 0.9, 1.0 ];
+        //_color ~= [ 0.2, 0.5, 1.0, 1.0 ];
         //_color ~= [ 0.6, 0.8, 1.0, 1.0 ];
 
       _vboHdr = new VboHdr(3, _program);
@@ -346,7 +388,7 @@ class FboHdr {
       glUniform3fv(loc, 1, lightPos.ptr);
 
       loc = glGetUniformLocation(program, "eyePos");
-      float[] eyePos = [0, 0, 6]; // _camera.eye
+      float[] eyePos = [0, 0, 1]; // _camera.eye
       glUniform3fv(loc, 1, eyePos.ptr);
 
       loc = glGetUniformLocation(program, "ambientColor");
@@ -366,7 +408,7 @@ class FboHdr {
       _program = program;
 
       FileHdr _fileHdr = new FileHdr;
-      string fileName = "./resource/sphere.obj";
+      string fileName = "./resource/ball.obj";
       _mesh = _fileHdr.make_mesh(fileName);
       _index = _fileHdr.make_index(fileName);
       _locNames = ["pos", "color"];
@@ -383,11 +425,11 @@ class FboHdr {
 
     void draw() {
       _fbo.bind();
-      glViewport(0, 0, 512, 512);
+      glViewport(0, 0, 1024, 1024);
 
       _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
 
-      Vec3 eye = Vec3(0, 0, 6);
+      Vec3 eye = Vec3(0, 0, 3.0);
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
       _camera.look_at(eye, center, up);
@@ -442,8 +484,8 @@ class GaussHdr {
       _fbo.unbind();
     }
 
-    float[40] gauss_weight(float eRange) {
-      float[40] weight;
+    float[8] gauss_weight(float eRange) {
+      float[8] weight;
       float t = 0.0;
       float d = eRange^^2 / 100;
       for (int i=0; i<weight.length; ++i) {
@@ -454,7 +496,7 @@ class GaussHdr {
           t += w;
       }
       for (int i=0; i<weight.length; ++i){
-        weight[i] /= t / 2.3;
+        weight[i] /= t;
       }
       return weight;
     }
@@ -485,7 +527,7 @@ class GaussHdr {
       loc = glGetUniformLocation(_program, "type");
       glUniform1i(loc, type);
 
-      float[40] weight = gauss_weight(300.0);
+      float[8] weight = gauss_weight(300.0);
       writeln(weight);
       loc = glGetUniformLocation(_program, "weight");
       glUniform1fv(loc, 40, weight.ptr);
@@ -493,7 +535,7 @@ class GaussHdr {
 
     void draw() {
       _fbo.bind();
-      glViewport(0, 0, 512, 512);
+      glViewport(0, 0, 256, 256);
 
       _vboHdr.create_vbo(_mesh, _texCoord);
       _vboHdr.enable_vbo(_locNames, _strides);
