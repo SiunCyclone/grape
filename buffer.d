@@ -77,7 +77,7 @@ class VboHdr {
       assert(locNames.length == _num);
       assert(strides.length == _num);
       foreach (int i, vbo; _vboList)
-        vbo.attach(strides[i], i, locNames[i]);
+        vbo.attach(locNames[i], strides[i], i);
     }
 
   private:
@@ -109,20 +109,43 @@ class AttributeLocation : Location {
       super(program, get);
     }
 
-    void attach(int stride, int num, string name) {
-      bind(num, name);
+    void attach(string name, int stride, int i) {
+      bind(name, i);
       _get(name);
       locate(stride);
     }
 
   private:
-    void bind(int num, string name) {
-      glBindAttribLocation(_program, num, cast(char*)name);
+    void bind(string name, int i) {
+      glBindAttribLocation(_program, i, cast(char*)name);
     }
 
     void locate(int stride) {
       glEnableVertexAttribArray(_location);
       glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+}
+
+class UniformLocation : Location {
+  public:
+    this(GLuint program) {
+      auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
+      super(program, get);
+    }
+
+    void attach(T)(string name, T value, int num=1) {
+      _get(name);
+      locate(value, num);
+    }
+
+  private:
+    // TODO シェーダープログラム毎に必要なものだけ準備
+    void locate(T)(T value, int num) {
+      glUniform1i(_location, value);
+      glUniform1fv(_location, num, value.ptr);
+      glUniform3fv(_location, num, value.ptr);
+      glUniform4fv(_location, num, value.ptr);
+      glUniformMatrix4fv(_location, num, GL_FALSE, value.ptr);
     }
 }
 
@@ -145,9 +168,9 @@ class VBO : Binder {
       unbind();
     }
 
-    void attach(int stride, int num, string name) {
+    void attach(string name, int stride, int num) {
       bind();
-      _attLoc.attach(stride, num, name);
+      _attLoc.attach(name, stride, num);
       unbind();
     }
 
@@ -315,28 +338,6 @@ class TexHdr {
     Texture _texture;
 }
 
-class UniformLocation : Location {
-  public:
-    this(GLuint program) {
-      auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
-      super(program, get);
-    }
-
-    void attach(T)(T value, string name, int num=1) {
-      _get(name);
-      locate(value, num);
-    }
-
-  private:
-    void locate(T)(T value, int num) {
-      glUniform1i(_location, value);
-      glUniform1fv(_location, num, value.ptr);
-      glUniform3fv(_location, num, value.ptr);
-      glUniform4fv(_location, num, value.ptr);
-      glUniformMatrix4fv(_location, num, GL_FALSE, value.ptr);
-    }
-}
-
 class FboHdr {
   public:
     this() {
@@ -383,22 +384,29 @@ class FboHdr {
       _ibo = new IBO;
       _ibo.create(_index);
 
-      auto loc = glGetUniformLocation(program, "lightPos");
       float[] lightPos = [0, 0, 1];
-      glUniform3fv(loc, 1, lightPos.ptr);
-
-      loc = glGetUniformLocation(program, "eyePos");
       float[] eyePos = [0, 0, 1]; // _camera.eye
-      glUniform3fv(loc, 1, eyePos.ptr);
-
-      loc = glGetUniformLocation(program, "ambientColor");
       float[] ambientColor = [0.1, 0.1, 0.1, 1.0];
-      glUniform4fv(loc, 1, ambientColor.ptr);
-
       Mat4 invMat4 = Mat4( 1, 0, 0, 0,
                            0, 1, 0, 0,
                            0, 0, 1, 0,
                            0, 0, 0, 1 ).inverse;
+
+      _uniLoc = new UniformLocation(_program);
+      //_uniLoc.attach("lightPos", lightPos);
+      //_uniLoc.attach("eyePos", eyePos);
+      //_uniLoc.attach("ambientColor", ambientColor);
+      //_uniLoc.attach("invMatrix", invMat4.mat);
+
+      auto loc = glGetUniformLocation(program, "lightPos");
+      glUniform3fv(loc, 1, lightPos.ptr);
+
+      loc = glGetUniformLocation(program, "eyePos");
+      glUniform3fv(loc, 1, eyePos.ptr);
+
+      loc = glGetUniformLocation(program, "ambientColor");
+      glUniform4fv(loc, 1, ambientColor.ptr);
+
       loc = glGetUniformLocation(program, "invMatrix");
       glUniformMatrix4fv(loc, 1, GL_FALSE, invMat4.mat.ptr);
     }
@@ -454,6 +462,8 @@ class FboHdr {
   private:
     RBO _rbo;
     FBO _fbo;
+
+    UniformLocation _uniLoc;
 
     float[] _normal;
 

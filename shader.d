@@ -283,25 +283,20 @@ mixin template GaussianYShader() {
 
 class Shader {
   public:
+    this(T)(T type) {
+      generate(type);
+    };
+
     this(T)(T type, string shaderCode) {
-      create_shader(type);
-      attach_compile(shaderCode);
+      this(type);
+      compile(shaderCode);
     }
 
     ~this() {
-      glDeleteShader(_shader); 
+      eliminate();
     }
 
-		alias _shader this; // TODO
-		GLuint _shader;
-
-  private:
-		void create_shader(T)(T type) {
-			_shader = glCreateShader(type);
-			enforce(_shader, "glCreateShader() faild");
-		}
-
-		void attach_compile(string shaderCode) {
+		void compile(string shaderCode) {
 			auto fst = &shaderCode[0];
 			int len = shaderCode.length;
 			glShaderSource(_shader, 1, &fst, &len);
@@ -311,6 +306,61 @@ class Shader {
 			glGetShaderiv(_shader, GL_COMPILE_STATUS, &result);
 			enforce(result != GL_FALSE, "glCompileShader() faild");
 		}
+
+		alias _shader this; // TODO
+
+  private:
+		void generate(T)(T type) {
+			_shader = glCreateShader(type);
+			enforce(_shader, "glCreateShader() faild");
+		}
+
+    void eliminate() {
+      glDeleteShader(_shader); 
+    }
+
+		GLuint _shader;
+}
+
+class ShaderProgram {
+  public:
+    this() {
+      generate();
+    }
+
+    ~this() {
+      eliminate();
+    }
+
+    GLuint attach(T)(T vs, T fs) {
+			glAttachShader(_program, vs);
+			glAttachShader(_program, fs);
+			glLinkProgram(_program);
+
+			int linked;
+			glGetProgramiv(_program, GL_LINK_STATUS, &linked);
+			enforce(linked != GL_FALSE, "glLinkProgram() faild");
+
+      return _program;
+    }
+
+    void use() {
+			glUseProgram(_program);
+    }
+
+    alias _program this;
+
+  private:
+    void generate() {
+			_program = glCreateProgram();
+			enforce(_program, "glCreateProgram() faild");
+    }
+
+    void eliminate() {
+      glDeleteProgram(_program);
+    }
+
+    GLuint _program;
 }
 
 // TODO 軽量化
@@ -333,15 +383,22 @@ class ShaderProgramHdr {
       //writeln(_list.length);
     }
 
-    ~this() {
-      foreach (program; _list)
-        glDeleteProgram(program);
+		void use(ShaderProgramType type) {
+      _current = type;
+      _list[_current].use();
     }
 
-    // delegate
+    @property {
+      GLuint current() {
+        return _list[_current];
+      }
+    }
+
+  private:
+    // TODO delegate
     void enable_program(ShaderProgramType[] typeList) {
       foreach (type; typeList) {
-        switch (type) {
+        final switch (type) {
           case ShaderProgramType.ClassicNormal:
             mixin ClassicNormalShader;
             add_program(type, vClassicNormal, fClassicNormal);
@@ -378,44 +435,20 @@ class ShaderProgramHdr {
             mixin GaussianYShader;
             add_program(type, vGaussianY, fGaussianY);
             break;
-          default:
         }
       } 
     }
 
-		void use(ShaderProgramType type) {
-      _current = type;
-			glUseProgram(_list[_current]);
-    }
-
-    @property {
-      GLuint current() {
-        return _list[_current];
-      }
-    }
-
-  private:
     void add_program(T)(ShaderProgramType type, T vShaderSource, T fShaderSource) {
       Shader vs = new Shader(VertexShader, vShaderSource);
       Shader fs = new Shader(FragmentShader, fShaderSource);
-      _list[type] = create_program(vs, fs);
-    }
 
-    GLuint create_program(T)(T vs, T fs) {
-			GLuint program = glCreateProgram();
-			enforce(program, "glCreateProgram() faild");
-
-			glAttachShader(program, vs);
-			glAttachShader(program, fs);
-			glLinkProgram(program);
-
-			int linked;
-			glGetProgramiv(program, GL_LINK_STATUS, &linked);
-			enforce(linked != GL_FALSE, "glLinkProgram() faild");
-
-      return program;
+      ShaderProgram program = new ShaderProgram;
+      program.attach(vs, fs);
+      _list[type] = program;
     }
 
     ShaderProgramType _current;
-    GLuint[ShaderProgramType] _list;
+    ShaderProgram[ShaderProgramType] _list;
 }
+

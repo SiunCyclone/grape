@@ -12,7 +12,7 @@ shared int WINDOW_Y;
 class Window {
   public:
     this(string name, int x, int y, int w, int h) {
-      create_window(name, x, y, w, h);
+      create(name, x, y, w, h);
       WINDOW_X = w;
       WINDOW_Y = h;
     }
@@ -42,7 +42,7 @@ class Window {
     SDL_Window* _window;
     alias _window this;
   private:
-    void create_window(string name, int x, int y, int w, int h) {
+    void create(string name, int x, int y, int w, int h) {
       _flag = true;
       // check last args
       _window = SDL_CreateWindow(cast(char*)name, x, y, w, h, SDL_WINDOW_OPENGL);
