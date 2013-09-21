@@ -8,7 +8,6 @@ import derelict.sdl2.image;
 import derelict.sdl2.ttf;
 import std.stdio;
 import orange.window;
-import orange.shader;
 import orange.file;
 import orange.math;
 import orange.camera;
@@ -89,10 +88,6 @@ class Location {
   public:
     this(GLuint program, void delegate(string) get) {
       _get = get;
-      init(program);
-    }
-
-    void init(GLuint program) {
       _program = program;
     }
 
@@ -128,17 +123,34 @@ class AttributeLocation : Location {
 
 class UniformLocation : Location {
   public:
-    this(GLuint program) {
+    this(GLuint program, ShaderProgramType type) {
       auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
       super(program, get);
+      init(type);
     }
 
     void attach(T)(string name, T value, int num=1) {
       _get(name);
-      locate(value, num);
+      //locate(value, num);
+      //_locate[name](value, num);
     }
 
   private:
+    void init(ShaderProgramType type) {
+      string vShader, fShader;
+      ShaderSource.load(type)(vShader, fShader);
+      writeln(vShader);
+      // TODO uniform抽出
+      // sampler2D 1i
+      
+      /*
+      final switch (dataType) {
+        case "sampler2D":
+          break;
+      }
+      */
+    }
+
     // TODO シェーダープログラム毎に必要なものだけ準備
     void locate(T)(T value, int num) {
       glUniform1i(_location, value);
@@ -147,6 +159,8 @@ class UniformLocation : Location {
       glUniform4fv(_location, num, value.ptr);
       glUniformMatrix4fv(_location, num, GL_FALSE, value.ptr);
     }
+
+    void delegate(int)[string] _locate;
 }
 
 class VBO : Binder {
@@ -346,9 +360,6 @@ class FboHdr {
       _camera = new Camera;
     }
 
-    ~this() {
-    }
-
     void init(Texture texture) {
       _fbo.create(texture);
 
@@ -362,7 +373,7 @@ class FboHdr {
       _fbo.unbind();
     }
 
-    void set(GLuint program) {
+    void set(GLuint program, ShaderProgramType type) {
       _program = program;
 
       FileHdr _fileHdr = new FileHdr;
@@ -392,7 +403,7 @@ class FboHdr {
                            0, 0, 1, 0,
                            0, 0, 0, 1 ).inverse;
 
-      _uniLoc = new UniformLocation(_program);
+      _uniLoc = new UniformLocation(_program, type);
       //_uniLoc.attach("lightPos", lightPos);
       //_uniLoc.attach("eyePos", eyePos);
       //_uniLoc.attach("ambientColor", ambientColor);
