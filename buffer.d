@@ -121,6 +121,43 @@ class AttributeLocation : Location {
     }
 }
 
+class Uniform {
+  public:
+    this(string vShader, string fShader) {
+      init();
+      extract(vShader, fShader);
+    }
+
+    void locate(string name, int value, string type, int num, GLint location) {
+      _uniInt[type](location, value);
+    }
+
+    void locate(string name, float[] value, string type, int num, GLint location) {
+      _uniFloatV[type](location, value, num);
+    }
+
+  private:
+    void init() {
+      _uniInt["1i"] = (GLint location, int value) { glUniform1i(location, value); };
+      _uniFloatV["1fv"] = (GLint location, float[] value, int num) { glUniform1fv(location, num, value.ptr); };
+      _uniFloatV["2fv"] = (GLint location, float[] value, int num) { glUniform2fv(location, num, value.ptr); };
+      _uniFloatV["3fv"] = (GLint location, float[] value, int num) { glUniform3fv(location, num, value.ptr); };
+      _uniFloatV["4fv"] = (GLint location, float[] value, int num) { glUniform4fv(location, num, value.ptr); };
+      _uniFloatV["mat4fv"] = (GLint location, float[] value, int num) {
+        glUniformMatrix4fv(location, num, GL_FALSE, value.ptr);
+      };
+    }
+
+    // TODO ソースから判別
+    void extract(string vShader, string fShader) {
+    }
+
+    void delegate(GLint, int)[string] _uniInt;
+    //void delegate(int[])[string] _uniIntV;
+    //void delegate(float)[string] _uniFloat;
+    void delegate(GLint, float[], int)[string] _uniFloatV;
+}
+
 class UniformLocation : Location {
   public:
     this(GLuint program, ShaderProgramType type) {
@@ -129,38 +166,19 @@ class UniformLocation : Location {
       init(type);
     }
 
-    void attach(T)(string name, T value, int num=1) {
+    void attach(T)(string name, T value, string type, int num=1) {
       _get(name);
-      //locate(value, num);
-      //_locate[name](value, num);
+      _uniform.locate(name, value, type, num, _location);
     }
 
   private:
     void init(ShaderProgramType type) {
       string vShader, fShader;
       ShaderSource.load(type)(vShader, fShader);
-      writeln(vShader);
-      // TODO uniform抽出
-      // sampler2D 1i
-      
-      /*
-      final switch (dataType) {
-        case "sampler2D":
-          break;
-      }
-      */
+      _uniform = new Uniform(vShader, fShader);
     }
 
-    // TODO シェーダープログラム毎に必要なものだけ準備
-    void locate(T)(T value, int num) {
-      glUniform1i(_location, value);
-      glUniform1fv(_location, num, value.ptr);
-      glUniform3fv(_location, num, value.ptr);
-      glUniform4fv(_location, num, value.ptr);
-      glUniformMatrix4fv(_location, num, GL_FALSE, value.ptr);
-    }
-
-    void delegate(int)[string] _locate;
+    Uniform _uniform;
 }
 
 class VBO : Binder {
@@ -404,22 +422,10 @@ class FboHdr {
                            0, 0, 0, 1 ).inverse;
 
       _uniLoc = new UniformLocation(_program, type);
-      //_uniLoc.attach("lightPos", lightPos);
-      //_uniLoc.attach("eyePos", eyePos);
-      //_uniLoc.attach("ambientColor", ambientColor);
-      //_uniLoc.attach("invMatrix", invMat4.mat);
-
-      auto loc = glGetUniformLocation(program, "lightPos");
-      glUniform3fv(loc, 1, lightPos.ptr);
-
-      loc = glGetUniformLocation(program, "eyePos");
-      glUniform3fv(loc, 1, eyePos.ptr);
-
-      loc = glGetUniformLocation(program, "ambientColor");
-      glUniform4fv(loc, 1, ambientColor.ptr);
-
-      loc = glGetUniformLocation(program, "invMatrix");
-      glUniformMatrix4fv(loc, 1, GL_FALSE, invMat4.mat.ptr);
+      _uniLoc.attach("lightPos", lightPos, "3fv");
+      _uniLoc.attach("eyePos", eyePos, "3fv");
+      _uniLoc.attach("ambientColor", ambientColor, "4fv");
+      _uniLoc.attach("invMatrix", invMat4.mat, "mat4fv");
     }
 
     /*
@@ -452,8 +458,7 @@ class FboHdr {
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
       _camera.look_at(eye, center, up);
-      auto loc = glGetUniformLocation(_program, "pvmMatrix");
-      glUniformMatrix4fv(loc, 1, GL_FALSE, _camera.pvMat4.mat.ptr);
+      _uniLoc.attach("pvmMatrix", _camera.pvMat4.mat, "mat4fv");
 
       //_vboHdr.create_vbo(_mesh, _color);
       _vboHdr.create_vbo(_mesh, _color, _normal);
@@ -522,7 +527,7 @@ class GaussHdr {
       return weight;
     }
 
-    void set(GLuint program, int type) {
+    void set(GLuint program, ShaderProgramType type, int num) {
       _program = program;
 
       _mesh = [ -1.0, 1.0,
@@ -542,16 +547,12 @@ class GaussHdr {
       _ibo = new IBO;
       _ibo.create(_index);
 
-      auto loc = glGetUniformLocation(_program, "tex");
-      glUniform1i(loc, 0);
-
-      loc = glGetUniformLocation(_program, "type");
-      glUniform1i(loc, type);
-
       float[8] weight = gauss_weight(300.0);
-      writeln(weight);
-      loc = glGetUniformLocation(_program, "weight");
-      glUniform1fv(loc, 40, weight.ptr);
+
+      _uniLoc = new UniformLocation(_program, type);
+      _uniLoc.attach("tex", 0, "1i");
+      _uniLoc.attach("type", num, "1i");
+      _uniLoc.attach("weight", weight, "1fv", 40);
     }
 
     void draw() {
@@ -577,6 +578,8 @@ class GaussHdr {
     FBO _fbo;
 
     GLuint _program;
+
+    UniformLocation _uniLoc;
 
     float[] _mesh;
     float[] _texCoord;
