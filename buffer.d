@@ -47,7 +47,7 @@ class Binder {
       _unbind();
     }
 
-  private:
+  protected:
     GLuint _id;
     dg _generate;
     dg _eliminate;
@@ -65,7 +65,7 @@ class VboHdr {
         _vboList[i] = new VBO(program);
     }
 
-    void create_vbo(T...)(T list) {
+    void create_vbo(float[][] list...) {
       assert(list.length == _num);
 
       foreach(int i, data; list)
@@ -125,7 +125,7 @@ class Uniform {
   public:
     this(string vShader, string fShader) {
       init();
-      extract(vShader, fShader);
+      //extract(vShader, fShader);
     }
 
     void locate(string name, int value, string type, int num, GLint location) {
@@ -363,7 +363,7 @@ class TexHdr {
   private:
     void set_location(string locName){
       auto loc = glGetUniformLocation(_program, cast(char*)locName);
-      glUniform1i(loc, 0); // TODO change last parameter
+      glUniform1i(loc, 0); // TODO
     }
 
     GLuint _program;
@@ -463,14 +463,8 @@ class FboHdr {
       //_vboHdr.create_vbo(_mesh, _color);
       _vboHdr.create_vbo(_mesh, _color, _normal);
       _vboHdr.enable_vbo(_locNames, _strides);
-      auto drawMode = DrawMode.Triangles;
+      _ibo.draw(DrawMode.Triangles); 
 
-      _ibo.draw(drawMode); 
-
-      quit();
-    }
-
-    void quit() {
       _fbo.unbind();
       glViewport(0, 0, WINDOW_X, WINDOW_Y);
     }
