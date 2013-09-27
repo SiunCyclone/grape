@@ -56,7 +56,7 @@ class Binder {
 }
 
 // TODO name
-class VboHdr {
+class VBOHdr {
   public:
     this(in int num, in GLuint program) {
       _num = num;
@@ -77,6 +77,10 @@ class VboHdr {
       assert(strides.length == _num);
       foreach (int i, vbo; _vboList)
         vbo.attach(locNames[i], strides[i], i);
+    }
+
+    void draw(DrawMode mode, int num) {
+      glDrawArrays(mode, 0, num);
     }
 
   private:
@@ -123,6 +127,10 @@ class AttributeLocation : Location {
 
 class Uniform {
   public:
+    this(){
+      init();
+    }
+
     this(string vShader, string fShader) {
       init();
       //extract(vShader, fShader);
@@ -160,6 +168,12 @@ class Uniform {
 
 class UniformLocation : Location {
   public:
+    this(GLuint program) {
+      auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
+      super(program, get);
+      _uniform = new Uniform();
+    }
+
     this(GLuint program, ShaderProgramType type) {
       auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
       super(program, get);
@@ -206,11 +220,6 @@ class VBO : Binder {
       unbind();
     }
 
-    /*
-    void draw(DrawMode mode) {
-      glDrawArrays(mode, 0, 3);
-    }
-    */
   private:
     AttributeLocation _attLoc;
 }
@@ -370,7 +379,7 @@ class TexHdr {
     Texture _texture;
 }
 
-class FboHdr {
+class FBOHdr {
   public:
     this() {
       _rbo = new RBO;
@@ -409,7 +418,7 @@ class FboHdr {
         //_color ~= [ 0.2, 0.5, 1.0, 1.0 ];
         //_color ~= [ 0.6, 0.8, 1.0, 1.0 ];
 
-      _vboHdr = new VboHdr(3, _program);
+      _vboHdr = new VBOHdr(3, _program);
       _ibo = new IBO;
       _ibo.create(_index);
 
@@ -442,7 +451,7 @@ class FboHdr {
       for (int i; i<_mesh.length/3; ++i)
         _color ~= [ 0.6, 0.8, 1.0, 1.0 ];
 
-      _vboHdr = new VboHdr(2, _program);
+      _vboHdr = new VBOHdr(2, _program);
       _ibo = new IBO;
       _ibo.create(_index);
     }
@@ -484,7 +493,7 @@ class FboHdr {
     int[] _index;
     string[] _locNames;
     int[] _strides;
-    VboHdr _vboHdr;
+    VBOHdr _vboHdr;
     IBO _ibo;
 }
 
@@ -537,7 +546,7 @@ class GaussHdr {
       _strides = [ 2, 2 ]; 
       _locNames = ["pos", "texCoord"];
 
-      _vboHdr = new VboHdr(2, _program);
+      _vboHdr = new VBOHdr(2, _program);
       _ibo = new IBO;
       _ibo.create(_index);
 
@@ -580,6 +589,6 @@ class GaussHdr {
     int[] _index;
     string[] _locNames;
     int[] _strides;
-    VboHdr _vboHdr;
+    VBOHdr _vboHdr;
     IBO _ibo;
 }

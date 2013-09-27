@@ -412,6 +412,7 @@ class ShaderProgram {
     }
 
     alias _program this;
+    GLuint _program;
 
   private:
     void generate() {
@@ -423,9 +424,9 @@ class ShaderProgram {
       glDeleteProgram(_program);
     }
 
-    GLuint _program;
 }
 
+// TODO いらない
 class ShaderProgramHdr {
 	public:
     this(ShaderProgramType[] typeList...) {

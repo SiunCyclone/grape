@@ -29,7 +29,7 @@ class Font {
 class FontHdr {
   public:
     this(GLuint program) {
-      _vboHdr = new VboHdr(2, program);
+      _vboHdr = new VBOHdr(2, program);
       _texHdr = new TexHdr(program);
       _ibo = new IBO;
       _ibo.create([0, 1, 2, 2, 3, 0]);
@@ -104,7 +104,7 @@ class FontHdr {
     string[2] _locNames;
     int[2] _strides;
 
-    VboHdr _vboHdr;
+    VBOHdr _vboHdr;
     IBO _ibo;
     TexHdr _texHdr;
     DrawMode _drawMode;
