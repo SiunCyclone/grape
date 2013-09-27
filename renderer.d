@@ -2,13 +2,81 @@ module orange.renderer;
 
 import orange.buffer;
 import orange.shader;
+import orange.window;
 
 import std.stdio;
+import std.math;
+import opengl.glew;
 
-class PostProcessing {
+class Filter {
   public:
+    this() {
+      init();
+    }
+
+    final void apply(void delegate() render) {
+      _fbo.bind();
+      glClear(GL_COLOR_BUFFER_BIT);
+      glClear(GL_DEPTH_BUFFER_BIT);
+      glViewport(0, 0, 256, 256);
+
+      render();
+      
+      glViewport(0, 0, WINDOW_X, WINDOW_Y);
+      _fbo.unbind();
+    }
+
+  protected:
+    final void init() {
+      _fbo = new FBO;
+      _texture = new Texture;
+
+      _texture.create(256, 256, null, GL_RGBA);
+      _fbo.create(_texture);
+
+      // TODO RBO
+      _fbo.bind();
+      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+      glDrawBuffers(1, drawBufs.ptr);
+      _fbo.unbind();
+    }
+
+    FBO _fbo;
+    Texture _texture;
+}
+
+class BlurFilter : Filter {
+  public:
+    this() {
+      _renderer = new FilterRenderer;
+    }
+
+    void render() {
+      _texture.enable();
+      _renderer.render();
+      _texture.disable();
+    }
+
+    // TODO 名前
+    float[8] gauss_weight(float eRange) {
+      float[8] weight;
+      float t = 0.0;
+      float d = eRange^^2 / 100;
+      for (int i=0; i<weight.length; ++i) {
+        float r = 1.0 + 2.0*i;
+        float w = exp(-0.5 * r^^2 / d);
+        weight[i] = w;
+        if (i > 0) w *= 2.0;
+          t += w;
+      }
+      for (int i=0; i<weight.length; ++i){
+        weight[i] /= t;
+      }
+      return weight;
+    }
 
   private:
+    FilterRenderer _renderer;
 }
 
 class Renderer {
@@ -58,6 +126,43 @@ class Renderer {
     int[] _strides;
 }
 
+class FilterRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 2, 2 ];
+      mixin FilterShaderSource;;
+      init(FilterShader, 2, locNames, strides, DrawMode.Triangles);
+
+      _program.use();
+      init_vbo();
+      init_ibo();
+      set_uniform("tex", 0, "1i");
+    }
+
+    override void render() {
+      _program.use();
+      set_vbo(_mesh, _texCoord);
+      _ibo.draw(_drawMode);
+    }
+
+  private:
+    void init_vbo() {
+      _mesh = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
+      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+    }
+
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
+
+    IBO _ibo;
+    float[] _mesh;
+    float[] _texCoord;
+}
+
 class NormalRenderer : Renderer {
   public:
     this() {
@@ -82,6 +187,28 @@ class NormalRenderer : Renderer {
   private:
     IBO _ibo;
 }
+
+class TextureRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 3, 2 ];
+      mixin NormalShaderSource;
+      init(NormalShader, 2, locNames, strides, DrawMode.Points);
+
+      _ibo = new IBO;
+    }
+
+    void set_ibo(int[] index) {
+      _program.use();
+      _ibo.create(index);
+    }
+
+  private:
+    IBO _ibo;
+}
+
+
 
 
 /*

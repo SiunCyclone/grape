@@ -301,6 +301,31 @@ mixin template GaussianYShaderSource() {
   };
 }
 
+mixin template FilterShaderSource() {
+  void delegate(out string, out string) FilterShader = (out string vShader, out string fShader) {
+    vShader = q{
+      attribute vec2 pos;
+      attribute vec2 texCoord;
+      varying vec2 vTexCoord;
+
+      void main() {
+        gl_Position = vec4(pos, 0.0, 1.0); 
+        vTexCoord = texCoord;
+      }
+    };
+
+    fShader = q{
+      uniform sampler2D tex;
+      varying vec2 vTexCoord;
+
+      void main() {
+        vec4 smpColor = texture(tex, vTexCoord);
+        gl_FragColor = smpColor;
+      }
+    };
+  };
+}
+
 class ShaderSource {
   public:
     static this() {
