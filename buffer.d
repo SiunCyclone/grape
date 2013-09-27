@@ -530,7 +530,7 @@ class GaussHdr {
       return weight;
     }
 
-    void set(GLuint program, ShaderProgramType type, int num) {
+    void set(GLuint program, ShaderProgramType type) {
       _program = program;
 
       _mesh = [ -1.0, 1.0,
@@ -554,8 +554,7 @@ class GaussHdr {
 
       _uniLoc = new UniformLocation(_program, type);
       _uniLoc.attach("tex", 0, "1i");
-      _uniLoc.attach("type", num, "1i");
-      _uniLoc.attach("weight", weight, "1fv", 40);
+      _uniLoc.attach("weight", weight, "1fv", 8);
     }
 
     void draw() {

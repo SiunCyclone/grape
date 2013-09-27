@@ -10,15 +10,19 @@ import opengl.glew;
 
 class Filter {
   public:
-    this() {
-      init();
+    this(int w, int h) {
+      init(w, h);
+    }
+
+    final void set_camera(float[] mat) {
+      _renderer.set_uniform("pvmMatrix", mat, "mat4fv");
     }
 
     final void apply(void delegate() render) {
       _fbo.bind();
       glClear(GL_COLOR_BUFFER_BIT);
       glClear(GL_DEPTH_BUFFER_BIT);
-      glViewport(0, 0, 256, 256);
+      glViewport(0, 0, _w, _h);
 
       render();
       
@@ -26,12 +30,30 @@ class Filter {
       _fbo.unbind();
     }
 
-  protected:
-    final void init() {
-      _fbo = new FBO;
-      _texture = new Texture;
+    final void texture_enable() {
+      _texture.enable();
+    }
 
-      _texture.create(256, 256, null, GL_RGBA);
+    final void texture_disable() {
+      _texture.disable();
+    }
+
+    final void render() {
+      texture_enable();
+      _renderer.render(); // TODO 描画位置指定
+      texture_disable();
+    }
+
+  protected:
+    final void init(int w, int h) {
+      _fbo = new FBO;
+      _texture = new Texture; //TODO もらう
+      _renderer = new FilterRenderer;
+
+      _w = w;
+      _h = h;
+
+      _texture.create(_w, _h, null, GL_RGBA);
       _fbo.create(_texture);
 
       // TODO RBO
@@ -43,40 +65,96 @@ class Filter {
 
     FBO _fbo;
     Texture _texture;
+    FilterRenderer _renderer;
+    int _w, _h;
 }
 
-class BlurFilter : Filter {
+class BlurFilter {
   public:
     this() {
-      _renderer = new FilterRenderer;
+      _heightRenderer = new GaussHeightRenderer;
+      _weightRenderer = new GaussWeightRenderer;
+
+      _filter = new Filter(128, 128);
+      _heightFilter= new Filter(128, 128);
+      _weightFilter= new Filter(128, 128);
     }
 
-    void render() {
-      _texture.enable();
-      _renderer.render();
-      _texture.disable();
+    void set_camera(float[] mat) {
+      /*
+      _filter.set_camera(mat);
+      _heightFilter.set_camera(mat);
+      */
     }
 
-    // TODO 名前
-    float[8] gauss_weight(float eRange) {
-      float[8] weight;
-      float t = 0.0;
-      float d = eRange^^2 / 100;
-      for (int i=0; i<weight.length; ++i) {
-        float r = 1.0 + 2.0*i;
-        float w = exp(-0.5 * r^^2 / d);
-        weight[i] = w;
-        if (i > 0) w *= 2.0;
-          t += w;
-      }
-      for (int i=0; i<weight.length; ++i){
-        weight[i] /= t;
-      }
-      return weight;
+    void apply(void delegate() render) {
+      _filter.apply(render);
+      _heightFilter.apply({ 
+        _filter.texture_enable();
+        _heightRenderer.render();
+        _filter.texture_disable();
+      });
+      _weightFilter.apply({ 
+        _heightFilter.texture_enable();
+        _weightRenderer.render();
+        _heightFilter.texture_disable();
+      });
+      _weightFilter.render();
     }
 
   private:
-    FilterRenderer _renderer;
+    GaussHeightRenderer _heightRenderer;
+    GaussWeightRenderer _weightRenderer;
+
+    Filter _filter;
+    Filter _heightFilter;
+    Filter _weightFilter;
+}
+
+class GlowFilter {
+  public:
+    this() {
+      _heightRenderer = new GaussHeightRenderer;
+      _weightRenderer = new GaussWeightRenderer;
+
+      _filter = new Filter(128, 128);
+      _heightFilter = new Filter(128, 128);
+      _weightFilter = new Filter(128, 128);
+      _highFilter = new Filter(1024, 1024);
+    }
+
+    void apply(void delegate() render) {
+      _highFilter.apply(render);
+      _filter.apply(render);
+      _heightFilter.apply({ 
+        _filter.texture_enable();
+        _heightRenderer.render();
+        _filter.texture_disable();
+      });
+      _weightFilter.apply({ 
+        _heightFilter.texture_enable();
+        _weightRenderer.render();
+        _heightFilter.texture_disable();
+      });
+
+      _weightFilter.render();
+      /*
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE); //add
+      _highFilter.render();
+      _weightFilter.render();
+      glDisable(GL_BLEND);
+      */
+    }
+
+  private:
+    GaussHeightRenderer _heightRenderer;
+    GaussWeightRenderer _weightRenderer;
+
+    Filter _filter;
+    Filter _heightFilter;
+    Filter _weightFilter;
+    Filter _highFilter;
 }
 
 class Renderer {
@@ -163,6 +241,124 @@ class FilterRenderer : Renderer {
     float[] _texCoord;
 }
 
+class GaussHeightRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 2, 2 ];
+      mixin GaussianYShaderSource;
+      init(GaussianYShader, 2, locNames, strides, DrawMode.Triangles);
+
+      _program.use();
+      init_vbo();
+      init_ibo();
+
+      float[8] weight = gauss_weight(50.0);
+      writeln(weight);
+      set_uniform("tex", 0, "1i");
+      set_uniform("weight", weight, "1fv", 8);
+    }
+
+    override void render() {
+      _program.use();
+      set_vbo(_mesh, _texCoord);
+      _ibo.draw(_drawMode);
+    }
+
+  private:
+    void init_vbo() {
+      _mesh = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
+      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+    }
+
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
+
+    // TODO 名前
+    float[8] gauss_weight(float eRange) {
+      float[8] weight;
+      float t = 0.0;
+      float d = eRange^^2 / 100;
+      for (int i=0; i<weight.length; ++i) {
+        float r = 1.0 + 2.0*i;
+        float w = exp(-0.5 * r^^2 / d);
+        weight[i] = w;
+        if (i > 0) w *= 2.0;
+          t += w;
+      }
+      for (int i=0; i<weight.length; ++i){
+        weight[i] /= t;
+      }
+      return weight;
+    }
+
+    IBO _ibo;
+    float[] _mesh;
+    float[] _texCoord;
+}
+
+class GaussWeightRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 2, 2 ];
+      mixin GaussianXShaderSource;
+      init(GaussianXShader, 2, locNames, strides, DrawMode.Triangles);
+
+      _program.use();
+      init_vbo();
+      init_ibo();
+
+      float[8] weight = gauss_weight(50.0);
+      writeln(weight);
+      set_uniform("tex", 0, "1i");
+      set_uniform("weight", weight, "1fv", 8);
+    }
+
+    override void render() {
+      _program.use();
+      set_vbo(_mesh, _texCoord);
+      _ibo.draw(_drawMode);
+    }
+
+  private:
+    void init_vbo() {
+      _mesh = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
+      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+    }
+
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
+
+    // TODO 名前
+    float[8] gauss_weight(float eRange) {
+      float[8] weight;
+      float t = 0.0;
+      float d = eRange^^2 / 100;
+      for (int i=0; i<weight.length; ++i) {
+        float r = 1.0 + 2.0*i;
+        float w = exp(-0.5 * r^^2 / d);
+        weight[i] = w;
+        if (i > 0) w *= 2.0;
+          t += w;
+      }
+      for (int i=0; i<weight.length; ++i){
+        weight[i] /= t;
+      }
+      return weight;
+    }
+
+    IBO _ibo;
+    float[] _mesh;
+    float[] _texCoord;
+}
+
 class NormalRenderer : Renderer {
   public:
     this() {
@@ -207,9 +403,6 @@ class TextureRenderer : Renderer {
   private:
     IBO _ibo;
 }
-
-
-
 
 /*
 class Renderer {

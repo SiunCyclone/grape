@@ -230,6 +230,7 @@ mixin template ADSShaderSource() {
   };
 }
 
+// Weightにリネーム
 mixin template GaussianXShaderSource() {
   void delegate(out string, out string) GaussianXShader = (out string vShader, out string fShader) {
     vShader = q{
@@ -249,8 +250,8 @@ mixin template GaussianXShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        //vec2 t = vec2(1.0) / vec2(128.0);
-        vec2 t = vec2(1.0) / vec2(256.0);
+        vec2 t = vec2(1.0) / vec2(128.0);
+        //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
         vec4 color = texture(tex, vTexCoord) * weight[0];
 
@@ -280,14 +281,14 @@ mixin template GaussianYShaderSource() {
 
     fShader = q{
       uniform sampler2D tex;
-      uniform int type;
       uniform float weight[8];
       varying vec2 vTexCoord;
 
       void main() {
-        //vec2 t = vec2(1.0) / vec2(128.0);
-        vec2 t = vec2(1.0) / vec2(256.0);
+        vec2 t = vec2(1.0) / vec2(128.0);
+        //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
+        //vec4 color = texture(tex, vTexCoord);
         vec4 color = texture(tex, vTexCoord) * weight[0];
 
         for (int i=1; i<weight.length(); ++i) {
@@ -307,8 +308,10 @@ mixin template FilterShaderSource() {
       attribute vec2 pos;
       attribute vec2 texCoord;
       varying vec2 vTexCoord;
+      //uniform mat4 pvmMatrix;
 
       void main() {
+        //gl_Position = pvmMatrix * vec4(pos, 0.0, 1.0); 
         gl_Position = vec4(pos, 0.0, 1.0); 
         vTexCoord = texCoord;
       }
@@ -321,6 +324,7 @@ mixin template FilterShaderSource() {
       void main() {
         vec4 smpColor = texture(tex, vTexCoord);
         gl_FragColor = smpColor;
+        //gl_FragColor = smpColor + vec4(0.2, 0.0, 0.0, 1.0);
       }
     };
   };
