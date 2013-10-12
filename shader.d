@@ -305,14 +305,14 @@ mixin template GaussianYShaderSource() {
 mixin template FilterShaderSource() {
   void delegate(out string, out string) FilterShader = (out string vShader, out string fShader) {
     vShader = q{
-      attribute vec2 pos;
+      attribute vec3 pos;
       attribute vec2 texCoord;
       varying vec2 vTexCoord;
       //uniform mat4 pvmMatrix;
 
       void main() {
         //gl_Position = pvmMatrix * vec4(pos, 0.0, 1.0); 
-        gl_Position = vec4(pos, 0.0, 1.0); 
+        gl_Position = vec4(pos, 1.0); 
         vTexCoord = texCoord;
       }
     };

@@ -11,7 +11,9 @@ import opengl.glew;
 class Filter {
   public:
     this(int w, int h) {
-      init(w, h);
+      _w = w;
+      _h = h;
+      init();
     }
 
     final void set_camera(float[] mat) {
@@ -44,14 +46,15 @@ class Filter {
       texture_disable();
     }
 
+    void above() {
+      _renderer.above();
+    }
+
   protected:
-    final void init(int w, int h) {
+    final void init() {
       _fbo = new FBO;
       _texture = new Texture; //TODO もらう
       _renderer = new FilterRenderer;
-
-      _w = w;
-      _h = h;
 
       _texture.create(_w, _h, null, GL_RGBA);
       _fbo.create(_texture);
@@ -111,19 +114,15 @@ class BlurFilter {
     Filter _weightFilter;
 }
 
-class GlowFilter {
+class GlowFilter : BlurFilter {
   public:
     this() {
-      _heightRenderer = new GaussHeightRenderer;
-      _weightRenderer = new GaussWeightRenderer;
-
-      _filter = new Filter(128, 128);
-      _heightFilter = new Filter(128, 128);
-      _weightFilter = new Filter(128, 128);
+      super();
       _highFilter = new Filter(1024, 1024);
+      _highFilter.above();
     }
 
-    void apply(void delegate() render) {
+    override void apply(void delegate() render) {
       _highFilter.apply(render);
       _filter.apply(render);
       _heightFilter.apply({ 
@@ -137,23 +136,14 @@ class GlowFilter {
         _heightFilter.texture_disable();
       });
 
-      _weightFilter.render();
-      /*
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE); //add
       _highFilter.render();
       _weightFilter.render();
       glDisable(GL_BLEND);
-      */
     }
 
   private:
-    GaussHeightRenderer _heightRenderer;
-    GaussWeightRenderer _weightRenderer;
-
-    Filter _filter;
-    Filter _heightFilter;
-    Filter _weightFilter;
     Filter _highFilter;
 }
 
@@ -184,6 +174,7 @@ class Renderer {
 
   protected:
     ShaderProgram _program;
+    DrawMode _drawMode;
 
   private:
     final void init_program(void delegate(out string, out string) dg) {
@@ -199,7 +190,6 @@ class Renderer {
     VBOHdr _vboHdr;
 
     // TODO 消す
-    DrawMode _drawMode;
     string[] _locNames;
     int[] _strides;
 }
@@ -208,7 +198,7 @@ class FilterRenderer : Renderer {
   public:
     this() {
       string[] locNames = [ "pos", "texCoord" ];
-      int[] strides = [ 2, 2 ];
+      int[] strides = [ 3, 2 ];
       mixin FilterShaderSource;;
       init(FilterShader, 2, locNames, strides, DrawMode.Triangles);
 
@@ -224,9 +214,13 @@ class FilterRenderer : Renderer {
       _ibo.draw(_drawMode);
     }
 
+    void above() {
+      _mesh = [ -1.0, 1.0, 0.0001, 1.0, 1.0, 0.0001, 1.0, -1.0, 0.0001, -1.0, -1.0, 0.0001 ];
+    }
+
   private:
     void init_vbo() {
-      _mesh = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
+      _mesh = [ -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0 ];
       _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
     }
 
@@ -254,7 +248,6 @@ class GaussHeightRenderer : Renderer {
       init_ibo();
 
       float[8] weight = gauss_weight(50.0);
-      writeln(weight);
       set_uniform("tex", 0, "1i");
       set_uniform("weight", weight, "1fv", 8);
     }
@@ -313,7 +306,6 @@ class GaussWeightRenderer : Renderer {
       init_ibo();
 
       float[8] weight = gauss_weight(50.0);
-      writeln(weight);
       set_uniform("tex", 0, "1i");
       set_uniform("weight", weight, "1fv", 8);
     }

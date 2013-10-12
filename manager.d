@@ -1,5 +1,7 @@
 module orange.manager;
 
+import std.stdio;
+
 enum {
   LIBRARY_NUM = 4
 }
@@ -67,6 +69,10 @@ class Manager {
   public:
     this() {
       _libraries.length = LIBRARY_NUM;
+    }
+
+    ~this() {
+      debug(tor) writeln("Manager dtor");
     }
 
     void enable_sdl2() {

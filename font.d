@@ -4,31 +4,40 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 import std.exception : enforce;
 import orange.buffer;
+import orange.shader;
 import orange.window;
-import opengl.glew;
 import orange.surface;
+import orange.renderer;
+import opengl.glew;
 
 import std.stdio;
 
 // TODO 複数扱う
 class Font {
   public:
-    this(string file, int size) {
-      _font = TTF_OpenFont(cast(char*)file, size);
-      enforce(_font != null, "_font is null");
+    this(string file) {
+      foreach (size; sizeList) {
+        _list[size] = TTF_OpenFont(cast(char*)file, size);
+        enforce(_list[size] != null, "TTF_OpenFont() failed");
+      }
     }
 
-    void free() {
-      TTF_CloseFont(_font);
+    static ~this() {
+      debug(tor) writeln("Font dtor");
+      foreach (font; _list)
+        TTF_CloseFont(font);
     }
 
-    alias _font this;
-    TTF_Font* _font; // TODO privateにしたほうがいいか
+    static immutable auto sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14, // TODO immutableにする
+                                       15, 16, 17, 18, 20, 22, 24, 26,
+                                       28, 32, 36, 40, 48, 56, 64, 72 ];
+    alias _list this;
+    static TTF_Font*[int] _list;
 }
 
 class FontHdr {
   public:
-    this(GLuint program) {
+    this(GLuint program) { //TODO program受け取らない
       _vboHdr = new VBOHdr(2, program);
       _texHdr = new TexHdr(program);
       _ibo = new IBO;
@@ -43,23 +52,16 @@ class FontHdr {
                0.0, 1.0 ];        
       _locNames = ["pos", "texCoord"];
       _strides = [ 3, 2 ]; 
+
+      //debug(tor) writeln("FontHdr ctor");
     }
 
     ~this() {
-      // ここで開放してくれないとTTFが先にQuitしてしまう
-      foreach (font; _font)
-        font.free();
+      //debug(tor) writeln("FontHdr dtor");
     }
 
-    void load(string file, int[] sizeList...) {
-      if (sizeList.length == 0) {
-        sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14, // TODO immutableにする
-                     15, 16, 17, 18, 20, 22, 24, 26,
-                     28, 32, 36, 40, 48, 56, 64, 72 ];
-      }
-
-      foreach (size; sizeList)
-        _font[size] = new Font(file, size);
+    void load(string file) { //TODO コンストラクタも受け取る？
+      _font = new Font(file);
     }
 
     void set_color(ubyte r, ubyte g, ubyte b) {
@@ -70,7 +72,7 @@ class FontHdr {
     void draw(float x, float y, string text, int size) {
       enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
-      _surf.create_ttf(_font[size], text, _color);
+      _surf.create_ttf(_font, size, text, _color);
       _surf.convert();
 
       float[12] pos = set_pos(x, y, _surf);
@@ -97,7 +99,8 @@ class FontHdr {
     }
 
     Surface _surf;
-    Font[int] _font;
+    //Font[int] _font;
+    Font _font;
     SDL_Color _color;
 
     float[8] _tex;
@@ -110,3 +113,66 @@ class FontHdr {
     DrawMode _drawMode;
 }
 
+/*
+class FontRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 3, 2 ];
+      mixin FontShaderSource;
+      init(FontShader, 2, locNames, strides, DrawMode.Triangles);
+
+      _program.use();
+      init_vbo();
+      init_ibo();
+    }
+
+    void load(string file, int[] sizeList...) {
+      if (sizeList.length == 0) {
+        sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14, // TODO immutableにする
+                     15, 16, 17, 18, 20, 22, 24, 26,
+                     28, 32, 36, 40, 48, 56, 64, 72 ];
+      }
+
+      foreach (size; sizeList)
+        _font[size] = new Font(file, size);
+    }
+
+    override void render() {
+      _program.use();
+      _ibo.draw(_drawMode);
+    }
+
+  private:
+    void init_vbo() {
+      _mesh = [ -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0 ];
+      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+    }
+
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
+
+    float[12] set_pos(float x, float y, Surface surf) {
+      auto startX = x / (WINDOW_X/2.0);
+      auto startY = y / (WINDOW_Y/2.0);
+      auto w = surf.w / (WINDOW_X/2.0);
+      auto h = surf.h / (WINDOW_Y/2.0);
+
+      return [ startX, startY, 0.0,
+               startX+w, startY, 0.0,
+               startX+w, startY-h, 0.0,
+               startX, startY-h, 0.0 ];
+    }
+
+    IBO _ibo;
+    float[] _mesh;
+    float[] _texCoord;
+
+    Surface _surf;
+    Font[int] _font;
+    SDL_Color _color;
+}
+*/
