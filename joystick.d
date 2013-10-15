@@ -25,8 +25,11 @@ class Joystick {
     }
 
     ~this() {
+      debug(tor) writeln("Joystick dtor");
+      /*
       if (SDL_JoystickGetAttached(_joystick))
         SDL_JoystickClose(_joystick);
+        */
     }
 
     float getAxis(in int axis) 

@@ -18,8 +18,11 @@ class Window {
     }
 
     ~this() {
+      debug(tor) writeln("Windows dtor");
+      /*
       SDL_GL_DeleteContext(_context); 
       SDL_DestroyWindow(_window);
+      */
     }
     
     void update() {

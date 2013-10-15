@@ -10,7 +10,8 @@ import orange.font;
 class Surface {
   public:
     ~this() {
-      free(_surf);
+      debug(tor) writeln("Surface dtor");
+      //free(_surf);
     }
 
     void create_ttf(Font font, int size, string text, SDL_Color color) {

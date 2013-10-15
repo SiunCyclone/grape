@@ -6,7 +6,7 @@ import std.exception : enforce;
 private final class SDL2 {
   import derelict.sdl2.sdl;
 
-  ~this(){
+  static ~this(){
     debug(tor) writeln("SDL2 dtor");
     if (isLoaded) SDL_Quit();
   }
@@ -26,33 +26,10 @@ private final class SDL2 {
   static bool isLoaded = false;
 }
 
-private final class SDL2TTF {
-  import derelict.sdl2.ttf;
-
-  ~this() {
-    debug(tor) writeln("SDL2TTF dtor");
-    if (isLoaded) TTF_Quit();
-  }
-
-  static void load() {
-    debug(tor) writeln("SDL2TTF load");
-
-    enforce(isLoaded != true, "SDL2TTF has loaded 2 times");
-    isLoaded = true;
-
-    DerelictSDL2ttf.load();
-
-    if (TTF_Init() == -1)
-      throw new Exception("TTF_Init() failed");
-  }
-
-  static bool isLoaded = false;
-}
-
 private final class SDL2IMAGE {
   import derelict.sdl2.image;
 
-  ~this() {
+  static ~this() {
     if (isLoaded) IMG_Quit();
   }
 
@@ -98,11 +75,13 @@ final class Manager {
       //SDL2.load();
     }
 
+    /*
     void enable_sdl2ttf() {
       tmp2 = new SDL2TTF;
       tmp2.load();
       //SDL2TTF.load();
     }
+    */
 
     void enable_sdl2image() {
       tmp3 = new SDL2IMAGE;
@@ -115,7 +94,7 @@ final class Manager {
     }
   private:
     SDL2 tmp;
-    SDL2TTF tmp2;
+   // SDL2TTF tmp2;
     SDL2IMAGE tmp3;
 }
 

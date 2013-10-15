@@ -12,28 +12,65 @@ import opengl.glew;
 
 import std.stdio;
 
+
+/*
+private final class SDL2TTF {
+  static ~this() {
+    debug(tor) writeln("SDL2TTF dtor");
+    if (isLoaded) TTF_Quit();
+  }
+
+  static void load() {
+    debug(tor) writeln("SDL2TTF load");
+
+    enforce(isLoaded != true, "SDL2TTF has loaded 2 times");
+    isLoaded = true;
+
+    DerelictSDL2ttf.load();
+
+    if (TTF_Init() == -1)
+      throw new Exception("TTF_Init() failed");
+  }
+
+  static bool isLoaded = false;
+}
+*/
+
 // TODO 複数扱う
-// FIXME 短時間にscene切り替えしすぎるTTF_OpenFont() failedになる
+// FIXME 一定量切り替えするとTTF_OpenFont() failedになる
 class Font {
   public:
     this(string file) {
-      foreach (size; sizeList) {
+      if (!isLoaded) {
+        isLoaded = true;
+        DerelictSDL2ttf.load();
+        if (TTF_Init() == -1)
+          throw new Exception("TTF_Init() failed");
+      }
+
+      foreach (size; _sizeList) {
         _list[size] = TTF_OpenFont(cast(char*)file, size);
         enforce(_list[size] != null, "TTF_OpenFont() failed");
       }
     }
 
     static ~this() {
-      debug(tor) writeln("Font dtor");
-      foreach (font; _list)
-        TTF_CloseFont(font);
+      debug(tor) writeln("Font static dtor");
+      if (isLoaded) {
+        foreach (font; _list)
+          TTF_CloseFont(font);
+        TTF_Quit();
+      }
     }
 
-    static immutable auto sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14, // TODO immutableにする
-                                       15, 16, 17, 18, 20, 22, 24, 26,
-                                       28, 32, 36, 40, 48, 56, 64, 72 ];
+    static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                        15, 16, 17, 18, 20, 22, 24, 26,
+                                        28, 32, 36, 40, 48, 56, 64, 72 ];
     alias _list this;
     static TTF_Font*[int] _list;
+
+  private:
+    static bool isLoaded = false;
 }
 
 class FontHdr {
