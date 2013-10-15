@@ -1,47 +1,65 @@
 module orange.manager;
 
 import std.stdio;
+import std.exception : enforce;
 
-enum {
-  LIBRARY_NUM = 4
-}
-
-class Library {}
-
-class SDL2 : Library {
+private final class SDL2 {
   import derelict.sdl2.sdl;
 
-  this() {
+  ~this(){
+    debug(tor) writeln("SDL2 dtor");
+    if (isLoaded) SDL_Quit();
+  }
+
+  static void load() {
+    debug(tor) writeln("SDL2 load");
+
+    enforce(isLoaded != true, "SDL2 has loaded 2 times");
+    isLoaded = true;
+
     DerelictSDL2.load();
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
       throw new Exception("SDL_Init() failed");
   }
 
-  ~this(){
-    SDL_Quit();
-  }
+  static bool isLoaded = false;
 }
 
-class SDL2TTF : Library {
+private final class SDL2TTF {
   import derelict.sdl2.ttf;
 
-  this() {
+  ~this() {
+    debug(tor) writeln("SDL2TTF dtor");
+    if (isLoaded) TTF_Quit();
+  }
+
+  static void load() {
+    debug(tor) writeln("SDL2TTF load");
+
+    enforce(isLoaded != true, "SDL2TTF has loaded 2 times");
+    isLoaded = true;
+
     DerelictSDL2ttf.load();
 
     if (TTF_Init() == -1)
       throw new Exception("TTF_Init() failed");
   }
 
-  ~this() {
-    TTF_Quit();
-  }
+  static bool isLoaded = false;
 }
 
-class SDL2IMAGE : Library {
+private final class SDL2IMAGE {
   import derelict.sdl2.image;
 
-  this() {
+  ~this() {
+    if (isLoaded) IMG_Quit();
+  }
+
+  static void load() {
+    enforce(isLoaded != true, "SDL2IMAGE has loaded 2 times");
+    isLoaded = true;
+
     DerelictSDL2Image.load();
 
     // TODO get in args
@@ -50,48 +68,54 @@ class SDL2IMAGE : Library {
       throw new Exception("Image_Init() failed");
   }
 
-  ~this() {
-    IMG_Quit();
-  }
+  static bool isLoaded = false;
 }
 
-class GLEW : Library {
+private final abstract class GLEW {
   import opengl.glew;
 
-  this() {
-    // create OpenGL context before call this
+  static void load() {
+    enforce(isLoaded != true, "GLEW has loaded 2 times");
+    isLoaded = true;
+    // Create OpenGL context before call this.load()
     if (glewInit() != GLEW_OK)
       throw new Exception("glewInit() failed");
   }
+
+  static bool isLoaded = false;
 }
 
-class Manager {
+// TODO tmp
+final class Manager {
   public:
-    this() {
-      _libraries.length = LIBRARY_NUM;
-    }
-
     ~this() {
       debug(tor) writeln("Manager dtor");
     }
 
     void enable_sdl2() {
-      _libraries ~= new SDL2;
+      tmp = new SDL2;
+      tmp.load();
+      //SDL2.load();
     }
 
     void enable_sdl2ttf() {
-      _libraries ~= new SDL2TTF;
+      tmp2 = new SDL2TTF;
+      tmp2.load();
+      //SDL2TTF.load();
     }
 
     void enable_sdl2image() {
-      _libraries ~= new SDL2IMAGE;
+      tmp3 = new SDL2IMAGE;
+      tmp3.load();
+      //SDL2IMAGE.load();
     }
 
     void enable_glew() {
-      _libraries ~= new GLEW;
+      GLEW.load();
     }
-
   private:
-    Library[] _libraries;
+    SDL2 tmp;
+    SDL2TTF tmp2;
+    SDL2IMAGE tmp3;
 }
 

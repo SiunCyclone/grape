@@ -19,13 +19,14 @@ class Joystick {
   public:
     this(in int num) {
       _joystick = SDL_JoystickOpen(num);
-      enforce(SDL_FALSE != SDL_JoystickGetAttached(_joystick), "Joystick attach error");
-      
+      enforce(_joystick != null, "SDL_JoystickOpen() failed");
+
       set_num();
     }
 
     ~this() {
-      SDL_JoystickClose(_joystick);
+      if (SDL_JoystickGetAttached(_joystick))
+        SDL_JoystickClose(_joystick);
     }
 
     float getAxis(in int axis) 

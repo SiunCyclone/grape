@@ -13,6 +13,7 @@ import opengl.glew;
 import std.stdio;
 
 // TODO 複数扱う
+// FIXME 短時間にscene切り替えしすぎるTTF_OpenFont() failedになる
 class Font {
   public:
     this(string file) {
@@ -57,10 +58,10 @@ class FontHdr {
     }
 
     ~this() {
-      //debug(tor) writeln("FontHdr dtor");
+      debug(tor) writeln("FontHdr dtor");
     }
 
-    void load(string file) { //TODO コンストラクタも受け取る？
+    void load(string file) { //TODO コンストラクタでも受け取るようにするか？
       _font = new Font(file);
     }
 
