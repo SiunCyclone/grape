@@ -75,14 +75,6 @@ final class Manager {
       //SDL2.load();
     }
 
-    /*
-    void enable_sdl2ttf() {
-      tmp2 = new SDL2TTF;
-      tmp2.load();
-      //SDL2TTF.load();
-    }
-    */
-
     void enable_sdl2image() {
       tmp3 = new SDL2IMAGE;
       tmp3.load();
@@ -94,7 +86,6 @@ final class Manager {
     }
   private:
     SDL2 tmp;
-   // SDL2TTF tmp2;
     SDL2IMAGE tmp3;
 }
 
