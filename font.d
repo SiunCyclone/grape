@@ -66,6 +66,7 @@ class Font {
 
     ~this() {
       debug(tor) writeln("Font dtor");
+      foreach (font; _fonts) destroy(font);
     }
 
     void load(string file) {
