@@ -1,6 +1,8 @@
 module orange.camera;
 
-import opengl.glew;
+//import opengl.glew;
+//import derelict.opengl3.gl;
+import derelict.opengl3.gl3;
 import std.math;
 import orange.math;
 

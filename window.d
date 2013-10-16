@@ -2,7 +2,8 @@ module orange.window;
 
 import std.exception : enforce;
 import derelict.sdl2.sdl;
-import opengl.glew;
+//import opengl.glew;
+import derelict.opengl3.gl3;
 
 import std.stdio;
 

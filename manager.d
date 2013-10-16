@@ -48,6 +48,7 @@ private final class SDL2IMAGE {
   static bool isLoaded = false;
 }
 
+/*
 private final abstract class GLEW {
   import opengl.glew;
 
@@ -61,6 +62,7 @@ private final abstract class GLEW {
 
   static bool isLoaded = false;
 }
+*/
 
 // TODO tmp
 final class Manager {
@@ -81,9 +83,12 @@ final class Manager {
       //SDL2IMAGE.load();
     }
 
+    /*
     void enable_glew() {
       GLEW.load();
     }
+    */
+
   private:
     SDL2 tmp;
     SDL2IMAGE tmp3;

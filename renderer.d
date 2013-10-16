@@ -6,7 +6,8 @@ import orange.window;
 
 import std.stdio;
 import std.math;
-import opengl.glew;
+//import opengl.glew;
+import derelict.opengl3.gl3;
 
 class Filter {
   public:

@@ -1,7 +1,8 @@
 module orange.shader;
 
 import std.exception : enforce;
-import opengl.glew;
+//import opengl.glew;
+import derelict.opengl3.gl3;
 
 import std.stdio;
 import std.traits : EnumMembers;

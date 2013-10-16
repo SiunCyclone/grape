@@ -1,6 +1,7 @@
 module orange.buffer;
 
-import opengl.glew;
+//import opengl.glew;
+import derelict.opengl3.gl3;
 import orange.shader;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
@@ -23,7 +24,7 @@ enum DrawMode {
   Triangles = GL_TRIANGLES,
   TriangleStrip = GL_TRIANGLE_STRIP,
   TriangleFan = GL_TRIANGLE_FAN,
-  Quads = GL_QUADS
+  //Quads = GL_QUADS
 }
 
 alias void delegate() dg;
