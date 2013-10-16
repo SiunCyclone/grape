@@ -11,67 +11,119 @@ import orange.renderer;
 import opengl.glew;
 
 import std.stdio;
-
-
-/*
-private final class SDL2TTF {
-  static ~this() {
-    debug(tor) writeln("SDL2TTF dtor");
-    if (isLoaded) TTF_Quit();
-  }
-
-  static void load() {
-    debug(tor) writeln("SDL2TTF load");
-
-    enforce(isLoaded != true, "SDL2TTF has loaded 2 times");
-    isLoaded = true;
-
-    DerelictSDL2ttf.load();
-
-    if (TTF_Init() == -1)
-      throw new Exception("TTF_Init() failed");
-  }
-
-  static bool isLoaded = false;
-}
-*/
+import std.string;
 
 // TODO 複数扱う
 // FIXME 一定量切り替えするとTTF_OpenFont() failedになる
-class Font {
+class FontUnit {
   public:
-    this(string file) {
-      if (!isLoaded) {
-        isLoaded = true;
+    this(string file, int size) {
+      if (!_initialized) {
+        _initialized = true;
         DerelictSDL2ttf.load();
         if (TTF_Init() == -1)
           throw new Exception("TTF_Init() failed");
       }
+       
+      _font = TTF_OpenFont(toStringz(file), size); 
+      enforce(_font !is null, "TTF_OpenFont() failed");
 
-      foreach (size; _sizeList) {
-        _list[size] = TTF_OpenFont(cast(char*)file, size);
-        enforce(_list[size] != null, "TTF_OpenFont() failed");
-      }
+      _instance ~= this;
     }
-
+     
+    ~this() {
+      TTF_CloseFont(_font);
+    }
+     
     static ~this() {
-      debug(tor) writeln("Font static dtor");
-      if (isLoaded) {
-        foreach (font; _list)
-          TTF_CloseFont(font);
+      if (_initialized) {
+        foreach (v; _instance) destroy(v);
         TTF_Quit();
       }
     }
 
+    //alias _font this;
+    @property {
+      TTF_Font* unit() {
+        return _font;
+      } 
+    }
+
+  private:
+    static bool _initialized;
+    static FontUnit[] _instance;
+    TTF_Font* _font;
+}
+ 
+class Font {
+  public:
+    this(string file) {
+      foreach (size; _sizeList)
+        _fonts[size] = new FontUnit(file, size);
+    }
+
+    //alias _fonts this;
+    TTF_Font* unit(int size) {
+      return _fonts[size].unit; 
+    }
+
+  private:
+    FontUnit[int] _fonts;
     static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
                                         15, 16, 17, 18, 20, 22, 24, 26,
                                         28, 32, 36, 40, 48, 56, 64, 72 ];
-    alias _list this;
-    static TTF_Font*[int] _list;
-
-  private:
-    static bool isLoaded = false;
 }
+
+/*
+class Font {
+  public:
+    this(string file) {
+      if (!_isLoaded) {
+        _isLoaded = true;
+        DerelictSDL2ttf.load();
+        if (TTF_Init() == -1)
+          throw new Exception("TTF_Init() failed");
+      }
+       
+      foreach (size; _sizeList) {
+        _list[size] = TTF_OpenFont(cast(char*)file, size);
+        enforce(_list[size] != null, "TTF_OpenFont() failed");
+      }
+
+      _instance ~= this;
+    }
+     
+    ~this() {
+      debug(tor) writeln("Font dtor");
+      foreach (font; _list)
+        TTF_CloseFont(font);
+    }
+     
+    static ~this() {
+      debug(tor) writeln("Font static dtor");
+      if (_isLoaded) {
+        foreach (v; _instance) destroy(v);
+        TTF_Quit();
+      }
+    }
+     
+    static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                        15, 16, 17, 18, 20, 22, 24, 26,
+                                        28, 32, 36, 40, 48, 56, 64, 72 ];
+    //alias _list this; // Cause segv
+    @property {
+      TTF_Font* list(int size) {
+        return _list[size];
+      }
+    }
+
+    TTF_Font*[int] _list;
+     
+  private:
+    static bool _isLoaded = false;
+    static Font[] _instance;
+}
+*/
 
 class FontHdr {
   public:
@@ -108,7 +160,7 @@ class FontHdr {
 
     //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
     void draw(float x, float y, string text, int size) {
-      enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
+      //enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
       _surf.create_ttf(_font, size, text, _color);
       _surf.convert();
