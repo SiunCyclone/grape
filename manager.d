@@ -48,22 +48,6 @@ private final class SDL2IMAGE {
   static bool isLoaded = false;
 }
 
-/*
-private final abstract class GLEW {
-  import opengl.glew;
-
-  static void load() {
-    enforce(isLoaded != true, "GLEW has loaded 2 times");
-    isLoaded = true;
-    // Create OpenGL context before call this.load()
-    if (glewInit() != GLEW_OK)
-      throw new Exception("glewInit() failed");
-  }
-
-  static bool isLoaded = false;
-}
-*/
-
 // TODO tmp
 final class Manager {
   public:
@@ -83,11 +67,19 @@ final class Manager {
       //SDL2IMAGE.load();
     }
 
-    /*
-    void enable_glew() {
-      GLEW.load();
+    void enable_opengl() {
+      import derelict.opengl3.gl;
+
+      DerelictGL.load();
+      DerelictGL.reload(); // Create OpenGL context before you call reload()
     }
-    */
+
+    void enable_opengl3() {
+      import derelict.opengl3.gl3;
+
+      DerelictGL3.load();
+      DerelictGL3.reload(); // Create OpenGL context before you call reload()
+    }
 
   private:
     SDL2 tmp;
