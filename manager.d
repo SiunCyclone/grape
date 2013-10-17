@@ -3,51 +3,6 @@ module orange.manager;
 import std.stdio;
 import std.exception : enforce;
 
-private final class SDL2 {
-  import derelict.sdl2.sdl;
-
-  static ~this(){
-    debug(tor) writeln("SDL2 dtor");
-    if (isLoaded) SDL_Quit();
-  }
-
-  static void load() {
-    debug(tor) writeln("SDL2 load");
-
-    enforce(isLoaded != true, "SDL2 has loaded 2 times");
-    isLoaded = true;
-
-    DerelictSDL2.load();
-
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-      throw new Exception("SDL_Init() failed");
-  }
-
-  static bool isLoaded = false;
-}
-
-private final class SDL2IMAGE {
-  import derelict.sdl2.image;
-
-  static ~this() {
-    if (isLoaded) IMG_Quit();
-  }
-
-  static void load() {
-    enforce(isLoaded != true, "SDL2IMAGE has loaded 2 times");
-    isLoaded = true;
-
-    DerelictSDL2Image.load();
-
-    // TODO get in args
-    int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
-    if (IMG_Init(flags) == -1)
-      throw new Exception("Image_Init() failed");
-  }
-
-  static bool isLoaded = false;
-}
-
 // TODO tmp
 final class Manager {
   public:
@@ -56,15 +11,11 @@ final class Manager {
     }
 
     void enable_sdl2() {
-      tmp = new SDL2;
-      tmp.load();
-      //SDL2.load();
+      SDL2.load();
     }
 
     void enable_sdl2image() {
-      tmp3 = new SDL2IMAGE;
-      tmp3.load();
-      //SDL2IMAGE.load();
+      SDL2IMAGE.load();
     }
 
     void enable_opengl() {
@@ -82,7 +33,45 @@ final class Manager {
     }
 
   private:
-    SDL2 tmp;
-    SDL2IMAGE tmp3;
+    final abstract class SDL2 {
+      import derelict.sdl2.sdl;
+
+      static ~this(){
+        debug(tor) writeln("SDL2 dtor");
+        if (isLoaded) SDL_Quit();
+      }
+
+      static void load() {
+        debug(tor) writeln("SDL2 load");
+
+        isLoaded = true;
+        DerelictSDL2.load();
+
+        if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+          throw new Exception("SDL_Init() failed");
+      }
+
+      static bool isLoaded = false;
+    }
+
+    final abstract class SDL2IMAGE {
+      import derelict.sdl2.image;
+
+      static ~this() {
+        if (isLoaded) IMG_Quit();
+      }
+
+      static void load() {
+        isLoaded = true;
+        DerelictSDL2Image.load();
+
+        // TODO get in args
+        int flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+        if (IMG_Init(flags) == -1)
+          throw new Exception("Image_Init() failed");
+      }
+
+      static bool isLoaded = false;
+    }
 }
 
