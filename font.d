@@ -14,7 +14,80 @@ import derelict.opengl3.gl3;
 import std.stdio;
 import std.string;
 
-private class FontUnit {
+private final class FontUnit {
+  public:
+    this(string file, int size) {
+      _font = TTF_OpenFont(toStringz(file), size); 
+      enforce(_font !is null, "TTF_OpenFont() failed");
+    }
+     
+    ~this() {
+      debug(tor) writeln("FontUnit dtor");
+      TTF_CloseFont(_font);
+    }
+     
+    //alias _font this;
+    @property {
+      TTF_Font* unit() {
+        return _font;
+      } 
+    }
+
+  private:
+    TTF_Font* _font;
+}
+
+class Font {
+  public: 
+    this() {
+      if (!_initialized) {
+        _initialized = true;
+        DerelictSDL2ttf.load();
+        if (TTF_Init() == -1)
+          throw new Exception("TTF_Init() failed");
+      }
+
+      _instance ~= this;
+    }
+
+    this(string file) {
+      this();
+      load(file);
+    }
+
+    ~this() {
+      debug(tor) writeln("Font dtor");
+      foreach (font; _fonts) destroy(font);
+    }
+
+    static ~this() {
+      debug(tor) writeln("Font static dtor");
+      if (_initialized) {
+        foreach (v; _instance) destroy(v);
+        TTF_Quit();
+      }
+    }
+
+    void load(string file) {
+      foreach (size; _sizeList)
+        _fonts[size] = new FontUnit(file, size);
+    }
+
+    TTF_Font* unit(int size) {
+      return _fonts[size].unit; 
+    }
+
+  private:
+    FontUnit[int] _fonts;
+    static Font[] _instance;
+    static bool _initialized;
+    static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                        15, 16, 17, 18, 20, 22, 24, 26,
+                                        28, 32, 36, 40, 48, 56, 64, 72 ];
+}
+
+/*
+private final class FontUnit {
   public:
     this(string file, int size) {
       if (!_initialized) {
@@ -85,6 +158,11 @@ class Font {
                                         15, 16, 17, 18, 20, 22, 24, 26,
                                         28, 32, 36, 40, 48, 56, 64, 72 ];
 }
+*/
+
+
+
+
 
 /*
 class Font {

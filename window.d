@@ -18,10 +18,12 @@ class Window {
       WINDOW_Y = h;
     }
 
-    static ~this() {
+    ~this() {
       debug(tor) writeln("Windows dtor");
+      /*
       SDL_GL_DeleteContext(_context); 
       SDL_DestroyWindow(_window);
+      */
     }
     
     void update() {
@@ -42,7 +44,7 @@ class Window {
     }
 
     alias _window this;
-    static SDL_Window* _window;
+    SDL_Window* _window;
 
   private:
     void create(string name, int x, int y, int w, int h) {
@@ -54,5 +56,5 @@ class Window {
     }
 
     bool _flag;
-    static SDL_GLContext _context;
+    SDL_GLContext _context;
 }
