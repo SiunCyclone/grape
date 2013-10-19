@@ -31,8 +31,10 @@ private final class WindowUnit {
     this(string name, int x, int y, int w, int h, WindowFlags flag) {
       _flag = flag;
       _window = SDL_CreateWindow(cast(char*)name, x, y, w, h, flag);
-      if (_flag == WindowFlags.OpenGL)
+      if (_flag == WindowFlags.OpenGL) {
         _context = SDL_GL_CreateContext(_window);
+        load_opengl();
+      }
       enforce(_window, "create_window() faild");
     }
 
@@ -50,6 +52,17 @@ private final class WindowUnit {
     // TODO 関数追加
 
   private:
+    void load_opengl() {
+      // TODO 必要なときだけglを読み込む
+      import derelict.opengl3.gl;
+      import derelict.opengl3.gl3;
+
+      DerelictGL.load();
+      DerelictGL.reload(); // Create OpenGL context before you call reload()
+      DerelictGL3.load();
+      DerelictGL3.reload(); // Create OpenGL context before you call reload()
+    }
+
     SDL_Window* _window;
     SDL_GLContext _context;
     WindowFlags _flag;
@@ -58,6 +71,14 @@ private final class WindowUnit {
 class Window {
   public:
     this(string name, int x, int y, int w, int h, WindowFlags flag) {
+      if (!_initialized) {
+        _initialized = true;
+        DerelictSDL2.load();
+
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
+          throw new Exception("SDL_InitSubSystem(SDL_INIT_VIDEO) failed");
+      }
+
       _flag = true;
       WINDOW_X = w;
       WINDOW_Y = h;
@@ -97,6 +118,7 @@ class Window {
     static Window[] _instance;
     WindowUnit _window;
     bool _flag;
+    static bool _initialized = false;
 }
 
 /*

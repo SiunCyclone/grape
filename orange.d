@@ -1,7 +1,6 @@
 module orange.orange;
 
-public import orange.observer;
-public import orange.manager; // deprecated
+//public import orange.manager; // deprecated
 public import orange.window;
 public import orange.shader;
 public import orange.buffer;

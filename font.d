@@ -81,7 +81,7 @@ class Font {
   private:
     FontUnit[int] _fonts;
     static Font[] _instance;
-    static bool _initialized;
+    static bool _initialized = false;
     static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
                                         15, 16, 17, 18, 20, 22, 24, 26,
                                         28, 32, 36, 40, 48, 56, 64, 72 ];

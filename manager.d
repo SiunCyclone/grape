@@ -3,9 +3,9 @@ module orange.manager;
 import std.stdio;
 import std.exception : enforce;
 
-// TODO tmp
 final class Manager {
   public:
+    /*
     ~this() {
       debug(tor) writeln("Manager dtor");
     }
@@ -16,20 +16,6 @@ final class Manager {
 
     void enable_sdl2image() {
       SDL2IMAGE.load();
-    }
-
-    void enable_opengl() {
-      import derelict.opengl3.gl;
-
-      DerelictGL.load();
-      DerelictGL.reload(); // Create OpenGL context before you call reload()
-    }
-
-    void enable_opengl3() {
-      import derelict.opengl3.gl3;
-
-      DerelictGL3.load();
-      DerelictGL3.reload(); // Create OpenGL context before you call reload()
     }
 
   private:
@@ -53,6 +39,7 @@ final class Manager {
 
       static bool isLoaded = false;
     }
+    */
 
     final abstract class SDL2IMAGE {
       import derelict.sdl2.image;
