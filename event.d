@@ -49,11 +49,11 @@ enum {
 class Event {
   public:
     @property {
-      bool is_happening() {
+      static bool is_happening() {
         return SDL_PollEvent(&_event) ? true : false;
       }
 
-      Uint32 type() {
+      static Uint32 type() {
         return _event.type;
       }
 
@@ -62,33 +62,33 @@ class Event {
     }
 
   private:
-    SDL_Event _event;
+    static SDL_Event _event;
 }
 
 mixin template KeyEvent() {
-  SDL_Keysym keysym() {
+  static SDL_Keysym keysym() {
     return _event.key.keysym;
   }
 
-  SDL_Scancode scancode() {
+  static SDL_Scancode scancode() {
     return keysym.scancode;
   }
 
-  SDL_Keycode keycode() {
+  static SDL_Keycode keycode() {
     return keysym.sym;
   }
 }
 
 mixin template JoyEvent() {
-  Uint8 button() {
+  static Uint8 button() {
     return _event.jbutton.button;
   }
 
-  Uint8 hat() {
+  static Uint8 hat() {
     return _event.jhat.hat;
   }
 
-  Uint8 axis() {
+  static Uint8 axis() {
     return _event.jaxis.axis;
   }
 }

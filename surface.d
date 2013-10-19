@@ -7,6 +7,20 @@ import std.exception : enforce;
 import std.stdio;
 import orange.font;
 
+// TODO
+class SurfaceUnit {
+  public: 
+    this() {
+    }
+
+    ~this() {
+      if (_surf !is null) SDL_FreeSurface(_surf);
+    }
+
+  private:
+    SDL_Surface* _surf;
+}
+
 class Surface {
   public:
     ~this() {
@@ -18,9 +32,8 @@ class Surface {
       free(_surf);
 
       _surf = TTF_RenderUTF8_Solid(font.unit(size), cast(char*)text, color);
-      //_surf = TTF_RenderUTF8_Solid(font.list(size), cast(char*)text, color);
       //_surf = TTF_RenderUTF8_Solid(font[size], cast(char*)text, color);
-      enforce(_surf != null, "_surf is null");
+      enforce(_surf !is null, "_surf is null");
     }
 
     void convert() {

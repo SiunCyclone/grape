@@ -89,7 +89,10 @@ class Joystick {
 
     static ~this() {
       debug(tor) writeln("Joystick static dtor");
-      foreach (v; _instance) destroy(v);      
+      if (_initialized) {
+        foreach (v; _instance) destroy(v);      
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+      }
     }
 
     float getAxis(int axis) 
@@ -154,9 +157,6 @@ class Joystick {
       }
     }
 
-    alias _joystick this;
-    JoystickUnit _joystick;
-
   private:
     void set_num() {
       _numAxes = _joystick.numAxes();
@@ -165,7 +165,7 @@ class Joystick {
       _numHats= _joystick.numBalls();
     }
 
-    //SDL_Joystick* _joystick;
+    JoystickUnit _joystick;
     static Joystick[] _instance;
     int _numAxes, _numButtons, _numBalls, _numHats;
     static bool _initialized = false;

@@ -94,7 +94,10 @@ class Window {
 
     static ~this() {
       debug(tor) writeln("Windows static dtor");
-      foreach (v; _instance) destroy(v);
+      if (_initialized) {
+        foreach (v; _instance) destroy(v);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+      }
     }
     
     void update() {
