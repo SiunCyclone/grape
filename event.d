@@ -47,6 +47,8 @@ enum {
 }
 
 class Event {
+  private @disable this() {}
+
   public:
     @property {
       static bool is_happening() {
