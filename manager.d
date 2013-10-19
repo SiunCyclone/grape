@@ -37,7 +37,7 @@ final class Manager {
       import derelict.sdl2.sdl;
 
       static ~this(){
-        debug(tor) writeln("SDL2 dtor");
+        debug(tor) writeln("SDL2 static dtor");
         if (isLoaded) SDL_Quit();
       }
 

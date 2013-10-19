@@ -73,6 +73,7 @@ class Font {
         _fonts[size] = new FontUnit(file, size);
     }
 
+    // alias this
     TTF_Font* unit(int size) {
       return _fonts[size].unit; 
     }
