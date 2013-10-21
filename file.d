@@ -9,7 +9,7 @@ import std.conv;
 // obj hdr
 class FileHdr {
   public:
-    float[] make_mesh(string file) {
+    float[] make_mesh(in string file) {
       float[] mesh;
       auto f = File(file, "r");
 
@@ -22,7 +22,7 @@ class FileHdr {
       return mesh;
     }
 
-    float[] make_normal(string file) {
+    float[] make_normal(in string file) {
       float[][] randomNormal;
       float[] normal;
       auto f = File(file, "r");
@@ -48,7 +48,7 @@ class FileHdr {
       return normal;
     }
 
-    int[] make_index(string file) {
+    int[] make_index(in string file) {
       int[] t;
       auto buf = appender(t);
       auto f = File(file, "r");

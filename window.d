@@ -28,7 +28,7 @@ enum WindowFlags {
 
 private final class WindowUnit {
   public:
-    this(string name, int x, int y, int w, int h, WindowFlags flag) {
+    this(in string name, in int x, in int y, in int w, in int h, in WindowFlags flag) {
       _flag = flag;
       _window = SDL_CreateWindow(cast(char*)name, x, y, w, h, flag);
       if (_flag == WindowFlags.OpenGL) {
@@ -70,7 +70,7 @@ private final class WindowUnit {
 
 class Window {
   public:
-    this(string name, int x, int y, int w, int h, WindowFlags flag) {
+    this(in string name, in int x, in int y, in int w, in int h, in WindowFlags flag) {
       if (!_initialized) {
         _initialized = true;
         DerelictSDL2.load();

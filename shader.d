@@ -373,11 +373,11 @@ class ShaderSource {
 
 class Shader {
   public:
-    this(ShaderType type) {
+    this(in ShaderType type) {
       generate(type);
     };
 
-    this(ShaderType type, string shaderCode) {
+    this(in ShaderType type, in string shaderCode) {
       this(type);
       compile(shaderCode);
     }
@@ -386,7 +386,7 @@ class Shader {
       eliminate();
     }
 
-		void compile(string shaderCode) {
+		void compile(in string shaderCode) {
 			auto fst = &shaderCode[0];
 			int len = shaderCode.length;
 			glShaderSource(_shader, 1, &fst, &len);
@@ -400,7 +400,7 @@ class Shader {
 		alias _shader this; // TODO
 
   private:
-		void generate(ShaderType type) {
+		void generate(in ShaderType type) {
 			_shader = glCreateShader(type);
 			enforce(_shader, "glCreateShader() faild");
 		}
@@ -427,7 +427,7 @@ class ShaderProgram {
       eliminate();
     }
 
-    void attach(T)(T vs, T fs) {
+    void attach(T)(in T vs, in T fs) {
 			glAttachShader(_program, vs);
 			glAttachShader(_program, fs);
 			glLinkProgram(_program);
@@ -469,7 +469,7 @@ class ShaderProgramHdr {
       //writeln(_list.length);
     }
 
-		void use(ShaderProgramType type) {
+		void use(in ShaderProgramType type) {
       _current = type;
       _list[_current].use();
     }
@@ -489,7 +489,7 @@ class ShaderProgramHdr {
       } 
     }
 
-    void add_program(T)(ShaderProgramType type, T vShaderSource, T fShaderSource) {
+    void add_program(T)(in ShaderProgramType type, in T vShaderSource, in T fShaderSource) {
       Shader vs = new Shader(ShaderType.Vertex, vShaderSource);
       Shader fs = new Shader(ShaderType.Fragment, fShaderSource);
       ShaderProgram program = new ShaderProgram(vs, fs);

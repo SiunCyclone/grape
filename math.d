@@ -6,11 +6,11 @@ import std.stdio;
 
 struct Vec3 {
   public:
-    this(float x, float y, float z) {
+    this(in float x, in float y, in float z) {
       set(x, y, z);
     }
 
-    void set(float x, float y, float z) {
+    void set(in float x, in float y, in float z) {
       _x = x;
       _y = y;
       _z = z;
@@ -56,16 +56,16 @@ struct Vec3 {
 
 struct Mat4 {
   public:
-    this(float[] coords...) {
+    this(in float[] coords...) {
       set(coords);
     }
 
-    void set(float[] coords...) {
+    void set(in float[] coords...) {
       assert(coords.length == 16);
       _mat = coords;
     }
 
-    Mat4 translate(float x, float y, float z) {
+    Mat4 translate(in float x, in float y, in float z) {
       Mat4 mat4 = Mat4( 1, 0, 0, 0,
                         0, 1, 0, 0,
                         0, 0, 1, 0,

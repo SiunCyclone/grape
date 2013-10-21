@@ -66,21 +66,21 @@ class VBOHdr {
         _vboList[i] = new VBO(program);
     }
 
-    void create_vbo(float[][] list...) {
+    void create_vbo(in float[][] list...) {
       assert(list.length == _num);
 
       foreach(int i, data; list)
         _vboList[i].create(data);
     }
 
-    void enable_vbo(string[] locNames, int[] strides) {
+    void enable_vbo(in string[] locNames, in int[] strides) {
       assert(locNames.length == _num);
       assert(strides.length == _num);
       foreach (int i, vbo; _vboList)
         vbo.attach(locNames[i], strides[i], i);
     }
 
-    void draw(DrawMode mode, int num) {
+    void draw(in DrawMode mode, in int num) {
       glDrawArrays(mode, 0, num);
     }
 
@@ -91,7 +91,7 @@ class VBOHdr {
 
 class Location {
   public:
-    this(GLuint program, void delegate(string) get) {
+    this(in GLuint program, in void delegate(string) get) {
       _get = get;
       _program = program;
     }
@@ -104,23 +104,23 @@ class Location {
 
 class AttributeLocation : Location {
   public:
-    this(GLuint program) {
+    this(in GLuint program) {
       auto get = (string name) { _location = glGetAttribLocation(_program, cast(char*)name); };
       super(program, get);
     }
 
-    void attach(string name, int stride, int i) {
+    void attach(in string name, in int stride, in int i) {
       bind(name, i);
       _get(name);
       locate(stride);
     }
 
   private:
-    void bind(string name, int i) {
+    void bind(in string name, in int i) {
       glBindAttribLocation(_program, i, cast(char*)name);
     }
 
-    void locate(int stride) {
+    void locate(in int stride) {
       glEnableVertexAttribArray(_location);
       glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
     }
@@ -137,57 +137,55 @@ class Uniform {
       //extract(vShader, fShader);
     }
 
-    void locate(string name, int value, string type, int num, GLint location) {
+    void locate(in string name, in int value, in string type, in int num, in GLint location) {
       _uniInt[type](location, value);
     }
 
-    void locate(string name, float[] value, string type, int num, GLint location) {
+    void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
       _uniFloatV[type](location, value, num);
     }
 
   private:
     void init() {
-      _uniInt["1i"] = (GLint location, int value) { glUniform1i(location, value); };
-      _uniFloatV["1fv"] = (GLint location, float[] value, int num) { glUniform1fv(location, num, value.ptr); };
-      _uniFloatV["2fv"] = (GLint location, float[] value, int num) { glUniform2fv(location, num, value.ptr); };
-      _uniFloatV["3fv"] = (GLint location, float[] value, int num) { glUniform3fv(location, num, value.ptr); };
-      _uniFloatV["4fv"] = (GLint location, float[] value, int num) { glUniform4fv(location, num, value.ptr); };
-      _uniFloatV["mat4fv"] = (GLint location, float[] value, int num) {
-        glUniformMatrix4fv(location, num, GL_FALSE, value.ptr);
-      };
+      _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
+      _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
+      _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
+      _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
+      _uniFloatV["4fv"] = (location, value, num) { glUniform4fv(location, num, value.ptr); };
+      _uniFloatV["mat4fv"] = (location, value, num) { glUniformMatrix4fv(location, num, GL_FALSE, value.ptr); };
     }
 
     // TODO ソースから判別
     void extract(string vShader, string fShader) {
     }
 
-    void delegate(GLint, int)[string] _uniInt;
+    void delegate(in GLint, in int)[string] _uniInt;
     //void delegate(int[])[string] _uniIntV;
     //void delegate(float)[string] _uniFloat;
-    void delegate(GLint, float[], int)[string] _uniFloatV;
+    void delegate(in GLint, in float[], in int)[string] _uniFloatV;
 }
 
 class UniformLocation : Location {
   public:
-    this(GLuint program) {
+    this(in GLuint program) {
       auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
       super(program, get);
       _uniform = new Uniform();
     }
 
-    this(GLuint program, ShaderProgramType type) {
+    this(in GLuint program, in ShaderProgramType type) {
       auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
       super(program, get);
       init(type);
     }
 
-    void attach(T)(string name, T value, string type, int num=1) {
+    void attach(T)(in string name, in T value, in string type, in int num=1) {
       _get(name);
       _uniform.locate(name, value, type, num, _location);
     }
 
   private:
-    void init(ShaderProgramType type) {
+    void init(in ShaderProgramType type) {
       string vShader, fShader;
       ShaderSource.load(type)(vShader, fShader);
       _uniform = new Uniform(vShader, fShader);
@@ -198,7 +196,7 @@ class UniformLocation : Location {
 
 class VBO : Binder {
   public:
-    this(GLuint program) {
+    this(in GLuint program) {
       _attLoc = new AttributeLocation(program);
       auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
         generate = { glGenBuffers(1, &_id); };
@@ -209,13 +207,13 @@ class VBO : Binder {
       super(init);
     }
 
-    void create(T)(T data) {
+    void create(T)(in T data) {
       bind();
       glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
       unbind();
     }
 
-    void attach(string name, int stride, int num) {
+    void attach(in string name, in int stride, in int num) {
       bind();
       _attLoc.attach(name, stride, num);
       unbind();
@@ -237,14 +235,14 @@ class IBO : Binder {
       super(init);
     }
 
-    void create(int[] index) {
-      _index = index;
+    void create(in int[] index) { // const
+      _index = index.dup;
       bind();
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STREAM_DRAW);
       unbind();
     }
 
-    void draw(DrawMode mode) { 
+    void draw(in DrawMode mode) { 
       glDrawElements(mode, _index.length, GL_UNSIGNED_INT, _index.ptr);
     }
 
@@ -263,13 +261,13 @@ class RBO : Binder {
     super(init);
   }
 
-  void create(T)(T type, int w, int h) {
+  void create(T)(in T type, in int w, in int h) {
     bind();
     glRenderbufferStorage(GL_RENDERBUFFER, type, w, h);
     unbind();
   }
 
-  void attach(T)(T type) {
+  void attach(T)(in T type) {
     bind();
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, _id);
     unbind();
@@ -287,7 +285,7 @@ class FBO : Binder {
     super(init);
   }
 
-  void create(T)(T texture) {
+  void create(T)(in T texture) {
     bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
     unbind();
@@ -308,8 +306,8 @@ class Texture : Binder {
       super(init);
     }
 
-    // TODO 分ける
-    void create(int w, int h, void* pixels, int bytesPerPixel) {
+    // TODO 分ける // void* const
+    void create(in int w, in int h, void* pixels, in int bytesPerPixel) {
       set_draw_mode(bytesPerPixel);
 
       glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
@@ -333,11 +331,11 @@ class Texture : Binder {
     alias _id this; // TODO private
 
   private:
-    void set_draw_mode(int bytesPerPixel) {
+    void set_draw_mode(in int bytesPerPixel) {
       _mode = (bytesPerPixel == 4) ? GL_RGBA : GL_RGB;
     }
 
-    void attach(int w, int h, void* pixels) {
+    void attach(in int w, in int h, void* pixels) { // const
       glTexImage2D(GL_TEXTURE_2D, 0, _mode, w, h, 0, _mode, GL_UNSIGNED_BYTE, pixels);
     }
 
@@ -352,12 +350,12 @@ class Texture : Binder {
 // TODO 必要あるのか
 class TexHdr {
   public:
-    this(GLuint program) {
+    this(in GLuint program) {
       _program = program; 
       _texture = new Texture;
     }
 
-    void create(Surface surf, string locName) {
+    void create(Surface surf, in string locName) { // const
       _texture.create(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
       set_location(locName);
     }
@@ -371,7 +369,7 @@ class TexHdr {
     }
 
   private:
-    void set_location(string locName){
+    void set_location(in string locName){
       auto loc = glGetUniformLocation(_program, cast(char*)locName);
       glUniform1i(loc, 0); // TODO
     }
@@ -388,7 +386,7 @@ class FBOHdr {
       _camera = new Camera;
     }
 
-    void init(Texture texture) {
+    void init(Texture texture) { //const
       _fbo.create(texture);
 
       _fbo.bind();
@@ -401,7 +399,7 @@ class FBOHdr {
       _fbo.unbind();
     }
 
-    void set(GLuint program, ShaderProgramType type) {
+    void set(in GLuint program, in ShaderProgramType type) {
       _program = program;
 
       FileHdr _fileHdr = new FileHdr;
@@ -531,7 +529,7 @@ class GaussHdr {
       return weight;
     }
 
-    void set(GLuint program, ShaderProgramType type) {
+    void set(in GLuint program, in ShaderProgramType type) {
       _program = program;
 
       _mesh = [ -1.0, 1.0,

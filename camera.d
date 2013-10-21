@@ -25,7 +25,7 @@ class Camera {
     void ortho() {
     }
 
-    void perspective(float fovy, float aspect, float znear, float zfar) {
+    void perspective(in float fovy, in float aspect, in float znear, in float zfar) {
       // translate to orange.math
       auto cot = delegate float(float x){ return 1 / tan(x); };
       auto f = cot(fovy/2);

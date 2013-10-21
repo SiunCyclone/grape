@@ -28,7 +28,7 @@ class Surface {
       //free(_surf);
     }
 
-    void create_ttf(Font font, int size, string text, SDL_Color color) {
+    void create_ttf(Font font, in int size, in string text, in SDL_Color color) {
       free(_surf);
 
       _surf = TTF_RenderUTF8_Solid(font.unit(size), cast(char*)text, color);

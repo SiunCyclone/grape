@@ -16,7 +16,7 @@ import std.string;
 
 private final class FontUnit {
   public:
-    this(string file, int size) {
+    this(in string file, in int size) {
       _font = TTF_OpenFont(toStringz(file), size); 
       enforce(_font !is null, "TTF_OpenFont() failed");
     }
@@ -50,7 +50,7 @@ class Font {
       _instance ~= this;
     }
 
-    this(string file) {
+    this(in string file) {
       this();
       load(file);
     }
@@ -68,13 +68,13 @@ class Font {
       }
     }
 
-    void load(string file) {
+    void load(in string file) {
       foreach (size; _sizeList)
         _fonts[size] = new FontUnit(file, size);
     }
 
     // alias this
-    TTF_Font* unit(int size) {
+    TTF_Font* unit(in int size) {
       return _fonts[size].unit; 
     }
 
@@ -218,7 +218,7 @@ class Font {
 
 class FontRenderer {
   public:
-    this(GLuint program) { //TODO program受け取らない
+    this(in GLuint program) { //TODO program受け取らない
       _vboHdr = new VBOHdr(2, program);
       _texHdr = new TexHdr(program);
       _ibo = new IBO;
@@ -245,12 +245,12 @@ class FontRenderer {
       _font = font;
     }
 
-    void set_color(ubyte r, ubyte g, ubyte b) {
+    void set_color(in ubyte r, in ubyte g, in ubyte b) {
       _color = SDL_Color(r, g, b);
     }
 
     //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
-    void draw(float x, float y, string text, int size) {
+    void draw(in float x, in float y, in string text, in int size) {
       //enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
 
       _surf.create_ttf(_font, size, text, _color);
@@ -267,7 +267,7 @@ class FontRenderer {
     }
 
   private:
-    float[12] set_pos(float x, float y, Surface surf) {
+    float[12] set_pos(in float x, in float y, Surface surf) {
       auto startX = x / (WINDOW_X/2.0);
       auto startY = y / (WINDOW_Y/2.0);
       auto w = surf.w / (WINDOW_X/2.0);

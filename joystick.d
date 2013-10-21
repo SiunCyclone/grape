@@ -17,7 +17,7 @@ enum {
 
 private final class JoystickUnit {
   public:
-    this(int deviceIndex) {
+    this(in int deviceIndex) {
       _joystick = SDL_JoystickOpen(deviceIndex);
       enforce(_joystick != null, "SDL_JoystickOpen() failed");
     }
@@ -28,11 +28,11 @@ private final class JoystickUnit {
         SDL_JoystickClose(_joystick);
     }
 
-    float getAxis(int axis) {
+    float getAxis(in int axis) {
       return SDL_JoystickGetAxis(_joystick, axis) / MAX_AXIS_STATE;
     }
 
-    int getButton(int button) {
+    int getButton(in int button) {
       return SDL_JoystickGetButton(_joystick, button);
     }
 
@@ -42,7 +42,7 @@ private final class JoystickUnit {
     }
     */
 
-    int getHat(int hat) {
+    int getHat(in int hat) {
       return SDL_JoystickGetHat(_joystick, hat);
     }
 
@@ -68,7 +68,7 @@ private final class JoystickUnit {
 
 class Joystick {
   public:
-    this(int deviceIndex) {
+    this(in int deviceIndex) {
       if (!_initialized) {
         _initialized = true;
         DerelictSDL2.load();
@@ -95,7 +95,7 @@ class Joystick {
       }
     }
 
-    float getAxis(int axis) 
+    float getAxis(in int axis) 
       in {
         assert(0 <= axis && axis <= _numAxes);
       }
@@ -104,7 +104,7 @@ class Joystick {
         return _joystick.getAxis(axis);
       }
 
-    int getButton(int button) 
+    int getButton(in int button) 
       in {
         assert(0 <= button && button <= _numButtons);
       }
@@ -124,7 +124,7 @@ class Joystick {
       }
       */
 
-    int getHat(int hat)
+    int getHat(in int hat)
       in {
         assert(0 <= hat && hat <= _numHats);
       }

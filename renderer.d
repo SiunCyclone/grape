@@ -11,13 +11,13 @@ import derelict.opengl3.gl3;
 
 class Filter {
   public:
-    this(int w, int h) {
+    this(in int w, in int h) {
       _w = w;
       _h = h;
       init();
     }
 
-    final void set_camera(float[] mat) {
+    final void set_camera(in float[] mat) {
       _renderer.set_uniform("pvmMatrix", mat, "mat4fv");
     }
 
@@ -91,7 +91,7 @@ class BlurFilter {
       */
     }
 
-    void apply(void delegate() render) {
+    void apply(in void delegate() render) {
       _filter.apply(render);
       _heightFilter.apply({ 
         _filter.texture_enable();
@@ -123,7 +123,7 @@ class GlowFilter : BlurFilter {
       _highFilter.above();
     }
 
-    override void apply(void delegate() render) {
+    override void apply(in void delegate() render) {
       _highFilter.apply(render);
       _filter.apply(render);
       _heightFilter.apply({ 
@@ -151,22 +151,22 @@ class GlowFilter : BlurFilter {
 class Renderer {
   public:
     // TODO dgだけにする dgの名前
-    final void init(void delegate(out string, out string) dg, int num, string[] locNames, int[] strides, DrawMode drawMode) {
+    final void init(in void delegate(out string, out string) dg, in int num, in string[] locNames, in int[] strides, in DrawMode drawMode) {
       init_program(dg);
       _vboHdr = new VBOHdr(num, _program); // TODO シェーダのソースからattributeの数指定
       _uniLoc = new UniformLocation(_program);
-      _locNames = locNames;
-      _strides = strides;
+      _locNames = locNames.dup;
+      _strides = strides.dup;
       _drawMode = drawMode;
     }
 
-    final void set_vbo(float[][] list...) {
+    final void set_vbo(in float[][] list...) {
       _program.use();
       _vboHdr.create_vbo(list);
       _vboHdr.enable_vbo(_locNames, _strides);
     }
 
-    final void set_uniform(T)(string name, T value, string type, int num=1) {
+    final void set_uniform(T)(in string name, in T value, in string type, in int num=1) {
       _program.use();
       _uniLoc.attach(name, value, type, num);
     }
@@ -178,7 +178,7 @@ class Renderer {
     DrawMode _drawMode;
 
   private:
-    final void init_program(void delegate(out string, out string) dg) {
+    final void init_program(in void delegate(out string, out string) dg) {
       dg(_vShader, _fShader);
       Shader vs = new Shader(ShaderType.Vertex, _vShader);
       Shader fs = new Shader(ShaderType.Fragment, _fShader);
@@ -272,7 +272,7 @@ class GaussHeightRenderer : Renderer {
     }
 
     // TODO 名前
-    float[8] gauss_weight(float eRange) {
+    float[8] gauss_weight(in float eRange) {
       float[8] weight;
       float t = 0.0;
       float d = eRange^^2 / 100;
@@ -330,7 +330,7 @@ class GaussWeightRenderer : Renderer {
     }
 
     // TODO 名前
-    float[8] gauss_weight(float eRange) {
+    float[8] gauss_weight(in float eRange) {
       float[8] weight;
       float t = 0.0;
       float d = eRange^^2 / 100;
@@ -363,7 +363,7 @@ class NormalRenderer : Renderer {
       _ibo = new IBO;
     }
 
-    void set_ibo(int[] index) {
+    void set_ibo(in int[] index) {
       _program.use();
       _ibo.create(index);
     }
@@ -388,7 +388,7 @@ class TextureRenderer : Renderer {
       _ibo = new IBO;
     }
 
-    void set_ibo(int[] index) {
+    void set_ibo(in int[] index) {
       _program.use();
       _ibo.create(index);
     }
