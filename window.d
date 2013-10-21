@@ -58,9 +58,9 @@ private final class WindowUnit {
       import derelict.opengl3.gl3;
 
       DerelictGL.load();
-      DerelictGL.reload(); // Create OpenGL context before you call reload()
+      DerelictGL.reload(); // You must create OpenGL Context before calling this function
       DerelictGL3.load();
-      DerelictGL3.reload(); // Create OpenGL context before you call reload()
+      DerelictGL3.reload(); // You must create OpenGL Context before calling this function
     }
 
     SDL_Window* _window;
