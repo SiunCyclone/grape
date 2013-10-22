@@ -360,11 +360,9 @@ class TexHdr {
       set_location(locName);
     }
 
-    void enable() {
+    void apply(dg dg) { // TODO weird name
       _texture.enable();
-    }
-
-    void disable() {
+      dg(); 
       _texture.disable();
     }
 

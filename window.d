@@ -79,7 +79,6 @@ class Window {
           throw new Exception("SDL_InitSubSystem(SDL_INIT_VIDEO) failed");
       }
 
-      _flag = true;
       WINDOW_X = w;
       WINDOW_Y = h;
       _window = new WindowUnit(name, x, y, w, h, flag);
@@ -107,20 +106,9 @@ class Window {
       glClear(GL_DEPTH_BUFFER_BIT);
     }
 
-    void should_close() {
-      _flag = false;
-    }
-
-    @property {
-      const bool is_open() {
-        return _flag;
-      }
-    }
-
   private:
     static Window[] _instance;
     WindowUnit _window;
-    bool _flag;
     static bool _initialized = false;
 }
 

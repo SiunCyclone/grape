@@ -261,9 +261,7 @@ class FontRenderer {
       _vboHdr.enable_vbo(_locNames, _strides);
 
       _texHdr.create(_surf, "tex");
-      _texHdr.enable();
-      _ibo.draw(_drawMode);
-      _texHdr.disable();
+      _texHdr.apply({ _ibo.draw(_drawMode); });
     }
 
   private:
