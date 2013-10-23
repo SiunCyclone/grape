@@ -17,30 +17,26 @@ class Filter {
       _renderer.set_uniform("pvmMatrix", mat, "mat4fv");
     }
 
-    final void apply(in void delegate() render) {
-      _fbo.bind();
-      glClear(GL_COLOR_BUFFER_BIT);
-      glClear(GL_DEPTH_BUFFER_BIT);
-      glViewport(0, 0, _w, _h);
-
-      render();
-      
-      glViewport(0, 0, WINDOW_X, WINDOW_Y);
-      _fbo.unbind();
-    }
-
-    final void texture_enable() {
-      _texture.enable();
-    }
-
-    final void texture_disable() {
-      _texture.disable();
+    final void apply(in void delegate() dg) {
+      _fbo.binded_scope({
+        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, _w, _h);
+        dg();
+        glViewport(0, 0, WINDOW_X, WINDOW_Y);
+      });
     }
 
     final void render() {
-      texture_enable();
-      _renderer.render(); // TODO 描画位置指定
-      texture_disable();
+      texture_enable({
+        _renderer.render(); // TODO Specify a drawing area
+      });
+    }
+
+    final void texture_enable(in void delegate() dg) {
+      _texture.enable({
+        dg();
+      });
     }
 
     void above() {
@@ -50,17 +46,17 @@ class Filter {
   protected:
     final void init() {
       _fbo = new FBO;
-      _texture = new Texture; //TODO もらう
+      _texture = new Texture; //TODO Get 
       _renderer = new FilterRenderer;
 
       _texture.create(_w, _h, null, GL_RGBA);
       _fbo.create(_texture);
 
       // TODO RBO
-      _fbo.bind();
-      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
-      glDrawBuffers(1, drawBufs.ptr);
-      _fbo.unbind();
+      _fbo.binded_scope({
+        GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+        glDrawBuffers(1, drawBufs.ptr);
+      });
     }
 
     FBO _fbo;
@@ -90,14 +86,14 @@ class BlurFilter {
     void apply(in void delegate() render) {
       _filter.apply(render);
       _heightFilter.apply({ 
-        _filter.texture_enable();
-        _heightRenderer.render();
-        _filter.texture_disable();
+        _filter.texture_enable({
+          _heightRenderer.render();
+        });
       });
       _weightFilter.apply({ 
-        _heightFilter.texture_enable();
-        _weightRenderer.render();
-        _heightFilter.texture_disable();
+        _heightFilter.texture_enable({
+          _weightRenderer.render();
+        });
       });
       _weightFilter.render();
     }
@@ -123,18 +119,18 @@ class GlowFilter : BlurFilter {
       _highFilter.apply(render);
       _filter.apply(render);
       _heightFilter.apply({ 
-        _filter.texture_enable();
-        _heightRenderer.render();
-        _filter.texture_disable();
+        _filter.texture_enable({
+          _heightRenderer.render();
+        });
       });
       _weightFilter.apply({ 
-        _heightFilter.texture_enable();
-        _weightRenderer.render();
-        _heightFilter.texture_disable();
+        _heightFilter.texture_enable({
+          _weightRenderer.render();
+        });
       });
 
       glEnable(GL_BLEND);
-      glBlendFunc(GL_ONE, GL_ONE); //add
+      glBlendFunc(GL_ONE, GL_ONE); // Add
       _highFilter.render();
       _weightFilter.render();
       glDisable(GL_BLEND);

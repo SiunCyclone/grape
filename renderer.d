@@ -9,12 +9,13 @@ import std.math;
 //import opengl.glew;
 import derelict.opengl3.gl3;
 
-class Renderer {
+abstract class Renderer {
   public:
-    // TODO dgだけにする dgの名前
+    // TODO Consider args
+    // TODO _ibo should be initialized here
     final void init(in void delegate(out string, out string) dg, in int num, in string[] locNames, in int[] strides, in DrawMode drawMode) {
       init_program(dg);
-      _vboHdr = new VBOHdr(num, _program); // TODO シェーダのソースからattributeの数指定
+      _vboHdr = new VBOHdr(num, _program); // TODO Detect the number of attributes from ShaderSource
       _uniLoc = new UniformLocation(_program);
       _locNames = locNames.dup;
       _strides = strides.dup;
@@ -27,6 +28,12 @@ class Renderer {
       _vboHdr.enable_vbo(_locNames, _strides);
     }
 
+    // _ibo must be initialized before calling this function, or cause segv
+    void set_ibo(in int[] index) {
+      _program.use();
+      _ibo.create(index);
+    }
+
     final void set_uniform(T)(in string name, in T value, in string type, in int num=1) {
       _program.use();
       _uniLoc.attach(name, value, type, num);
@@ -37,6 +44,7 @@ class Renderer {
   protected:
     ShaderProgram _program;
     DrawMode _drawMode;
+    IBO _ibo; // Must be initialized in SubClass when rendering model using IBO
 
   private:
     final void init_program(in void delegate(out string, out string) dg) {
@@ -51,7 +59,7 @@ class Renderer {
     UniformLocation _uniLoc;
     VBOHdr _vboHdr;
 
-    // TODO 消す
+    // TODO delete
     string[] _locNames;
     int[] _strides;
 }
@@ -214,48 +222,30 @@ class GaussWeightRenderer : Renderer {
 }
 
 class NormalRenderer : Renderer {
-  public:
-    this() {
-      string[] locNames = [ "pos", "color" ];
-      int[] strides = [ 3, 4 ];
-      mixin NormalShaderSource;
-      init(NormalShader, 2, locNames, strides, DrawMode.Points);
+  this() {
+    string[] locNames = [ "pos", "color" ];
+    int[] strides = [ 3, 4 ];
+    mixin NormalShaderSource;
+    init(NormalShader, 2, locNames, strides, DrawMode.Points);
 
-      _ibo = new IBO;
-    }
+    _ibo = new IBO;
+  }
 
-    void set_ibo(in int[] index) {
-      _program.use();
-      _ibo.create(index);
-    }
-
-    override void render() {
-      _program.use();
-      _ibo.draw(_drawMode);
-    }
-
-  private:
-    IBO _ibo;
+  override void render() {
+    _program.use();
+    _ibo.draw(_drawMode);
+  }
 }
 
 class TextureRenderer : Renderer {
-  public:
-    this() {
-      string[] locNames = [ "pos", "texCoord" ];
-      int[] strides = [ 3, 2 ];
-      mixin NormalShaderSource;
-      init(NormalShader, 2, locNames, strides, DrawMode.Points);
+  this() {
+    string[] locNames = [ "pos", "texCoord" ];
+    int[] strides = [ 3, 2 ];
+    mixin NormalShaderSource;
+    init(NormalShader, 2, locNames, strides, DrawMode.Points);
+  }
 
-      _ibo = new IBO;
-    }
-
-    void set_ibo(in int[] index) {
-      _program.use();
-      _ibo.create(index);
-    }
-
-  private:
-    IBO _ibo;
+  override void render() {}
 }
 
 /*

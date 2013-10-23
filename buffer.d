@@ -2,7 +2,6 @@ module orange.buffer;
 
 //import opengl.glew;
 import derelict.opengl3.gl3;
-import orange.shader;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 
@@ -13,6 +12,7 @@ import orange.file;
 import orange.math;
 import orange.camera;
 import orange.surface;
+import orange.shader;
 
 import std.math;
 
@@ -27,11 +27,11 @@ enum DrawMode {
   //Quads = GL_QUADS
 }
 
-alias void delegate() dg;
+alias void delegate() void_dg;
 
 class Binder {
   public:
-    this(void delegate(ref dg, ref dg, ref dg, ref dg) init) {
+    this(void delegate(ref void_dg, ref void_dg, ref void_dg, ref void_dg) init) {
       init(_generate, _eliminate, _bind, _unbind);
       _generate();
     }
@@ -40,20 +40,18 @@ class Binder {
       _eliminate();
     }
 
-    void bind() {
+    void binded_scope(void_dg dg) {
       _bind();
-    }
-
-    void unbind() {
-      _unbind();
+      scope(exit) _unbind();
+      dg();
     }
 
   protected:
     GLuint _id;
-    dg _generate;
-    dg _eliminate;
-    dg _bind;
-    dg _unbind;
+    void_dg _generate;
+    void_dg _eliminate;
+    void_dg _bind;
+    void_dg _unbind;
 }
 
 // TODO name
@@ -76,6 +74,7 @@ class VBOHdr {
     void enable_vbo(in string[] locNames, in int[] strides) {
       assert(locNames.length == _num);
       assert(strides.length == _num);
+
       foreach (int i, vbo; _vboList)
         vbo.attach(locNames[i], strides[i], i);
     }
@@ -96,7 +95,7 @@ class Location {
       _program = program;
     }
 
-  private:
+  protected:
     GLuint _program;
     GLint _location;
     void delegate(string) _get;
@@ -198,7 +197,8 @@ class VBO : Binder {
   public:
     this(in GLuint program) {
       _attLoc = new AttributeLocation(program);
-      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+
+      auto init = (ref void_dg generate, ref void_dg eliminate, ref void_dg bind, ref void_dg unbind) {
         generate = { glGenBuffers(1, &_id); };
         eliminate = { glDeleteBuffers(1, &_id); };
         bind = { glBindBuffer(GL_ARRAY_BUFFER, _id); };
@@ -208,15 +208,11 @@ class VBO : Binder {
     }
 
     void create(T)(in T data) {
-      bind();
-      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
-      unbind();
+      binded_scope({ glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW); });
     }
 
     void attach(in string name, in int stride, in int num) {
-      bind();
-      _attLoc.attach(name, stride, num);
-      unbind();
+      binded_scope({ _attLoc.attach(name, stride, num); });
     }
 
   private:
@@ -226,7 +222,7 @@ class VBO : Binder {
 class IBO : Binder {
   public:
     this() {
-      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+      auto init = (ref void_dg generate, ref void_dg eliminate, ref void_dg bind, ref void_dg unbind) {
         generate = { glGenBuffers(1, &_id); };
         eliminate = { glDeleteBuffers(1, &_id); };
         bind = { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id); };
@@ -237,9 +233,7 @@ class IBO : Binder {
 
     void create(in int[] index) { // const
       _index = index.dup;
-      bind();
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STREAM_DRAW);
-      unbind();
+      binded_scope({ glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STREAM_DRAW); });
     }
 
     void draw(in DrawMode mode) { 
@@ -252,7 +246,7 @@ class IBO : Binder {
 
 class RBO : Binder {
   this() {
-    auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+    auto init = (ref void_dg generate, ref void_dg eliminate, ref void_dg bind, ref void_dg unbind) {
       generate = { glGenRenderbuffers(1, &_id); };
       eliminate = { glDeleteRenderbuffers(1, &_id); };
       bind = { glBindRenderbuffer(GL_RENDERBUFFER, _id); };
@@ -262,21 +256,17 @@ class RBO : Binder {
   }
 
   void create(T)(in T type, in int w, in int h) {
-    bind();
-    glRenderbufferStorage(GL_RENDERBUFFER, type, w, h);
-    unbind();
+    binded_scope({ glRenderbufferStorage(GL_RENDERBUFFER, type, w, h); });
   }
 
   void attach(T)(in T type) {
-    bind();
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, _id);
-    unbind();
+    binded_scope({ glFramebufferRenderbuffer(GL_FRAMEBUFFER, type, GL_RENDERBUFFER, _id); });
   }
 }
 
 class FBO : Binder {
   this() {
-    auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+    auto init = (ref void_dg generate, ref void_dg eliminate, ref void_dg bind, ref void_dg unbind) {
       generate = { glGenFramebuffers(1, &_id); };
       eliminate = { glDeleteFramebuffers(1, &_id); };
       bind = { glBindFramebuffer(GL_FRAMEBUFFER, _id); };
@@ -286,18 +276,17 @@ class FBO : Binder {
   }
 
   void create(T)(in T texture) {
-    bind();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    unbind();
+    binded_scope({ glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0); });
   }
-  
-  // glCheckFramebufferStatus TODO fboがちゃんとコンパイルされているかチェック
+
+  // TODO Check whether fbo is certainly compiled 
+  // glCheckFramebufferStatus 
 }
 
 class Texture : Binder {
   public:
     this() {
-      auto init = (ref dg generate, ref dg eliminate, ref dg bind, ref dg unbind) {
+      auto init = (ref void_dg generate, ref void_dg eliminate, ref void_dg bind, ref void_dg unbind) {
         generate = { glGenTextures(1, &_id); };
         eliminate = { glDeleteTextures(1, &_id); };
         bind = { glBindTexture(GL_TEXTURE_2D, _id); };
@@ -306,26 +295,22 @@ class Texture : Binder {
       super(init);
     }
 
-    // TODO 分ける // void* const
+    // TODO divide
     void create(in int w, in int h, void* pixels, in int bytesPerPixel) {
       set_draw_mode(bytesPerPixel);
 
-      glActiveTexture(GL_TEXTURE0); // TODO 0以外も対応
-      unbind(); // TODO diableがちゃんと呼ばれていれば必要ない。が、つけておくべきか
-      bind();
-      attach(w, h, pixels);
-      filter();
-      unbind();
+      glActiveTexture(GL_TEXTURE0); // TODO Cover other units
+      binded_scope({ attach(w, h, pixels); filter(); });
     }
 
-    void enable() {
-      glActiveTexture(GL_TEXTURE0);
-      bind();
-    }
+    void enable(void_dg dg) {
+      binded_scope({
+        glActiveTexture(GL_TEXTURE0);
+        dg();
 
-    void disable() {
-      glActiveTexture(GL_TEXTURE0);
-      unbind();
+        // Need? It's only needed if dg() changes the texture-unit
+        glActiveTexture(GL_TEXTURE0);
+      });
     }
 
     alias _id this; // TODO private
@@ -347,7 +332,7 @@ class Texture : Binder {
     int _mode;
 }
 
-// TODO 必要あるのか
+// TODO Need?
 class TexHdr {
   public:
     this(in GLuint program) {
@@ -360,10 +345,8 @@ class TexHdr {
       set_location(locName);
     }
 
-    void apply(dg dg) { // TODO weird name
-      _texture.enable();
-      dg(); 
-      _texture.disable();
+    void apply(void_dg dg) { // TODO weird name
+      _texture.enable({ dg(); });
     }
 
   private:
@@ -376,7 +359,7 @@ class TexHdr {
     Texture _texture;
 }
 
-class FBOHdr {
+deprecated class FBOHdr {
   public:
     this() {
       _rbo = new RBO;
@@ -387,14 +370,13 @@ class FBOHdr {
     void init(Texture texture) { //const
       _fbo.create(texture);
 
-      _fbo.bind();
-      _rbo.create(GL_DEPTH_COMPONENT, 1024, 1024);
-      _rbo.attach(GL_DEPTH_ATTACHMENT);
+      _fbo.binded_scope({
+        _rbo.create(GL_DEPTH_COMPONENT, 1024, 1024);
+        _rbo.attach(GL_DEPTH_ATTACHMENT);
 
-      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
-      glDrawBuffers(1, drawBufs.ptr);
-
-      _fbo.unbind();
+        GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+        glDrawBuffers(1, drawBufs.ptr);
+      });
     }
 
     void set(in GLuint program, in ShaderProgramType type) {
@@ -455,23 +437,23 @@ class FBOHdr {
     */
 
     void draw() {
-      _fbo.bind();
-      glViewport(0, 0, 1024, 1024);
+      _fbo.binded_scope({
+        glViewport(0, 0, 1024, 1024);
 
-      _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
+        _camera.perspective(45.0, cast(float)512/512, 0.1, 100.0);
 
-      Vec3 eye = Vec3(0, 0, 3.0);
-      Vec3 center = Vec3(0, 0, 0);
-      Vec3 up = Vec3(0, 1, 0);
-      _camera.look_at(eye, center, up);
-      _uniLoc.attach("pvmMatrix", _camera.pvMat4.mat, "mat4fv");
+        Vec3 eye = Vec3(0, 0, 3.0);
+        Vec3 center = Vec3(0, 0, 0);
+        Vec3 up = Vec3(0, 1, 0);
+        _camera.look_at(eye, center, up);
+        _uniLoc.attach("pvmMatrix", _camera.pvMat4.mat, "mat4fv");
 
-      //_vboHdr.create_vbo(_mesh, _color);
-      _vboHdr.create_vbo(_mesh, _color, _normal);
-      _vboHdr.enable_vbo(_locNames, _strides);
-      _ibo.draw(DrawMode.Triangles); 
+        //_vboHdr.create_vbo(_mesh, _color);
+        _vboHdr.create_vbo(_mesh, _color, _normal);
+        _vboHdr.enable_vbo(_locNames, _strides);
+        _ibo.draw(DrawMode.Triangles); 
+      });
 
-      _fbo.unbind();
       glViewport(0, 0, WINDOW_X, WINDOW_Y);
     }
 
@@ -494,7 +476,7 @@ class FBOHdr {
     IBO _ibo;
 }
 
-class GaussHdr {
+deprecated class GaussHdr {
   public:
     this() {
       _rbo = new RBO;
@@ -504,10 +486,10 @@ class GaussHdr {
     void init(Texture texture) {
       _fbo.create(texture);
 
-      _fbo.bind();
-      GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
-      glDrawBuffers(1, drawBufs.ptr);
-      _fbo.unbind();
+      _fbo.binded_scope({
+        GLenum[] drawBufs = [GL_COLOR_ATTACHMENT0];
+        glDrawBuffers(1, drawBufs.ptr);
+      });
     }
 
     float[8] gauss_weight(float eRange) {
@@ -555,20 +537,16 @@ class GaussHdr {
     }
 
     void draw() {
-      _fbo.bind();
-      glViewport(0, 0, 256, 256);
+      _fbo.binded_scope({
+        glViewport(0, 0, 256, 256);
 
-      _vboHdr.create_vbo(_mesh, _texCoord);
-      _vboHdr.enable_vbo(_locNames, _strides);
-      auto drawMode = DrawMode.Triangles;
+        _vboHdr.create_vbo(_mesh, _texCoord);
+        _vboHdr.enable_vbo(_locNames, _strides);
+        auto drawMode = DrawMode.Triangles;
 
-      _ibo.draw(drawMode); 
+        _ibo.draw(drawMode); 
+      });
 
-      quit();
-    }
-
-    void quit() {
-      _fbo.unbind();
       glViewport(0, 0, WINDOW_X, WINDOW_Y);
     }
 
