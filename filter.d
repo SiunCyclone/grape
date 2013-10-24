@@ -28,13 +28,13 @@ class Filter {
     }
 
     final void render() {
-      texture_enable({
+      texture_scope({
         _renderer.render(); // TODO Specify a drawing area
       });
     }
 
-    final void texture_enable(in void delegate() dg) {
-      _texture.enable({
+    final void texture_scope(in void delegate() dg) {
+      _texture.applied_scope({
         dg();
       });
     }
@@ -86,12 +86,12 @@ class BlurFilter {
     void apply(in void delegate() render) {
       _filter.apply(render);
       _heightFilter.apply({ 
-        _filter.texture_enable({
+        _filter.texture_scope({
           _heightRenderer.render();
         });
       });
       _weightFilter.apply({ 
-        _heightFilter.texture_enable({
+        _heightFilter.texture_scope({
           _weightRenderer.render();
         });
       });
@@ -119,12 +119,12 @@ class GlowFilter : BlurFilter {
       _highFilter.apply(render);
       _filter.apply(render);
       _heightFilter.apply({ 
-        _filter.texture_enable({
+        _filter.texture_scope({
           _heightRenderer.render();
         });
       });
       _weightFilter.apply({ 
-        _heightFilter.texture_enable({
+        _heightFilter.texture_scope({
           _weightRenderer.render();
         });
       });

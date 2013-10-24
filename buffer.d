@@ -303,7 +303,7 @@ class Texture : Binder {
       binded_scope({ attach(w, h, pixels); filter(); });
     }
 
-    void enable(void_dg dg) {
+    void applied_scope(void_dg dg) {
       binded_scope({
         glActiveTexture(GL_TEXTURE0);
         dg();
@@ -345,8 +345,8 @@ class TexHdr {
       set_location(locName);
     }
 
-    void apply(void_dg dg) { // TODO weird name
-      _texture.enable({ dg(); });
+    void applied_scope(void_dg dg) {
+      _texture.applied_scope({ dg(); });
     }
 
   private:

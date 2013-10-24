@@ -13,6 +13,19 @@ import derelict.opengl3.gl3;
 
 import std.stdio;
 import std.string;
+import std.algorithm;
+import std.array;
+import std.conv;
+
+static immutable auto FontSizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                       15, 16, 17, 18, 20, 22, 24, 26,
+                                       28, 32, 36, 40, 48, 56, 64, 72 ];
+
+/* Cannot compile but I'm not sure... 
+static immutable int[25] FontSizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                                          15, 16, 17, 18, 20, 22, 24, 26,
+                                          28, 32, 36, 40, 48, 56, 64, 72 ];
+*/
 
 private final class FontUnit {
   public:
@@ -37,7 +50,7 @@ private final class FontUnit {
     TTF_Font* _font;
 }
 
-class Font {
+final class Font {
   public: 
     this() {
       if (!_initialized) {
@@ -69,7 +82,7 @@ class Font {
     }
 
     void load(in string file) {
-      foreach (size; _sizeList)
+      foreach (size; FontSizeList)
         _fonts[size] = new FontUnit(file, size);
     }
 
@@ -82,9 +95,6 @@ class Font {
     FontUnit[int] _fonts;
     static Font[] _instance;
     static bool _initialized = false;
-    static immutable auto _sizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                                        15, 16, 17, 18, 20, 22, 24, 26,
-                                        28, 32, 36, 40, 48, 56, 64, 72 ];
 }
 
 /*
@@ -161,10 +171,6 @@ class Font {
 }
 */
 
-
-
-
-
 /*
 class Font {
   public:
@@ -218,7 +224,7 @@ class Font {
 
 class FontRenderer {
   public:
-    this(in GLuint program) { //TODO program受け取らない
+    this(in GLuint program) { //TODO Don't get program
       _vboHdr = new VBOHdr(2, program);
       _texHdr = new TexHdr(program);
       _ibo = new IBO;
@@ -251,7 +257,7 @@ class FontRenderer {
 
     //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
     void draw(in float x, in float y, in string text, in int size) {
-      //enforce(size in _font, "font size error. you call wrong size of the font which is not loaded");
+      enforce(!find(FontSizeList, size).array.empty, "Called wrong size of the font. These are available FontSizeList.\n" ~ FontSizeList.to!string);
 
       _surf.create_ttf(_font, size, text, _color);
       _surf.convert();
@@ -261,7 +267,7 @@ class FontRenderer {
       _vboHdr.enable_vbo(_locNames, _strides);
 
       _texHdr.create(_surf, "tex");
-      _texHdr.apply({ _ibo.draw(_drawMode); });
+      _texHdr.applied_scope({ _ibo.draw(_drawMode); });
     }
 
   private:
@@ -291,12 +297,6 @@ class FontRenderer {
     TexHdr _texHdr;
     DrawMode _drawMode;
 }
-
-
-
-
-
-
 
 
 /*
