@@ -50,25 +50,25 @@ private final class SurfaceUnit {
   public: 
     ~this() {
       debug(dtor) writeln("SurfaceUnit dtor");
-      //free();
+      //free(); TODO
     }
 
-    void create(SDL_Surface* delegate() dg) {
+    void create(in SDL_Surface* delegate() dg) {
       free();
       _surf = dg();
       enforce(_surf !is null, "Surface.create() failed. SurfaceUnit._surf is null");
     }
 
-    void convert(SurfaceFormat flag) {
+    void convert(in SurfaceFormat flag) {
       auto tmp = SDL_ConvertSurfaceFormat(_surf, flag, 0);
       free();
       _surf = tmp;
       enforce(_surf !is null, "SDL_ConvertSurfaceFormat() failed. SurfaceUnit._surf is null");
     }
 
-    // alias this
-    // To be honest, I don't want to return private pointer.
     @property {
+      // alias this
+      // To be honest, I don't want to return private pointer.
       SDL_Surface* surf() {
         return _surf;
       }
@@ -94,7 +94,7 @@ final class Surface {
       destroy(_unit);
     }
 
-    void create(SDL_Surface* delegate() dg) {
+    void create(in SDL_Surface* delegate() dg) {
       _unit.create(dg);
     }
 

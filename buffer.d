@@ -298,9 +298,15 @@ class Texture : Binder {
     // TODO divide
     void create(in int w, in int h, void* pixels, in int bytesPerPixel) {
       set_draw_mode(bytesPerPixel);
+      _w = w;
+      _h = h;
 
       glActiveTexture(GL_TEXTURE0); // TODO Cover other units
       binded_scope({ attach(w, h, pixels); filter(); });
+    }
+
+    void create(Surface surf) {
+      create(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
     }
 
     void applied_scope(void_dg dg) {
@@ -314,6 +320,16 @@ class Texture : Binder {
     }
 
     alias _id this; // TODO private
+
+    @property {
+      int w() {
+        return _w;
+      }
+
+      int h() {
+        return _h;
+      }
+    }
 
   private:
     void set_draw_mode(in int bytesPerPixel) {
@@ -330,10 +346,11 @@ class Texture : Binder {
     }
 
     int _mode;
+    int _w;
+    int _h;
 }
 
-// TODO Need?
-class TexHdr {
+deprecated class TexHdr {
   public:
     this(in GLuint program) {
       _program = program; 
@@ -566,3 +583,4 @@ deprecated class GaussHdr {
     VBOHdr _vboHdr;
     IBO _ibo;
 }
+

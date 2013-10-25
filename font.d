@@ -60,6 +60,7 @@ final class Font {
           throw new Exception("TTF_Init() failed");
       }
 
+      _texture = new Texture;
       _surf = new Surface;
       _instance ~= this;
     }
@@ -87,19 +88,21 @@ final class Font {
         _units[size] = new FontUnit(file, size);
     }
 
-    void create_surface(in int size, in string text, in SDL_Color color) {
+    void create_texture(in int size, in string text, in SDL_Color color) {
       _surf.create({ return TTF_RenderUTF8_Solid(_units[size].unit, toStringz(text), color); });
       _surf.convert(SurfaceFormat.abgr8888);
+      _texture.create(_surf);
     }
 
     @property {
-      Surface surf() {
-        return _surf;
+      Texture texture() {
+        return _texture;
       }
     }
 
   private:
     FontUnit[int] _units;
+    Texture _texture;
     Surface _surf;
     static Font[] _instance;
     static bool _initialized = false;
@@ -118,25 +121,7 @@ class FontRenderer : Renderer {
       init_ibo();
       set_uniform("tex", 0, "1i");
 
-
-      //_vboHdr = new VBOHdr(2, program);
-      //_texHdr = new TexHdr(program);
-      //_ibo = new IBO;
-      //_ibo.create([0, 1, 2, 2, 3, 0]);
-      //_surf = new Surface;
-
-      //_drawMode = DrawMode.Triangles;
-
-      /*
-      _tex = [ 0.0, 0.0,
-               1.0, 0.0,
-               1.0, 1.0,
-               0.0, 1.0 ];        
-      _locNames = ["pos", "texCoord"];
-      _strides = [ 3, 2 ]; 
-      */
-
-      //debug(tor) writeln("FontHdr ctor");
+      debug(tor) writeln("FontHdr ctor");
     }
 
     void set_font(Font font) {
@@ -153,28 +138,16 @@ class FontRenderer : Renderer {
       enforce(!find(FontSizeList, size).array.empty, "Called wrong size of the font. These are available FontSizeList.\n" ~ FontSizeList.to!string);
       _program.use();
 
-      //_surf.create_ttf(_font, size, text, _color);
-      //_surf.convert();
-      _font.create_surface(size, text, _color);
+      _font.create_texture(size, text, _color);
 
-      //float[12] pos = set_pos(x, y, _surf);
-
-      /*
-      float[12] pos = set_pos(x, y, _font);
+      float[12] pos = set_pos(x, y);
       set_vbo(pos, _texCoord);
-      _ibo.draw(_drawMode);
-      */
-
-      //_vboHdr.create_vbo(pos, _tex);
-      //_vboHdr.enable_vbo(_locNames, _strides);
-
-      //_texHdr.create(_surf, "tex");
-      //_texHdr.applied_scope({ _ibo.draw(_drawMode); });
+      _font.texture.applied_scope({ _ibo.draw(_drawMode); });
     }
 
   private:
     void init_vbo() {
-      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+      _texCoord = [ 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0 ];        
     }
 
     void init_ibo() {
@@ -183,11 +156,11 @@ class FontRenderer : Renderer {
       _ibo.create(index);
     }
 
-    float[12] set_pos(in float x, in float y, Font font) {
+    float[12] set_pos(in float x, in float y) {
       auto startX = x / (WINDOW_X/2.0);
       auto startY = y / (WINDOW_Y/2.0);
-      auto w = font.surf.w / (WINDOW_X/2.0);
-      auto h = font.surf.h / (WINDOW_Y/2.0);
+      auto w = _font.texture.w / (WINDOW_X/2.0);
+      auto h = _font.texture.h / (WINDOW_Y/2.0);
 
       return [ startX, startY, 0.0,
                startX+w, startY, 0.0,
@@ -195,22 +168,9 @@ class FontRenderer : Renderer {
                startX, startY-h, 0.0 ];
     }
 
-    //Surface _surf;
-    //Font[int] _font;
     Font _font;
     SDL_Color _color;
-
     float[] _texCoord;
-    /*
-    float[8] _tex;
-    string[2] _locNames;
-    int[2] _strides;
-
-    VBOHdr _vboHdr;
-    IBO _ibo;
-    TexHdr _texHdr;
-    DrawMode _drawMode;
-    */
 }
 
 
