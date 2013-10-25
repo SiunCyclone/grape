@@ -13,4 +13,5 @@ public import orange.event;
 public import orange.math;
 public import orange.renderer;
 public import orange.filter;
+public import orange.image;
 

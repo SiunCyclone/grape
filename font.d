@@ -2,20 +2,20 @@ module orange.font;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
+import derelict.opengl3.gl3;
+
+import std.stdio;
+import std.string;
 import std.exception : enforce;
+import std.algorithm;
+import std.array;
+import std.conv;
+
 import orange.buffer;
 import orange.shader;
 import orange.window;
 import orange.surface;
 import orange.renderer;
-//import opengl.glew;
-import derelict.opengl3.gl3;
-
-import std.stdio;
-import std.string;
-import std.algorithm;
-import std.array;
-import std.conv;
 
 static immutable auto FontSizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
                                        15, 16, 17, 18, 20, 22, 24, 26,
@@ -60,6 +60,7 @@ final class Font {
           throw new Exception("TTF_Init() failed");
       }
 
+      _surf = new Surface;
       _instance ~= this;
     }
 
@@ -70,7 +71,7 @@ final class Font {
 
     ~this() {
       debug(tor) writeln("Font dtor");
-      foreach (font; _fonts) destroy(font);
+      foreach (font; _units) destroy(font);
     }
 
     static ~this() {
@@ -83,19 +84,135 @@ final class Font {
 
     void load(in string file) {
       foreach (size; FontSizeList)
-        _fonts[size] = new FontUnit(file, size);
+        _units[size] = new FontUnit(file, size);
     }
 
-    // alias this
-    TTF_Font* unit(in int size) {
-      return _fonts[size].unit; 
+    void create_surface(in int size, in string text, in SDL_Color color) {
+      _surf.create({ return TTF_RenderUTF8_Solid(_units[size].unit, toStringz(text), color); });
+      _surf.convert(SurfaceFormat.abgr8888);
+    }
+
+    @property {
+      Surface surf() {
+        return _surf;
+      }
     }
 
   private:
-    FontUnit[int] _fonts;
+    FontUnit[int] _units;
+    Surface _surf;
     static Font[] _instance;
     static bool _initialized = false;
 }
+
+class FontRenderer : Renderer {
+  public:
+    this() {
+      string[] locNames = ["pos", "texCoord"];
+      int[] strides = [ 3, 2 ]; 
+      mixin FontShaderSource;
+      init(FontShader, 2, locNames, strides, DrawMode.Triangles);
+
+      _program.use();
+      init_vbo();
+      init_ibo();
+      set_uniform("tex", 0, "1i");
+
+
+      //_vboHdr = new VBOHdr(2, program);
+      //_texHdr = new TexHdr(program);
+      //_ibo = new IBO;
+      //_ibo.create([0, 1, 2, 2, 3, 0]);
+      //_surf = new Surface;
+
+      //_drawMode = DrawMode.Triangles;
+
+      /*
+      _tex = [ 0.0, 0.0,
+               1.0, 0.0,
+               1.0, 1.0,
+               0.0, 1.0 ];        
+      _locNames = ["pos", "texCoord"];
+      _strides = [ 3, 2 ]; 
+      */
+
+      //debug(tor) writeln("FontHdr ctor");
+    }
+
+    void set_font(Font font) {
+      _font = font;
+    }
+
+    void set_color(in ubyte r, in ubyte g, in ubyte b) {
+      _color = SDL_Color(r, g, b);
+    }
+
+    override void render() {}
+    //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
+    void render(in float x, in float y, in string text, in int size) {
+      enforce(!find(FontSizeList, size).array.empty, "Called wrong size of the font. These are available FontSizeList.\n" ~ FontSizeList.to!string);
+      _program.use();
+
+      //_surf.create_ttf(_font, size, text, _color);
+      //_surf.convert();
+      _font.create_surface(size, text, _color);
+
+      //float[12] pos = set_pos(x, y, _surf);
+
+      /*
+      float[12] pos = set_pos(x, y, _font);
+      set_vbo(pos, _texCoord);
+      _ibo.draw(_drawMode);
+      */
+
+      //_vboHdr.create_vbo(pos, _tex);
+      //_vboHdr.enable_vbo(_locNames, _strides);
+
+      //_texHdr.create(_surf, "tex");
+      //_texHdr.applied_scope({ _ibo.draw(_drawMode); });
+    }
+
+  private:
+    void init_vbo() {
+      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+    }
+
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
+
+    float[12] set_pos(in float x, in float y, Font font) {
+      auto startX = x / (WINDOW_X/2.0);
+      auto startY = y / (WINDOW_Y/2.0);
+      auto w = font.surf.w / (WINDOW_X/2.0);
+      auto h = font.surf.h / (WINDOW_Y/2.0);
+
+      return [ startX, startY, 0.0,
+               startX+w, startY, 0.0,
+               startX+w, startY-h, 0.0,
+               startX, startY-h, 0.0 ];
+    }
+
+    //Surface _surf;
+    //Font[int] _font;
+    Font _font;
+    SDL_Color _color;
+
+    float[] _texCoord;
+    /*
+    float[8] _tex;
+    string[2] _locNames;
+    int[2] _strides;
+
+    VBOHdr _vboHdr;
+    IBO _ibo;
+    TexHdr _texHdr;
+    DrawMode _drawMode;
+    */
+}
+
 
 /*
 private final class FontUnit {
@@ -222,6 +339,7 @@ class Font {
 }
 */
 
+/*
 class FontRenderer {
   public:
     this(in GLuint program) { //TODO Don't get program
@@ -297,7 +415,7 @@ class FontRenderer {
     TexHdr _texHdr;
     DrawMode _drawMode;
 }
-
+*/
 
 /*
 class FontRenderer : Renderer {

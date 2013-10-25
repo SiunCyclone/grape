@@ -62,7 +62,7 @@ struct Mat4 {
 
     void set(in float[] coords...) {
       assert(coords.length == 16);
-      _mat = coords;
+      _mat[] = coords[];
     }
 
     Mat4 translate(in float x, in float y, in float z) {

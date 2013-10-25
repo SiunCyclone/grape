@@ -11,8 +11,10 @@ import derelict.opengl3.gl3;
 
 abstract class Renderer {
   public:
-    // TODO Consider args
-    // TODO _ibo should be initialized here
+    // TODO
+    // Consider args
+    // _ibo should be initialized here
+    // num is not needed. you can assume it from strides.length or locNames.length or whatever.
     final void init(in void delegate(out string, out string) dg, in int num, in string[] locNames, in int[] strides, in DrawMode drawMode) {
       init_program(dg);
       _vboHdr = new VBOHdr(num, _program); // TODO Detect the number of attributes from ShaderSource
@@ -69,7 +71,7 @@ class FilterRenderer : Renderer {
     this() {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 3, 2 ];
-      mixin FilterShaderSource;;
+      mixin FilterShaderSource;
       init(FilterShader, 2, locNames, strides, DrawMode.Triangles);
 
       _program.use();
@@ -100,7 +102,7 @@ class FilterRenderer : Renderer {
       _ibo.create(index);
     }
 
-    IBO _ibo;
+    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
@@ -158,7 +160,7 @@ class GaussHeightRenderer : Renderer {
       return weight;
     }
 
-    IBO _ibo;
+    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
@@ -216,7 +218,7 @@ class GaussWeightRenderer : Renderer {
       return weight;
     }
 
-    IBO _ibo;
+    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
