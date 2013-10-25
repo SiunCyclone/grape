@@ -46,11 +46,11 @@ enum SurfaceFormat {
   yyyu = SDL_PIXELFORMAT_YVYU
 }
 
-private final class SurfaceUnit {
-  public: 
+final class Surface {
+  public:
     ~this() {
-      debug(dtor) writeln("SurfaceUnit dtor");
-      //free(); TODO
+      debug(dtor) writeln("Surface dtor");
+      // free();
     }
 
     void create(in SDL_Surface* delegate() dg) {
@@ -67,10 +67,20 @@ private final class SurfaceUnit {
     }
 
     @property {
-      // alias this
-      // To be honest, I don't want to return private pointer.
-      SDL_Surface* surf() {
-        return _surf;
+      int w() {
+        return _surf.w;
+      }  
+
+      int h() {
+        return _surf.h;
+      }
+
+      void* pixels() {
+        return _surf.pixels;
+      }
+
+      int bytes_per_pixel() {
+        return _surf.format.BytesPerPixel;
       }
     }
 
@@ -81,47 +91,6 @@ private final class SurfaceUnit {
     }
 
     SDL_Surface* _surf;
-}
-
-final class Surface {
-  public:
-    this() {
-      _unit = new SurfaceUnit;
-    }
-
-    ~this() {
-      debug(dtor) writeln("Surface dtor");
-      destroy(_unit);
-    }
-
-    void create(in SDL_Surface* delegate() dg) {
-      _unit.create(dg);
-    }
-
-    void convert(in SurfaceFormat flag) {
-      _unit.convert(flag);
-    }
-
-    @property {
-      int w() {
-        return _unit.surf.w;
-      }  
-
-      int h() {
-        return _unit.surf.h;
-      }
-
-      void* pixels() {
-        return _unit.surf.pixels;
-      }
-
-      int bytes_per_pixel() {
-        return _unit.surf.format.BytesPerPixel;
-      }
-    }
-
-  private:
-    SurfaceUnit _unit;
 }
 
 /*
