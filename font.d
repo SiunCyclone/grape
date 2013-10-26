@@ -133,6 +133,7 @@ class FontRenderer : Renderer {
     }
 
     override void render() {}
+
     //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
     void render(in float x, in float y, in string text, in int size) {
       enforce(!find(FontSizeList, size).array.empty, "Called wrong size of the font. These are available FontSizeList.\n" ~ FontSizeList.to!string);

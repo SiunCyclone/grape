@@ -453,7 +453,6 @@ class ShaderProgram {
     void eliminate() {
       glDeleteProgram(_program);
     }
-
 }
 
 // TODO いらない
