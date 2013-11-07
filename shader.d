@@ -388,7 +388,7 @@ class Shader {
 
 		void compile(in string shaderCode) {
 			auto fst = &shaderCode[0];
-			int len = shaderCode.length;
+			int len = cast(int)shaderCode.length;
 			glShaderSource(_shader, 1, &fst, &len);
 			glCompileShader(_shader);
 

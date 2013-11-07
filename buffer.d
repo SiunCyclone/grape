@@ -237,7 +237,7 @@ class IBO : Binder {
     }
 
     void draw(in DrawMode mode) { 
-      glDrawElements(mode, _index.length, GL_UNSIGNED_INT, _index.ptr);
+      glDrawElements(mode, cast(int)_index.length, GL_UNSIGNED_INT, _index.ptr);
     }
 
   private: 

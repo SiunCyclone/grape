@@ -18,7 +18,7 @@ abstract class Renderer {
       assert(strides.length == locNames.length);
 
       init_program(dg);
-      _vboHdr = new VBOHdr(strides.length, _program); // TODO Detect the number of attributes from ShaderSource.
+      _vboHdr = new VBOHdr(cast(int)strides.length, _program); // TODO Detect the number of attributes from ShaderSource.
       _uniLoc = new UniformLocation(_program);
       _locNames = locNames.dup;
       _strides = strides.dup;
