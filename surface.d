@@ -56,14 +56,14 @@ final class Surface {
     void create(in SDL_Surface* delegate() dg) {
       free();
       _surf = dg();
-      enforce(_surf !is null, "Surface.create() failed. SurfaceUnit._surf is null");
+      enforce(_surf !is null, "Surface.create() failed.");
     }
 
     void convert(in SurfaceFormat flag) {
       auto tmp = SDL_ConvertSurfaceFormat(_surf, flag, 0);
       free();
       _surf = tmp;
-      enforce(_surf !is null, "SDL_ConvertSurfaceFormat() failed. SurfaceUnit._surf is null");
+      enforce(_surf !is null, "SDL_ConvertSurfaceFormat() failed.");
     }
 
     @property {

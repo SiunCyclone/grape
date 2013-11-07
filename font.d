@@ -10,6 +10,7 @@ import std.exception : enforce;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.file;
 
 import orange.buffer;
 import orange.shader;
@@ -30,6 +31,7 @@ static immutable int[25] FontSizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
 private final class FontUnit {
   public:
     this(in string file, in int size) {
+      enforce(exists(file), file ~ "does not exist");
       _font = TTF_OpenFont(toStringz(file), size); 
       enforce(_font !is null, "TTF_OpenFont() failed");
     }

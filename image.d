@@ -5,6 +5,7 @@ import derelict.sdl2.image;
 
 import std.stdio;
 import std.string;
+import std.file;
 import std.exception : enforce;
 
 import orange.buffer;
@@ -40,6 +41,7 @@ class Image {
     }
 
     void load(in string file) {
+      enforce(exists(file), file ~ "does not exist");
       _surf.create({ return IMG_Load(toStringz(file)); });
       enforce(_surf !is null, "IMG_Load() failed");
     }
