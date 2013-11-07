@@ -42,8 +42,8 @@ class Binder {
 
     void binded_scope(void_dg dg) {
       _bind();
-      scope(exit) _unbind();
       dg();
+      _unbind();
     }
 
   protected:
@@ -309,12 +309,13 @@ class Texture : Binder {
       create(surf.w, surf.h, surf.pixels, surf.bytes_per_pixel);
     }
 
+    // Provides a scope that a texture is enabled.
     void applied_scope(void_dg dg) {
       binded_scope({
         glActiveTexture(GL_TEXTURE0);
         dg();
 
-        // Need? It's only needed if dg() changes the texture-unit
+        // Need? It's only needed if dg() changes the texture-unit.
         glActiveTexture(GL_TEXTURE0);
       });
     }

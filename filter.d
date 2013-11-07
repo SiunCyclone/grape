@@ -17,10 +17,16 @@ class Filter {
       _renderer.set_uniform("pvmMatrix", mat, "mat4fv");
     }
 
-    final void apply(in void delegate() dg) {
+    // Enables user to respecify a filtered area. Note that the area is the whole screen by default.
+    final void set_area(in float x, in float y, in float w, in float h) {
+
+    }
+
+    final void applied_scope(in void delegate() dg) {
       _fbo.binded_scope({
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
+        //glClearColor(0, 0, 0, 0.5);
         glViewport(0, 0, _w, _h);
         dg();
         glViewport(0, 0, WINDOW_X, WINDOW_Y);
@@ -39,8 +45,14 @@ class Filter {
       });
     }
 
+    // TODO delete
     void above() {
       _renderer.above();
+    }
+
+    // TODO delete
+    void above2() {
+      _renderer.above2();
     }
 
   protected:
@@ -76,26 +88,32 @@ class BlurFilter {
       _weightFilter= new Filter(128, 128);
     }
 
+    /*
     void set_camera(float[] mat) {
-      /*
       _filter.set_camera(mat);
       _heightFilter.set_camera(mat);
-      */
     }
+    */
 
-    void apply(in void delegate() render) {
-      _filter.apply(render);
-      _heightFilter.apply({ 
+    void applied_scope(in void delegate() render) {
+      _filter.applied_scope(render);
+
+      _heightFilter.applied_scope({ 
         _filter.texture_scope({
           _heightRenderer.render();
         });
       });
-      _weightFilter.apply({ 
+
+      _weightFilter.applied_scope({ 
         _heightFilter.texture_scope({
           _weightRenderer.render();
         });
       });
+
+      //_weightFilter.above2(); // TODO delete
+      //glDepthFunc(GL_LEQUAL);
       _weightFilter.render();
+      //glDepthFunc(GL_LESS);
     }
 
   private:
@@ -112,31 +130,40 @@ class GlowFilter : BlurFilter {
     this() {
       super();
       _highFilter = new Filter(1024, 1024);
-      _highFilter.above();
+      _gFilter = new Filter(1024, 1024);
     }
 
-    override void apply(in void delegate() render) {
-      _highFilter.apply(render);
-      _filter.apply(render);
-      _heightFilter.apply({ 
+    override void applied_scope(in void delegate() render) {
+      _highFilter.applied_scope(render);
+      _filter.applied_scope(render);
+
+      _heightFilter.applied_scope({ 
         _filter.texture_scope({
           _heightRenderer.render();
         });
       });
-      _weightFilter.apply({ 
+
+      _weightFilter.applied_scope({ 
         _heightFilter.texture_scope({
           _weightRenderer.render();
         });
       });
 
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_ONE, GL_ONE); // Add
-      _highFilter.render();
-      _weightFilter.render();
-      glDisable(GL_BLEND);
+      _gFilter.applied_scope({
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE); // Add
+
+        _highFilter.render();
+        _weightFilter.render(); // fboでdepath bufferが有効になってないからaboveする必要がない
+
+        glDisable(GL_BLEND);
+      });
+
+      _gFilter.render();
     }
 
   private:
     Filter _highFilter;
+    Filter _gFilter;
 }
 

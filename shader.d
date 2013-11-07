@@ -13,7 +13,7 @@ enum ShaderType {
 }
 
 enum ShaderProgramType {
-  Custom = 1000,
+  Custom = 1000, // TODO delete
   ClassicNormal = 0,
   ClassicTexture = 1,
   Font = 2,

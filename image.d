@@ -62,13 +62,18 @@ class Image {
 
 class ImageRenderer : Renderer {
   public:
+    this(Image image) {
+      this();
+      set_image(image);
+    }
+
     this() {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 3, 2 ];
 
       // TODO Weird name
       mixin FontShaderSource;
-      init(FontShader, 2, locNames, strides, DrawMode.Triangles);
+      init(FontShader, locNames, strides, DrawMode.Triangles);
 
       _program.use();
       init_vbo();

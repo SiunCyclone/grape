@@ -13,11 +13,12 @@ abstract class Renderer {
   public:
     // TODO
     // Consider args
-    // _ibo should be initialized here
-    // num is not needed. you can assume it from strides.length or locNames.length or whatever.
-    final void init(in void delegate(out string, out string) dg, in int num, in string[] locNames, in int[] strides, in DrawMode drawMode) {
+    // _ibo should be initialized here.
+    final void init(in void delegate(out string, out string) dg, in string[] locNames, in int[] strides, in DrawMode drawMode) {
+      assert(strides.length == locNames.length);
+
       init_program(dg);
-      _vboHdr = new VBOHdr(num, _program); // TODO Detect the number of attributes from ShaderSource
+      _vboHdr = new VBOHdr(strides.length, _program); // TODO Detect the number of attributes from ShaderSource.
       _uniLoc = new UniformLocation(_program);
       _locNames = locNames.dup;
       _strides = strides.dup;
@@ -30,7 +31,7 @@ abstract class Renderer {
       _vboHdr.enable_vbo(_locNames, _strides);
     }
 
-    // _ibo must be initialized before calling this function, or cause segv
+    // _ibo must be initialized before calling this function, or cause segv.
     void set_ibo(in int[] index) {
       _program.use();
       _ibo.create(index);
@@ -46,7 +47,7 @@ abstract class Renderer {
   protected:
     ShaderProgram _program;
     DrawMode _drawMode;
-    IBO _ibo; // Must be initialized in SubClass when rendering model using IBO
+    IBO _ibo; // Must be initialized in SubClass when rendering model using IBO.
 
   private:
     final void init_program(in void delegate(out string, out string) dg) {
@@ -72,7 +73,7 @@ class FilterRenderer : Renderer {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 3, 2 ];
       mixin FilterShaderSource;
-      init(FilterShader, 2, locNames, strides, DrawMode.Triangles);
+      init(FilterShader, locNames, strides, DrawMode.Triangles);
 
       _program.use();
       init_vbo();
@@ -86,8 +87,14 @@ class FilterRenderer : Renderer {
       _ibo.draw(_drawMode);
     }
 
+    // TODO delete
     void above() {
-      _mesh = [ -1.0, 1.0, 0.0001, 1.0, 1.0, 0.0001, 1.0, -1.0, 0.0001, -1.0, -1.0, 0.0001 ];
+      _mesh = [ -1.0, 1.0, 0.00001, 1.0, 1.0, 0.00001, 1.0, -1.0, 0.00001, -1.0, -1.0, 0.00001 ];
+    }
+
+    // TODO delete
+    void above2() {
+      _mesh = [ -1.0, 1.0, 0.00002, 1.0, 1.0, 0.00002, 1.0, -1.0, 0.00002, -1.0, -1.0, 0.00002 ];
     }
 
   private:
@@ -102,7 +109,6 @@ class FilterRenderer : Renderer {
       _ibo.create(index);
     }
 
-    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
@@ -113,7 +119,7 @@ class GaussHeightRenderer : Renderer {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 2, 2 ];
       mixin GaussianYShaderSource;
-      init(GaussianYShader, 2, locNames, strides, DrawMode.Triangles);
+      init(GaussianYShader, locNames, strides, DrawMode.Triangles);
 
       _program.use();
       init_vbo();
@@ -160,7 +166,6 @@ class GaussHeightRenderer : Renderer {
       return weight;
     }
 
-    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
@@ -171,7 +176,7 @@ class GaussWeightRenderer : Renderer {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 2, 2 ];
       mixin GaussianXShaderSource;
-      init(GaussianXShader, 2, locNames, strides, DrawMode.Triangles);
+      init(GaussianXShader, locNames, strides, DrawMode.Triangles);
 
       _program.use();
       init_vbo();
@@ -218,7 +223,6 @@ class GaussWeightRenderer : Renderer {
       return weight;
     }
 
-    IBO _ibo; // TODO delete
     float[] _mesh;
     float[] _texCoord;
 }
@@ -228,7 +232,7 @@ class NormalRenderer : Renderer {
     string[] locNames = [ "pos", "color" ];
     int[] strides = [ 3, 4 ];
     mixin NormalShaderSource;
-    init(NormalShader, 2, locNames, strides, DrawMode.Points);
+    init(NormalShader, locNames, strides, DrawMode.Points);
 
     _ibo = new IBO;
   }
@@ -244,7 +248,7 @@ class TextureRenderer : Renderer {
     string[] locNames = [ "pos", "texCoord" ];
     int[] strides = [ 3, 2 ];
     mixin NormalShaderSource;
-    init(NormalShader, 2, locNames, strides, DrawMode.Points);
+    init(NormalShader, locNames, strides, DrawMode.Points);
   }
 
   override void render() {}

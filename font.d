@@ -114,7 +114,7 @@ class FontRenderer : Renderer {
       string[] locNames = ["pos", "texCoord"];
       int[] strides = [ 3, 2 ]; 
       mixin FontShaderSource;
-      init(FontShader, 2, locNames, strides, DrawMode.Triangles);
+      init(FontShader, locNames, strides, DrawMode.Triangles);
 
       _program.use();
       init_vbo();
@@ -143,7 +143,11 @@ class FontRenderer : Renderer {
 
       float[12] pos = set_pos(x, y);
       set_vbo(pos, _texCoord);
-      _font.texture.applied_scope({ _ibo.draw(_drawMode); });
+      _font.texture.applied_scope({
+        glDepthFunc(GL_ALWAYS);
+        _ibo.draw(_drawMode);
+        glDepthFunc(GL_LESS);
+      });
     }
 
   private:
