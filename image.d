@@ -97,7 +97,7 @@ class ImageRenderer : Renderer {
 
       float[12] pos = set_pos(x, y);
       set_vbo(pos, _texCoord);
-      _image.texture.applied_scope({ _ibo.draw(_drawMode); });
+      _image.texture.texture_scope({ _ibo.draw(_drawMode); });
     }
 
   private:

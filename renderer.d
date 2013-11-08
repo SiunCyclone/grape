@@ -251,7 +251,9 @@ class TextureRenderer : Renderer {
     init(NormalShader, locNames, strides, DrawMode.Points);
   }
 
-  override void render() {}
+  override void render() {
+  
+  }
 }
 
 

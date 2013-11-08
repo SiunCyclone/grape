@@ -310,7 +310,7 @@ class Texture : Binder {
     }
 
     // Provides a scope that a texture is enabled.
-    void applied_scope(void_dg dg) {
+    void texture_scope(void_dg dg) {
       binded_scope({
         glActiveTexture(GL_TEXTURE0);
         dg();
@@ -364,7 +364,7 @@ deprecated class TexHdr {
     }
 
     void applied_scope(void_dg dg) {
-      _texture.applied_scope({ dg(); });
+      _texture.texture_scope({ dg(); });
     }
 
   private:

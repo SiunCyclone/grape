@@ -251,9 +251,11 @@ mixin template GaussianXShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        vec2 t = vec2(1.0) / vec2(128.0);
+        //vec2 t = vec2(1.0) / vec2(128.0);
         //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
+        vec2 t = vec2(1.0) / vec2(1024.0);
+        //vec2 t = vec2(1.0) / vec2(2048.0);
         vec4 color = texture(tex, vTexCoord) * weight[0];
 
         for (int i=1; i<weight.length(); ++i) {
@@ -286,9 +288,11 @@ mixin template GaussianYShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        vec2 t = vec2(1.0) / vec2(128.0);
+        //vec2 t = vec2(1.0) / vec2(128.0);
         //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
+        vec2 t = vec2(1.0) / vec2(1024.0);
+        //vec2 t = vec2(1.0) / vec2(2048.0);
         //vec4 color = texture(tex, vTexCoord);
         vec4 color = texture(tex, vTexCoord) * weight[0];
 

@@ -145,7 +145,7 @@ class FontRenderer : Renderer {
 
       float[12] pos = set_pos(x, y);
       set_vbo(pos, _texCoord);
-      _font.texture.applied_scope({
+      _font.texture.texture_scope({
         glDepthFunc(GL_ALWAYS);
         _ibo.draw(_drawMode);
         glDepthFunc(GL_LESS);
