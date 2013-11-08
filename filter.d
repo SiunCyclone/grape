@@ -51,6 +51,12 @@ abstract class Filter {
     */
 
   protected:
+    final void render(in int i) {
+      texture_scope(i, {
+        _renderer.render(); // TODO Specify a drawing area
+      });
+    }
+    
     final void create_texture(in int i, in void delegate() dg) {
       attach(i);
       fbo_scope(dg);
@@ -93,37 +99,37 @@ class BlurFilter : Filter {
   public:
     this(in int w, in int h) {
       super(3, w, h);
-      _heightRenderer = new GaussHeightRenderer;
-      _weightRenderer = new GaussWeightRenderer;
+      _weightRenderer = new GaussWeightRenderer([w, h]);
+      _heightRenderer = new GaussHeightRenderer([w, h]);
     }
 
-    override void filter(in void delegate() render) {
-      create_texture(0, render);
-      create_texture(1, { texture_scope(0, { _heightRenderer.render(); }); });
-      create_texture(2, { texture_scope(1, { _weightRenderer.render(); }); });
+    override void filter(in void delegate() dg) {
+      create_texture(0, dg);
+      create_texture(1, { texture_scope(0, { _weightRenderer.render(); }); });
+      create_texture(2, { texture_scope(1, { _heightRenderer.render(); }); });
     }
 
   private:
-    GaussHeightRenderer _heightRenderer;
     GaussWeightRenderer _weightRenderer;
+    GaussHeightRenderer _heightRenderer;
 }
 
 class GlowFilter : Filter {
   public:
-    this(in int w, in int h) {
+    this(in int w, in int h, in int w2, in int h2) {
       super(2, w, h);
-      _blurFilter = new BlurFilter(w, h);
+      _blurFilter = new BlurFilter(w2, h2);
     }
 
-    override void filter(in void delegate() render) {
-      create_texture(0, render);
-      _blurFilter.filter(render);
+    override void filter(in void delegate() dg) {
+      create_texture(0, dg);
+      _blurFilter.filter(dg);
 
       create_texture(1, { 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE); // Add
 
-        render();
+        render(0);
         _blurFilter.render();
 
         glDisable(GL_BLEND);

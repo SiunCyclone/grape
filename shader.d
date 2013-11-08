@@ -252,19 +252,25 @@ mixin template GaussianXShaderSource() {
     fShader = q{
       uniform sampler2D tex;
       uniform float weight[8];
+      uniform vec2 resolution;
       varying vec2 vTexCoord;
 
       void main() {
         //vec2 t = vec2(1.0) / vec2(128.0);
         //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
-        vec2 t = vec2(1.0) / vec2(1024.0);
+        //vec2 t = vec2(1.0) / vec2(1024.0);
         //vec2 t = vec2(1.0) / vec2(2048.0);
+        vec2 t = vec2(1.0) / resolution;
         vec4 color = texture(tex, vTexCoord) * weight[0];
 
         for (int i=1; i<weight.length(); ++i) {
           color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0)) * t) * weight[i];
           color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0)) * t) * weight[i];
+          /*
+          color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0))) * weight[i];
+          color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0))) * weight[i];
+          */
         }
 
         gl_FragColor = color;
@@ -289,20 +295,26 @@ mixin template GaussianYShaderSource() {
     fShader = q{
       uniform sampler2D tex;
       uniform float weight[8];
+      uniform vec2 resolution;
       varying vec2 vTexCoord;
 
       void main() {
         //vec2 t = vec2(1.0) / vec2(128.0);
         //vec2 t = vec2(1.0) / vec2(256.0);
         //vec2 t = vec2(1.0) / vec2(512.0);
-        vec2 t = vec2(1.0) / vec2(1024.0);
+        //vec2 t = vec2(1.0) / vec2(1024.0);
         //vec2 t = vec2(1.0) / vec2(2048.0);
         //vec4 color = texture(tex, vTexCoord);
+        vec2 t = vec2(1.0) / resolution;
         vec4 color = texture(tex, vTexCoord) * weight[0];
 
         for (int i=1; i<weight.length(); ++i) {
           color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i)) * t) * weight[i];
           color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i)) * t) * weight[i];
+          /*
+          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i))) * weight[i];
+          color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i))) * weight[i];
+          */
         }
 
         gl_FragColor = color;

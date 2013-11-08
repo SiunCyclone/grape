@@ -105,19 +105,20 @@ class FilterRenderer : Renderer {
 
 class GaussHeightRenderer : Renderer {
   public:
-    this() {
+    this(in float[2] resolution) {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 2, 2 ];
       mixin GaussianYShaderSource;
       init(GaussianYShader, locNames, strides, DrawMode.Triangles);
 
-      _program.use();
       init_vbo();
       init_ibo();
 
+      _program.use();
       float[8] weight = gauss_weight(50.0);
       set_uniform("tex", 0, "1i");
       set_uniform("weight", weight, "1fv", 8);
+      set_uniform("resolution", resolution, "2fv");
     }
 
     override void render() {
@@ -162,19 +163,20 @@ class GaussHeightRenderer : Renderer {
 
 class GaussWeightRenderer : Renderer {
   public:
-    this() {
+    this(in float[2] resolution) {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 2, 2 ];
       mixin GaussianXShaderSource;
       init(GaussianXShader, locNames, strides, DrawMode.Triangles);
 
-      _program.use();
       init_vbo();
       init_ibo();
 
+      _program.use();
       float[8] weight = gauss_weight(50.0);
       set_uniform("tex", 0, "1i");
       set_uniform("weight", weight, "1fv", 8);
+      set_uniform("resolution", resolution, "2fv");
     }
 
     override void render() {
@@ -223,6 +225,7 @@ class NormalRenderer : Renderer {
     int[] strides = [ 3, 4 ];
     mixin NormalShaderSource;
     init(NormalShader, locNames, strides, DrawMode.Points);
+    //init(NormalShader, locNames, strides, DrawMode.Triangles);
 
     _ibo = new IBO;
   }
@@ -242,6 +245,7 @@ class TextureRenderer : Renderer {
       init(TextureShader, locNames, strides, DrawMode.Triangles);
 
       init_ibo();
+
       _program.use();
       set_uniform("tex", 0, "1i");
     }
