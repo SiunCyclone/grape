@@ -132,14 +132,14 @@ mixin template TextureShaderSource() {
   void delegate(out string, out string) TextureShader = (out string vShader, out string fShader) {
     vShader = q{
       attribute vec3 pos;
-      attribute vec4 color;
       attribute vec2 texCoord;
-      varying vec4 vColor;
       varying vec2 vTexCoord;
       uniform mat4 pvmMatrix;
+      //attribute vec4 color;
+      //varying vec4 vColor;
 
       void main() {
-        vColor = color;
+        //vColor = color;
         vTexCoord = texCoord;
         gl_Position = pvmMatrix * vec4(pos, 1.0); 
       }
@@ -147,13 +147,17 @@ mixin template TextureShaderSource() {
 
     fShader = q{
       uniform sampler2D tex;
-      varying vec4 vColor;
       varying vec2 vTexCoord;
+      //varying vec4 vColor;
 
       void main() {
         vec4 smpColor = texture(tex, vTexCoord);
+        if (smpColor.a < 0.5) {
+          discard;
+        } else {
+          gl_FragColor = smpColor;
+        }
         //gl_FragColor = vColor;
-        gl_FragColor = smpColor;
         //gl_FragColor = smpColor + vColor;
         //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
       }
@@ -335,46 +339,6 @@ mixin template FilterShaderSource() {
   };
 }
 
-class ShaderSource {
-  public:
-    static this() {
-      init();
-    }
-
-    static void delegate(out string, out string) load(ShaderProgramType type) {
-      return _loader[type];
-    }
-
-    static void add(void delegate(out string, out string) CustomShader) {
-      _loader[ShaderProgramType.Custom] = CustomShader;
-    }
-
-  private:
-    static void init() {
-      mixin ClassicNormalShaderSource;
-      mixin ClassicTextureShaderSource;
-      mixin FontShaderSource;
-      mixin NormalShaderSource;
-      mixin TextureShaderSource;
-      mixin DiffuseShaderSource;
-      mixin ADSShaderSource;
-      mixin GaussianXShaderSource;
-      mixin GaussianYShaderSource;
-
-      _loader[ShaderProgramType.ClassicNormal] = ClassicNormalShader;
-      _loader[ShaderProgramType.ClassicTexture] = ClassicTextureShader;
-      _loader[ShaderProgramType.Font] = FontShader;
-      _loader[ShaderProgramType.Normal] = NormalShader;
-      _loader[ShaderProgramType.Texture] = TextureShader;
-      _loader[ShaderProgramType.Diffuse] = DiffuseShader;
-      _loader[ShaderProgramType.ADS] = ADSShader;
-      _loader[ShaderProgramType.GaussianX] = GaussianXShader;
-      _loader[ShaderProgramType.GaussianY] = GaussianYShader;
-    }
-
-    static void delegate(out string, out string)[ShaderProgramType] _loader;
-}
-
 class Shader {
   public:
     this(in ShaderType type) {
@@ -459,7 +423,50 @@ class ShaderProgram {
     }
 }
 
-// TODO いらない
+/*
+class ShaderSource {
+  public:
+    static this() {
+      init();
+    }
+
+    static void delegate(out string, out string) load(ShaderProgramType type) {
+      return _loader[type];
+    }
+
+    static void add(void delegate(out string, out string) CustomShader) {
+      _loader[ShaderProgramType.Custom] = CustomShader;
+    }
+
+  private:
+    static void init() {
+      mixin ClassicNormalShaderSource;
+      mixin ClassicTextureShaderSource;
+      mixin FontShaderSource;
+      mixin NormalShaderSource;
+      mixin TextureShaderSource;
+      mixin DiffuseShaderSource;
+      mixin ADSShaderSource;
+      mixin GaussianXShaderSource;
+      mixin GaussianYShaderSource;
+
+      _loader[ShaderProgramType.ClassicNormal] = ClassicNormalShader;
+      _loader[ShaderProgramType.ClassicTexture] = ClassicTextureShader;
+      _loader[ShaderProgramType.Font] = FontShader;
+      _loader[ShaderProgramType.Normal] = NormalShader;
+      _loader[ShaderProgramType.Texture] = TextureShader;
+      _loader[ShaderProgramType.Diffuse] = DiffuseShader;
+      _loader[ShaderProgramType.ADS] = ADSShader;
+      _loader[ShaderProgramType.GaussianX] = GaussianXShader;
+      _loader[ShaderProgramType.GaussianY] = GaussianYShader;
+    }
+
+    static void delegate(out string, out string)[ShaderProgramType] _loader;
+}
+*/
+
+
+/*
 class ShaderProgramHdr {
 	public:
     this(ShaderProgramType[] typeList...) {
@@ -502,4 +509,5 @@ class ShaderProgramHdr {
     ShaderProgramType _current;
     ShaderProgram[ShaderProgramType] _list;
 }
+*/
 

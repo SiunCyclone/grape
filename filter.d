@@ -30,12 +30,16 @@ abstract class Filter {
     }
     */
 
-    abstract void create(in void delegate());
+    abstract void filter(in void delegate());
 
     final void render() {
       texture_scope(_textures.length-1, {
         _renderer.render(); // TODO Specify a drawing area
       });
+    }
+
+    final void filter_scope(in void delegate() dg) {
+      texture_scope(_textures.length-1, dg);
     }
 
     /*
@@ -71,9 +75,9 @@ abstract class Filter {
 
     void fbo_scope(in void delegate() dg) {
       _fbo.binded_scope({
+        //glClearColor(0.0, 0.0, 0.0, 0.0);
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
-        //glClearColor(0, 0, 0, 0.5);
         glViewport(0, 0, _w, _h);
         dg();
         glViewport(0, 0, WINDOW_X, WINDOW_Y);
@@ -93,7 +97,7 @@ class BlurFilter : Filter {
       _weightRenderer = new GaussWeightRenderer;
     }
 
-    override void create(in void delegate() render) {
+    override void filter(in void delegate() render) {
       create_texture(0, render);
       create_texture(1, { texture_scope(0, { _heightRenderer.render(); }); });
       create_texture(2, { texture_scope(1, { _weightRenderer.render(); }); });
@@ -111,9 +115,9 @@ class GlowFilter : Filter {
       _blurFilter = new BlurFilter(w, h);
     }
 
-    override void create(in void delegate() render) {
+    override void filter(in void delegate() render) {
       create_texture(0, render);
-      _blurFilter.create(render);
+      _blurFilter.filter(render);
 
       create_texture(1, { 
         glEnable(GL_BLEND);

@@ -172,11 +172,13 @@ class UniformLocation : Location {
       _uniform = new Uniform();
     }
 
+    /*
     this(in GLuint program, in ShaderProgramType type) {
       auto get = (string name) { _location = glGetUniformLocation(_program, cast(char*)name); };
       super(program, get);
       init(type);
     }
+    */
 
     void attach(T)(in string name, in T value, in string type, in int num=1) {
       _get(name);
@@ -184,11 +186,13 @@ class UniformLocation : Location {
     }
 
   private:
+    /*
     void init(in ShaderProgramType type) {
       string vShader, fShader;
       ShaderSource.load(type)(vShader, fShader);
       _uniform = new Uniform(vShader, fShader);
     }
+    */
 
     Uniform _uniform;
 }
@@ -427,7 +431,8 @@ deprecated class FBOHdr {
                            0, 0, 1, 0,
                            0, 0, 0, 1 ).inverse;
 
-      _uniLoc = new UniformLocation(_program, type);
+      //_uniLoc = new UniformLocation(_program, type);
+      _uniLoc = new UniformLocation(_program);
       _uniLoc.attach("lightPos", lightPos, "3fv");
       _uniLoc.attach("eyePos", eyePos, "3fv");
       _uniLoc.attach("ambientColor", ambientColor, "4fv");
@@ -549,7 +554,8 @@ deprecated class GaussHdr {
 
       float[8] weight = gauss_weight(300.0);
 
-      _uniLoc = new UniformLocation(_program, type);
+      //_uniLoc = new UniformLocation(_program, type);
+      _uniLoc = new UniformLocation(_program);
       _uniLoc.attach("tex", 0, "1i");
       _uniLoc.attach("weight", weight, "1fv", 8);
     }

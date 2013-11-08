@@ -75,9 +75,9 @@ class FilterRenderer : Renderer {
       mixin FilterShaderSource;
       init(FilterShader, locNames, strides, DrawMode.Triangles);
 
-      _program.use();
       init_vbo();
       init_ibo();
+      _program.use();
       set_uniform("tex", 0, "1i");
     }
 
@@ -85,16 +85,6 @@ class FilterRenderer : Renderer {
       _program.use();
       set_vbo(_mesh, _texCoord);
       _ibo.draw(_drawMode);
-    }
-
-    // TODO delete
-    void above() {
-      _mesh = [ -1.0, 1.0, 0.00001, 1.0, 1.0, 0.00001, 1.0, -1.0, 0.00001, -1.0, -1.0, 0.00001 ];
-    }
-
-    // TODO delete
-    void above2() {
-      _mesh = [ -1.0, 1.0, 0.00002, 1.0, 1.0, 0.00002, 1.0, -1.0, 0.00002, -1.0, -1.0, 0.00002 ];
     }
 
   private:
@@ -244,16 +234,29 @@ class NormalRenderer : Renderer {
 }
 
 class TextureRenderer : Renderer {
-  this() {
-    string[] locNames = [ "pos", "texCoord" ];
-    int[] strides = [ 3, 2 ];
-    mixin NormalShaderSource;
-    init(NormalShader, locNames, strides, DrawMode.Points);
-  }
+  public:
+    this() {
+      string[] locNames = [ "pos", "texCoord" ];
+      int[] strides = [ 3, 2 ];
+      mixin TextureShaderSource;
+      init(TextureShader, locNames, strides, DrawMode.Triangles);
 
-  override void render() {
-  
-  }
+      init_ibo();
+      _program.use();
+      set_uniform("tex", 0, "1i");
+    }
+
+    override void render() {
+      _program.use();
+      _ibo.draw(_drawMode);
+    }
+
+  private:
+    void init_ibo() {
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+      _ibo = new IBO;
+      _ibo.create(index);
+    }
 }
 
 
