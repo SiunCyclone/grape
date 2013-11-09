@@ -32,32 +32,23 @@ abstract class Filter {
 
     abstract void filter(in void delegate());
 
-    final void render() {
+    final void render(int i=-1) {
+      if (i < 0) i = _textures.length - 1;
+
       glDisable(GL_DEPTH_TEST);
-      texture_scope(_textures.length-1, {
-        _renderer.render(); // TODO Specify a drawing area
-      });
+      filter_scope(i, { _renderer.render(); }); // TODO Specify a drawing area });
       glEnable(GL_DEPTH_TEST);
     }
 
-    final void filter_scope(in void delegate() dg) {
-      texture_scope(_textures.length-1, dg);
-    }
-
-  protected:
-    final void render(in int i) {
-      texture_scope(i, {
-        _renderer.render(); // TODO Specify a drawing area
-      });
-    }
-    
-    final void texture_scope(in int i, in void delegate() dg) {
+    final void filter_scope(in int i, in void delegate() dg) {
       glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE);
       _textures[i].texture_scope(dg);
       glDisable(GL_BLEND);
     }
 
-    final void create_texture(in int i, in void delegate() dg) {
+  protected:
+    final void create_filter(in int i, in void delegate() dg) {
       attach(i);
       fbo_scope(dg);
     }
@@ -97,9 +88,9 @@ class BlurFilter : Filter {
     }
 
     override void filter(in void delegate() dg) {
-      create_texture(0, dg);
-      create_texture(1, { texture_scope(0, { _weightRenderer.render(); }); });
-      create_texture(2, { texture_scope(1, { _heightRenderer.render(); }); });
+      create_filter(0, dg);
+      create_filter(1, { filter_scope(0, { _weightRenderer.render(); }); });
+      create_filter(2, { filter_scope(1, { _heightRenderer.render(); }); });
     }
 
   private:
@@ -119,10 +110,10 @@ class GlowFilter : Filter {
     }
 
     override void filter(in void delegate() dg) {
-      create_texture(0, dg);
+      create_filter(0, dg);
       _blurFilter.filter(dg);
 
-      create_texture(1, { 
+      create_filter(1, { 
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
 
