@@ -93,6 +93,7 @@ final class Font {
     void create_texture(in int size, in string text, in SDL_Color color) {
       _surf.create({ return TTF_RenderUTF8_Solid(_units[size].unit, toStringz(text), color); });
       _surf.convert(SurfaceFormat.abgr8888);
+      //_surf.convert(SurfaceFormat.rgba8888);
       _texture.create(_surf);
     }
 

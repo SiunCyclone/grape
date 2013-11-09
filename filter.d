@@ -33,22 +33,16 @@ abstract class Filter {
     abstract void filter(in void delegate());
 
     final void render() {
+      glDisable(GL_DEPTH_TEST);
       texture_scope(_textures.length-1, {
         _renderer.render(); // TODO Specify a drawing area
       });
+      glEnable(GL_DEPTH_TEST);
     }
 
     final void filter_scope(in void delegate() dg) {
       texture_scope(_textures.length-1, dg);
     }
-
-    /*
-    @property {
-      Texture texture() {
-        return _textures[$-1];
-      }
-    }
-    */
 
   protected:
     final void render(in int i) {
@@ -57,16 +51,16 @@ abstract class Filter {
       });
     }
     
+    final void texture_scope(in int i, in void delegate() dg) {
+      glEnable(GL_BLEND);
+      _textures[i].texture_scope(dg);
+      glDisable(GL_BLEND);
+    }
+
     final void create_texture(in int i, in void delegate() dg) {
       attach(i);
       fbo_scope(dg);
     }
-
-    final void texture_scope(in int i, in void delegate() dg) {
-      _textures[i].texture_scope(dg);
-    }
-
-    Texture[] _textures; // privateでいいかも
 
   private:
     void attach(in int i) {
@@ -81,9 +75,7 @@ abstract class Filter {
 
     void fbo_scope(in void delegate() dg) {
       _fbo.binded_scope({
-        //glClearColor(0.0, 0.0, 0.0, 0.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, _w, _h);
         dg();
         glViewport(0, 0, WINDOW_X, WINDOW_Y);
@@ -93,6 +85,7 @@ abstract class Filter {
     FBO _fbo;
     int _w, _h;
     FilterRenderer _renderer;
+    Texture[] _textures;
 }
 
 class BlurFilter : Filter {
@@ -116,6 +109,10 @@ class BlurFilter : Filter {
 
 class GlowFilter : Filter {
   public:
+    this(in int w, in int h) {
+      this(w, h, w, h);
+    }
+
     this(in int w, in int h, in int w2, in int h2) {
       super(2, w, h);
       _blurFilter = new BlurFilter(w2, h2);
@@ -127,7 +124,7 @@ class GlowFilter : Filter {
 
       create_texture(1, { 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE); // Add
+        glBlendFunc(GL_ONE, GL_ONE);
 
         render(0);
         _blurFilter.render();

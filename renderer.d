@@ -225,7 +225,7 @@ class NormalRenderer : Renderer {
     int[] strides = [ 3, 4 ];
     mixin NormalShaderSource;
     init(NormalShader, locNames, strides, DrawMode.Points);
-    //init(NormalShader, locNames, strides, DrawMode.Triangles);
+    //init(NormalShader, locNames, strides, DrawMode.Triangles); // TODO
 
     _ibo = new IBO;
   }

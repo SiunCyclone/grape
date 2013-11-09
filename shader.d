@@ -152,11 +152,17 @@ mixin template TextureShaderSource() {
 
       void main() {
         vec4 smpColor = texture(tex, vTexCoord);
+        //gl_FragColor = smpColor + vec4(1.0, 1.0, 1.0, 0.0);;
+        gl_FragColor = smpColor;
+        //gl_FragColor = smpColor + vec4(0.2, 0.2, 0.2, 0.0);
+        //gl_FragColor = vec4(0.2, 0.2, 0.2, 0.3);
+        /*
         if (smpColor.a < 0.5) {
           discard;
         } else {
           gl_FragColor = smpColor;
         }
+        */
         //gl_FragColor = vColor;
         //gl_FragColor = smpColor + vColor;
         //gl_FragColor = vec4(smpColor.rgb, vColor.a * smpColor.a);
@@ -345,6 +351,7 @@ mixin template FilterShaderSource() {
       void main() {
         vec4 smpColor = texture(tex, vTexCoord);
         gl_FragColor = smpColor;
+        //gl_FragColor = (smpColor.rgb, 0.2);
         //gl_FragColor = smpColor + vec4(0.2, 0.0, 0.0, 1.0);
       }
     };
