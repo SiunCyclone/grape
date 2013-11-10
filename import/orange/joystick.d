@@ -8,13 +8,6 @@ enum {
   MAX_AXIS_STATE = 32767.0
 }
 
-enum {
-  PLAYER_1 = 0,
-  PLAYER_2 = 1,  
-  PLAYER_3 = 2,  
-  PLAYER_4 = 3  
-}
-
 private final class JoystickUnit {
   public:
     this(in int deviceIndex) {

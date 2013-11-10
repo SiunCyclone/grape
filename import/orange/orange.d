@@ -1,5 +1,10 @@
 module orange.orange;
 
+pragma(lib, "DerelictSDL2");
+pragma(lib, "DerelictGL3");
+pragma(lib, "DerelictUtil");
+pragma(lib, "dl");
+
 //public import orange.manager; // deprecated
 public import orange.window;
 public import orange.shader;
