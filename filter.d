@@ -83,19 +83,23 @@ class BlurFilter : Filter {
   public:
     this(in int w, in int h) {
       super(3, w, h);
-      _weightRenderer = new GaussWeightRenderer([w, h]);
-      _heightRenderer = new GaussHeightRenderer([w, h]);
+      _renderer = new GaussianRenderer([w, h]);
     }
 
     override void filter(in void delegate() dg) {
       create_filter(0, dg);
-      create_filter(1, { filter_scope(0, { _weightRenderer.render(); }); });
-      create_filter(2, { filter_scope(1, { _heightRenderer.render(); }); });
+      create_filter(1, { filter_scope(0, {
+        _renderer.set_type(0);
+        _renderer.render(); });
+      });
+      create_filter(2, { filter_scope(1, {
+        _renderer.set_type(1);
+        _renderer.render(); });
+      });
     }
 
   private:
-    GaussWeightRenderer _weightRenderer;
-    GaussHeightRenderer _heightRenderer;
+    GaussianRenderer _renderer;
 }
 
 class GlowFilter : Filter {

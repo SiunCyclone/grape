@@ -103,13 +103,13 @@ class FilterRenderer : Renderer {
     float[] _texCoord;
 }
 
-class GaussHeightRenderer : Renderer {
+class GaussianRenderer : Renderer {
   public:
     this(in float[2] resolution) {
       string[] locNames = [ "pos", "texCoord" ];
       int[] strides = [ 2, 2 ];
-      mixin GaussianYShaderSource;
-      init(GaussianYShader, locNames, strides, DrawMode.Triangles);
+      mixin GaussianShaderSource;
+      init(GaussianShader, locNames, strides, DrawMode.Triangles);
 
       init_vbo();
       init_ibo();
@@ -119,6 +119,11 @@ class GaussHeightRenderer : Renderer {
       set_uniform("tex", 0, "1i");
       set_uniform("weight", weight, "1fv", 8);
       set_uniform("resolution", resolution, "2fv");
+    }
+
+    void set_type(in int type) {
+      _program.use();
+      set_uniform("type", type, "1i");
     }
 
     override void render() {
@@ -139,65 +144,6 @@ class GaussHeightRenderer : Renderer {
       _ibo.create(index);
     }
 
-    // TODO 名前
-    float[8] gauss_weight(in float eRange) {
-      float[8] weight;
-      float t = 0.0;
-      float d = eRange^^2 / 100;
-      for (int i=0; i<weight.length; ++i) {
-        float r = 1.0 + 2.0*i;
-        float w = exp(-0.5 * r^^2 / d);
-        weight[i] = w;
-        if (i > 0) w *= 2.0;
-          t += w;
-      }
-      for (int i=0; i<weight.length; ++i){
-        weight[i] /= t;
-      }
-      return weight;
-    }
-
-    float[] _mesh;
-    float[] _texCoord;
-}
-
-class GaussWeightRenderer : Renderer {
-  public:
-    this(in float[2] resolution) {
-      string[] locNames = [ "pos", "texCoord" ];
-      int[] strides = [ 2, 2 ];
-      mixin GaussianXShaderSource;
-      init(GaussianXShader, locNames, strides, DrawMode.Triangles);
-
-      init_vbo();
-      init_ibo();
-
-      _program.use();
-      float[8] weight = gauss_weight(50.0);
-      set_uniform("tex", 0, "1i");
-      set_uniform("weight", weight, "1fv", 8);
-      set_uniform("resolution", resolution, "2fv");
-    }
-
-    override void render() {
-      _program.use();
-      set_vbo(_mesh, _texCoord);
-      _ibo.draw(_drawMode);
-    }
-
-  private:
-    void init_vbo() {
-      _mesh = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
-      _texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
-    }
-
-    void init_ibo() {
-      int[] index = [ 0, 1, 2, 0, 2, 3 ];
-      _ibo = new IBO;
-      _ibo.create(index);
-    }
-
-    // TODO 名前
     float[8] gauss_weight(in float eRange) {
       float[8] weight;
       float t = 0.0;
