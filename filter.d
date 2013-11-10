@@ -67,9 +67,12 @@ abstract class Filter {
     void fbo_scope(in void delegate() dg) {
       _fbo.binded_scope({
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ZERO); // default blend
         glViewport(0, 0, _w, _h);
         dg();
         glViewport(0, 0, WINDOW_X, WINDOW_Y);
+        glDisable(GL_BLEND);
       });
     }
 
@@ -88,13 +91,17 @@ class BlurFilter : Filter {
 
     override void filter(in void delegate() dg) {
       create_filter(0, dg);
-      create_filter(1, { filter_scope(0, {
-        _renderer.set_type(0);
-        _renderer.render(); });
+      create_filter(1, {
+        filter_scope(0, {
+          _renderer.set_type(0);
+          _renderer.render();
+        });
       });
-      create_filter(2, { filter_scope(1, {
-        _renderer.set_type(1);
-        _renderer.render(); });
+      create_filter(2, {
+        filter_scope(1, {
+          _renderer.set_type(1);
+          _renderer.render();
+        });
       });
     }
 
@@ -118,13 +125,9 @@ class GlowFilter : Filter {
       _blurFilter.filter(dg);
 
       create_filter(1, { 
-        glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-
         render(0);
         _blurFilter.render();
-
-        glDisable(GL_BLEND);
       });
     }
 

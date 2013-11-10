@@ -13,7 +13,6 @@ enum ShaderType {
 }
 
 enum ShaderProgramType {
-  Custom = 1000, // TODO delete
   ClassicNormal = 0,
   ClassicTexture = 1,
   Font = 2,
@@ -257,8 +256,8 @@ mixin template GaussianShaderSource() {
     fShader = q{
       uniform sampler2D tex;
       uniform float weight[8];
-      uniform vec2 resolution;
       uniform int type;
+      uniform vec2 resolution;
       varying vec2 vTexCoord;
 
       void main() {
