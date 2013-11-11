@@ -1,16 +1,18 @@
 Orange
 ======
 
+Orange is a Cross-Platform Game Library for D.
+
 ### Building
 
-##### Requirement
+###### Requirement
 * OpenGL
 * SDL2
 * SDL2TTF
 * SDL2IMAGE
 
-##### Procedure
-`$ORANGE` is the path of the cloned orange directory  
+###### Procedure
+`$ORANGE` is the path of the cloned orange directory.  
 
 1. Clone the repo  
 ```
@@ -45,8 +47,8 @@ Linex:
 $ORANGE/Derelict3/dmd/libDerelictSDL2.a
 $ORANGE/Derelict3/dmd/libDerelictGL3.a
 $ORANGE/Derelict3/dmd/libDerelictUtil.a
--L-ldl
 $ORANGE/lib/libOrange.a
+-L-ldl
 ```
 or
 ```
@@ -54,13 +56,13 @@ or
 -I$ORANGE/import
 -L-L$ORANGE/Derelict3/lib/dmd
 $ORANGE/lib/libOrange.a  
-In your source code:
+------------------------------
+### In your source code ###
 pragma(lib, "DerelictSDL2");
 pragma(lib, "DerelictGL3");
 pragma(lib, "DerelictUtil");
 pragma(lib, "dl");
 ```
-
 Windows:  
 TODO
 
