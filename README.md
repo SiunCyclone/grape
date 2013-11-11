@@ -10,6 +10,7 @@ Orange is a Cross-Platform Game Library for D.
 * SDL2
 * SDL2TTF
 * SDL2IMAGE
+* Git
 
 ###### Procedure
 `$ORANGE` is the path of the cloned orange directory.  
@@ -18,28 +19,13 @@ Orange is a Cross-Platform Game Library for D.
 ```
 git clone git://github.com:pabekkubb/orange.git
 ```
-
-2. Initialize and update the submodule  
+2. Build Orange
 ```
-cd $ORANGE
-git submodule init  
-git submodule update  
-```
-
-3. Build Derelict3  
-```
-cd $ORANGE/Derelict3/build
+cd $ORANGE/build
 dmd build.d
-./build Util GL3 SDL2
+./build
 ```
-
-4. Build Orange  
-```
-cd $ORANGE
-make
-```
-
-5. Add compiler options  
+3. Add compiler options  
 Linex:
 ```
 -I$ORANGE/Derelict3/import
