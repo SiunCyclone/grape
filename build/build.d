@@ -12,8 +12,6 @@ void buildDerelict3() {
     string[] commands;
 
     string directory = "../Derelict3/build";
-    commands ~= "git submodule init";
-    commands ~= "git submodule update";
     commands ~= "dmd -of" ~ directory ~ "/build " ~ directory ~ "/build.d";
     commands ~= directory ~ "/build";
     
