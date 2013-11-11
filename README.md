@@ -1,16 +1,15 @@
 Orange
 ======
 
-Building
---------
+### Building
 
-### Requirement ###  
+##### Requirement
 * OpenGL
 * SDL2
 * SDL2TTF
 * SDL2IMAGE
 
-### Procedure ###  
+##### Procedure
 `$ORANGE` is the path of the cloned orange directory  
 
 1. Clone the repo  
@@ -54,8 +53,7 @@ or
 -I$ORANGE/Derelict3/import
 -I$ORANGE/import
 -L-L$ORANGE/Derelict3/lib/dmd
-$ORANGE/lib/libOrange.a
-
+$ORANGE/lib/libOrange.a  
 In your source code:
 pragma(lib, "DerelictSDL2");
 pragma(lib, "DerelictGL3");
