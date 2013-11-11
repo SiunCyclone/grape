@@ -31,7 +31,7 @@ void buildOrange() {
 
     string target = "-of../lib/libOrange ";
     string ops = "-lib -O -release -inline ";
-    string libs = "-I../Derelict3/import -L-L../Derelict3/lib/dmd ";
+    string libs = "-I../Derelict3/import ";
     string sources = "";
     foreach (file; dirEntries("../import/orange", "*.d", SpanMode.shallow))
       sources ~= file ~ " ";

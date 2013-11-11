@@ -1,0 +1,18 @@
+{
+	"name": "orange",
+	"description": "Cross-Platform Game Library for D",
+  "homepage": "https://github.com/pabekkubb/orange",
+  "license": "MIT",
+	"authors": [
+		"siun"
+	],
+
+	"dependencies": {
+    "derelict:sdl2": "~master",
+    "derelict:opengl3": "~master"
+	},
+
+  "sourcePaths": ["import/orange"],
+  "importPaths": ["import"],
+}
+
