@@ -1,0 +1,28 @@
+{
+  "name": "examples",
+  "description": "Orange examples",
+  "homepage": "https://github.com/pabekkubb/orange",
+  "license": "MIT",
+  "authors": [
+    "siun"
+  ],
+
+	"dependencies": {
+    "derelict:sdl2": "~master",
+    "derelict:opengl3": "~master",
+	},
+
+  "configurations": [
+    {
+      "name": "example",
+      "targetName": "example",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/example.d"],
+    },
+  ],
+
+  "sourcePaths": ["../import/orange"],
+  "importPaths": ["../import"],
+}
+

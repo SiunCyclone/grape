@@ -6,10 +6,6 @@ Orange is a Cross-Platform Game Library for D.
 ### Building
 
 ##### Requirement
-* OpenGL
-* SDL2
-* SDL2TTF
-* SDL2IMAGE
 * Dub or Git
 
 ##### Procedure
@@ -67,5 +63,8 @@ or
   pragma(lib, "dl");
 ```
 Windows:  
+TODO
+
+### API Documentation 
 TODO
 

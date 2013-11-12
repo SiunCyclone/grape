@@ -94,3 +94,4 @@ mixin template JoyEvent() {
     return _event.jaxis.axis;
   }
 }
+
