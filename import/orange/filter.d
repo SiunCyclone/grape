@@ -33,7 +33,7 @@ abstract class Filter {
     abstract void filter(in void delegate());
 
     final void render(int i=-1) {
-      if (i < 0) i = _textures.length - 1;
+      if (i < 0) i = cast(int)_textures.length - 1;
 
       glDisable(GL_DEPTH_TEST);
       filter_scope(i, { _renderer.render(); }); // TODO Specify a drawing area });
