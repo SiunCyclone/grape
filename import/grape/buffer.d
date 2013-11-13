@@ -65,7 +65,7 @@ class VBOHdr {
     }
 
     void create_vbo(in float[][] list...) {
-      assert(list.length == _num);
+      assert(list.length == _num, "Doesn't match the number of vbo attributes");
 
       foreach(int i, data; list)
         _vboList[i].create(data);

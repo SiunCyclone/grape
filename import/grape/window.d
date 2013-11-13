@@ -2,12 +2,11 @@ module grape.window;
 
 import std.exception : enforce;
 import derelict.sdl2.sdl;
-//import opengl.glew;
 import derelict.opengl3.gl3;
 
 import std.stdio;
 
-shared int WINDOW_X; // TODO 変える
+shared int WINDOW_X;
 shared int WINDOW_Y;
 
 enum WindowFlags {
@@ -70,6 +69,18 @@ private final class WindowUnit {
 
 class Window {
   public:
+    this(in int w, in int h) {
+      this("grape", 0, 0, w, h, WindowFlags.OpenGL);
+    }
+
+    this(in string name, in int w, in int h) {
+      this(name, 0, 0, w, h, WindowFlags.OpenGL);
+    }
+
+    this(in string name, in int x, in int y, in int w, in int h) {
+      this(name, x, y, w, h, WindowFlags.OpenGL);
+    }
+
     this(in string name, in int x, in int y, in int w, in int h, in WindowFlags flag) {
       if (!_initialized) {
         _initialized = true;

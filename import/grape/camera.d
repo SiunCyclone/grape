@@ -1,17 +1,21 @@
 module grape.camera;
 
-//import opengl.glew;
-//import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 import std.math;
 import grape.math;
+import grape.window : WINDOW_X, WINDOW_Y;
 
 import std.stdio;
 
 class Camera {
   public :
     this() {
+      Vec3 eye = Vec3(0, 0, 1);
+      Vec3 center = Vec3(0, 0, 0);
+      Vec3 up = Vec3(0, 1, 0);
 
+      perspective(45.0, cast(float)WINDOW_X/WINDOW_Y, 0.1, 100.0);
+      look_at(eye, center, up);
     }
 
     void translate() {
