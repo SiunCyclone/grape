@@ -1,8 +1,8 @@
-module orange.filter;
+module grape.filter;
 
-import orange.buffer;
-import orange.renderer;
-import orange.window;
+import grape.buffer;
+import grape.renderer;
+import grape.window;
 import derelict.opengl3.gl3;
 
 abstract class Filter {

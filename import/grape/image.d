@@ -1,4 +1,4 @@
-module orange.image;
+module grape.image;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
@@ -8,11 +8,11 @@ import std.string;
 import std.file;
 import std.exception : enforce;
 
-import orange.buffer;
-import orange.surface;
-import orange.renderer;
-import orange.shader;
-import orange.window;
+import grape.buffer;
+import grape.surface;
+import grape.renderer;
+import grape.shader;
+import grape.window;
 
 class Image {
   public:

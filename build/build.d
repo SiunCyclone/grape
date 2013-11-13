@@ -4,7 +4,7 @@ import std.stdio;
 
 void main() {
   buildDerelict3();
-  buildOrange();
+  buildGrape();
 }
 
 void buildDerelict3() {
@@ -23,15 +23,15 @@ void buildDerelict3() {
   }
 }
 
-void buildOrange() {
+void buildGrape() {
   try {
     string[] commands;
 
-    string target = "-of../lib/libOrange ";
+    string target = "-of../lib/libGrape";
     string ops = "-lib -O -release -inline ";
     string libs = "-I../Derelict3/import ";
     string sources = "";
-    foreach (file; dirEntries("../import/orange", "*.d", SpanMode.shallow))
+    foreach (file; dirEntries("../import/grape", "*.d", SpanMode.shallow))
       sources ~= file ~ " ";
     commands ~= "dmd " ~ ops ~ target ~ sources ~ libs;
 
@@ -39,7 +39,7 @@ void buildOrange() {
   }
 
   catch (Exception e) {
-    writeln("buildOrange() failed");
+    writeln("buildGrape() failed");
   }
 }
 

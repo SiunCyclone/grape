@@ -1,7 +1,7 @@
 {
   "name": "examples",
-  "description": "Orange examples",
-  "homepage": "https://github.com/pabekkubb/orange",
+  "description": "Grape examples",
+  "homepage": "https://github.com/pabekkubb/grape",
   "license": "MIT",
   "authors": [
     "siun"
@@ -22,7 +22,7 @@
     },
   ],
 
-  "sourcePaths": ["../import/orange"],
+  "sourcePaths": ["../import/grape"],
   "importPaths": ["../import"],
 }
 

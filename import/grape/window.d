@@ -1,4 +1,4 @@
-module orange.window;
+module grape.window;
 
 import std.exception : enforce;
 import derelict.sdl2.sdl;

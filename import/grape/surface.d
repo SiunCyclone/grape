@@ -1,4 +1,4 @@
-module orange.surface;
+module grape.surface;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;

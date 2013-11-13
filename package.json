@@ -1,7 +1,7 @@
 {
-	"name": "orange",
+	"name": "grape",
 	"description": "Cross-Platform Game Library for D",
-  "homepage": "https://github.com/pabekkubb/orange",
+  "homepage": "https://github.com/pabekkubb/grape",
   "license": "MIT",
 	"authors": [
 		"siun"
@@ -12,7 +12,7 @@
     "derelict:opengl3": "~master",
 	},
 
-  "sourcePaths": ["import/orange"],
+  "sourcePaths": ["import/grape"],
   "importPaths": ["import"],
 }
 

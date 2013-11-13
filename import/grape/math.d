@@ -1,4 +1,4 @@
-module orange.math;
+module grape.math;
 
 import std.math;
 

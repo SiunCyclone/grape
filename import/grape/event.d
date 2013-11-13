@@ -1,4 +1,4 @@
-module orange.event;
+module grape.event;
 
 import derelict.sdl2.sdl;
 

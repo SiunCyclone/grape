@@ -1,4 +1,4 @@
-module orange.shader;
+module grape.shader;
 
 import std.exception : enforce;
 //import opengl.glew;

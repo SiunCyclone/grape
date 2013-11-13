@@ -1,10 +1,10 @@
-module orange.camera;
+module grape.camera;
 
 //import opengl.glew;
 //import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 import std.math;
-import orange.math;
+import grape.math;
 
 import std.stdio;
 
@@ -26,7 +26,7 @@ class Camera {
     }
 
     void perspective(in float fovy, in float aspect, in float znear, in float zfar) {
-      // translate to orange.math
+      // translate to grape.math
       auto cot = delegate float(float x){ return 1 / tan(x); };
       auto f = cot(fovy/2);
 

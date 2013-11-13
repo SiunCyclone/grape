@@ -1,4 +1,4 @@
-module orange.font;
+module grape.font;
 
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
@@ -12,11 +12,11 @@ import std.array;
 import std.conv;
 import std.file;
 
-import orange.buffer;
-import orange.shader;
-import orange.window;
-import orange.surface;
-import orange.renderer;
+import grape.buffer;
+import grape.shader;
+import grape.window;
+import grape.surface;
+import grape.renderer;
 
 static immutable auto FontSizeList = [ 6, 7, 8, 9, 10, 11, 12, 13, 14,
                                        15, 16, 17, 18, 20, 22, 24, 26,

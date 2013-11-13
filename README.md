@@ -1,7 +1,7 @@
-Orange
+Grape
 ======
 
-Orange is a Cross-Platform Game Library for D.
+Grape is a Cross-Platform Game Library for D.
 
 ### Building
 
@@ -15,25 +15,25 @@ Orange is a Cross-Platform Game Library for D.
 ```
 {
     "dependencies": {
-        "orange": "~master"
+        "grape": "~master"
     }
 }
 ```
 
 ###### -- Another way (Require Git)  
 
-`$ORANGE` is the path of the cloned orange directory.  
+`$GRAPE` is the path of the cloned grape directory.  
 
 1, Clone the repos  
 ```
-  git clone git://github.com:pabekkubb/orange.git
-  cd $ORANGE
+  git clone git://github.com:pabekkubb/grape.git
+  cd $GRAPE
   git clone git://github.com/aldacron/Derelict3
 ```
 
-2, Build Orange
+2, Build Grape and Derelict3
 ```
-  cd $ORANGE/build
+  cd $GRAPE/build
   dmd build.d
   ./build
 ```
@@ -41,20 +41,20 @@ Orange is a Cross-Platform Game Library for D.
 3, Add compiler options  
 Linex:
 ```d
-  -I$ORANGE/Derelict3/import
-  -I$ORANGE/import
-  $ORANGE/Derelict3/dmd/libDerelictSDL2.a
-  $ORANGE/Derelict3/dmd/libDerelictGL3.a
-  $ORANGE/Derelict3/dmd/libDerelictUtil.a
-  $ORANGE/lib/libOrange.a
+  -I$GRAPE/Derelict3/import
+  -I$GRAPE/import
+  $GRAPE/Derelict3/dmd/libDerelictSDL2.a
+  $GRAPE/Derelict3/dmd/libDerelictGL3.a
+  $GRAPE/Derelict3/dmd/libDerelictUtil.a
+  $GRAPE/lib/libGrape.a
   -L-ldl
 ```
 or
 ```d
-  -I$ORANGE/Derelict3/import
-  -I$ORANGE/import
-  -L-L$ORANGE/Derelict3/lib/dmd
-  $ORANGE/lib/libOrange.a  
+  -I$GRAPE/Derelict3/import
+  -I$GRAPE/import
+  -L-L$GRAPE/Derelict3/lib/dmd
+  $GRAPE/lib/libGrape.a  
   ------------------------------
   ### In your source code ###
   pragma(lib, "DerelictSDL2");

@@ -1,4 +1,4 @@
-module orange.joystick;
+module grape.joystick;
 
 import derelict.sdl2.sdl;
 import std.exception : enforce;

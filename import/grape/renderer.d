@@ -1,8 +1,8 @@
-module orange.renderer;
+module grape.renderer;
 
-import orange.buffer;
-import orange.shader;
-import orange.window;
+import grape.buffer;
+import grape.shader;
+import grape.window;
 
 import std.stdio;
 import std.math;
