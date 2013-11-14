@@ -477,7 +477,7 @@ deprecated class FBOHdr {
         _ibo.draw(DrawMode.Triangles); 
       });
 
-      glViewport(0, 0, WINDOW_X, WINDOW_Y);
+      glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
   private:
@@ -571,7 +571,7 @@ deprecated class GaussHdr {
         _ibo.draw(drawMode); 
       });
 
-      glViewport(0, 0, WINDOW_X, WINDOW_Y);
+      glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
   private:

@@ -165,10 +165,10 @@ class FontRenderer : Renderer {
     }
 
     float[12] set_pos(in float x, in float y) {
-      auto startX = x / (WINDOW_X/2.0);
-      auto startY = y / (WINDOW_Y/2.0);
-      auto w = _font.texture.w / (WINDOW_X/2.0);
-      auto h = _font.texture.h / (WINDOW_Y/2.0);
+      auto startX = x / (WINDOW_WIDTH/2.0);
+      auto startY = y / (WINDOW_HEIGHT/2.0);
+      auto w = _font.texture.w / (WINDOW_WIDTH/2.0);
+      auto h = _font.texture.h / (WINDOW_HEIGHT/2.0);
 
       return [ startX, startY, 0.0,
                startX+w, startY, 0.0,

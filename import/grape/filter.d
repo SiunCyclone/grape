@@ -75,7 +75,7 @@ abstract class Filter {
         glBlendFunc(GL_ONE, GL_ZERO); // default blend
         glViewport(0, 0, _w, _h);
         dg();
-        glViewport(0, 0, WINDOW_X, WINDOW_Y);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         glDisable(GL_BLEND);
       });
     }
@@ -164,7 +164,7 @@ class Filter {
         //glClearColor(0, 0, 0, 0.5);
         glViewport(0, 0, _w, _h);
         dg();
-        glViewport(0, 0, WINDOW_X, WINDOW_Y);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
       });
     }
 

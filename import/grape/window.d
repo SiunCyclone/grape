@@ -6,8 +6,8 @@ import derelict.opengl3.gl3;
 
 import std.stdio;
 
-shared int WINDOW_X;
-shared int WINDOW_Y;
+shared int WINDOW_WIDTH;
+shared int WINDOW_HEIGHT;
 
 enum WindowFlags {
   FullScreen = SDL_WINDOW_FULLSCREEN,
@@ -90,8 +90,8 @@ class Window {
           throw new Exception("SDL_InitSubSystem(SDL_INIT_VIDEO) failed");
       }
 
-      WINDOW_X = w;
-      WINDOW_Y = h;
+      WINDOW_WIDTH = w;
+      WINDOW_HEIGHT = h;
       _window = new WindowUnit(name, x, y, w, h, flag);
 
       _instance ~= this;

@@ -5,6 +5,12 @@ import std.stdio;
 
 struct Vec3 {
   public:
+    this() {
+      _x = 1;
+      _y = 1;
+      _z = 1;
+    }
+
     this(in float x, in float y, in float z) {
       set(x, y, z);
     }
@@ -34,6 +40,10 @@ struct Vec3 {
         return _z;
       }
 
+      float magnitude() {
+        return sqrt(pow(_x, 2) + pow(_y, 2) + pow(_z, 2));
+      }
+
       void normalize() {
         auto m = magnitude();
         if (m == 0) return;
@@ -41,16 +51,12 @@ struct Vec3 {
         _y = _y / m;
         _z = _z / m;
       }
-
-      float magnitude() {
-        return sqrt(pow(_x, 2) + pow(_y, 2) + pow(_z, 2));
-      }
     }
 
   private:
-    float _x = 1;
-    float _y = 1;
-    float _z = 1;
+    float _x;
+    float _y;
+    float _z;
 }
 
 struct Mat4 {

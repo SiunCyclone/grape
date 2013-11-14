@@ -4,7 +4,7 @@ import std.math;
 import std.stdio;
 import derelict.opengl3.gl3;
 import grape.math;
-import grape.window : WINDOW_X, WINDOW_Y;
+import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 
 class Camera {
   public :
@@ -13,7 +13,7 @@ class Camera {
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
 
-      perspective(45.0, cast(float)WINDOW_X/WINDOW_Y, 0.1, 100.0);
+      perspective(45.0, cast(float)WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100.0);
       look_at(eye, center, up);
     }
 

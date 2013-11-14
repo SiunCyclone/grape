@@ -33,6 +33,8 @@ void main() {
   while (loop) {
     Input.poll();
 
+    camera.rotate();
+
     renderer.set_uniform("pvmMatrix", camera.pvMat4.mat, "mat4fv");
     renderer.render();
 
