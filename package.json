@@ -1,16 +1,16 @@
 {
-	"name": "grape",
-	"description": "Cross-Platform Game Library for D",
+  "name": "grape",
+  "description": "Cross-Platform Game Library for D",
   "homepage": "https://github.com/pabekkubb/grape",
   "license": "MIT",
-	"authors": [
-		"siun"
-	],
+  "authors": [
+    "siun"
+  ],
 
-	"dependencies": {
+  "dependencies": {
     "derelict:sdl2": "~master",
     "derelict:opengl3": "~master",
-	},
+  },
 
   "sourcePaths": ["import/grape"],
   "importPaths": ["import"],

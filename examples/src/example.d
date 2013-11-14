@@ -5,8 +5,11 @@ import grape.window;
 import grape.camera;
 import grape.renderer;
 import grape.filter;
+import grape.input;
 import grape.math;
+import grape.keyboard;
 import derelict.opengl3.gl3;
+//import derelict.sdl2.sdl;
 
 void main() { 
   int width = 800;
@@ -39,17 +42,33 @@ void main() {
   }
   */
 
-  int cnt = 0;
+  bool running = true;
 
-  while (1) {
-    ++cnt;
-    if (cnt > 150) break;
+  Input.key_down(KEY_Q, {
+    running = false;
+  });
+
+  /*
+  Input.axis_move(number, {
+
+  });
+
+  Input.button_down(number, {
+
+  });
+
+  Input.hat_down(direction, {
+
+  });
+  */
+
+  while (running) {
+    Input.poll();
 
     renderer.set_uniform("pvmMatrix", camera.pvMat4.mat, "mat4fv");
     renderer.set_ibo(index);
     renderer.set_vbo(coords, color);
 
-    //renderer.render();
     filter.filter({
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       renderer.render();
@@ -59,4 +78,3 @@ void main() {
     window.update();
   }
 }
-

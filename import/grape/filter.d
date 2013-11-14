@@ -7,7 +7,7 @@ import derelict.opengl3.gl3;
 
 abstract class Filter {
   public:
-    this(in int num, in int w, in int h) {
+    this(in size_t num, in int w, in int h) {
       _w = w;
       _h = h;
       _fbo = new FBO;
@@ -32,15 +32,19 @@ abstract class Filter {
 
     abstract void filter(in void delegate());
 
-    final void render(int i=-1) {
-      if (i < 0) i = cast(int)_textures.length - 1;
+    final void render() {
+      render(_textures.length-1);
+    }
+
+    final void render(in size_t i) {
+      assert(i < _textures.length);
 
       glDisable(GL_DEPTH_TEST);
       filter_scope(i, { _renderer.render(); }); // TODO Specify a drawing area });
       glEnable(GL_DEPTH_TEST);
     }
 
-    final void filter_scope(in int i, in void delegate() dg) {
+    final void filter_scope(in size_t i, in void delegate() dg) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
       _textures[i].texture_scope(dg);

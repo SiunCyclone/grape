@@ -57,7 +57,7 @@ class Binder {
 // TODO name
 class VBOHdr {
   public:
-    this(in int num, in GLuint program) {
+    this(in size_t num, in GLuint program) {
       _num = num;
       _vboList.length = _num;
       for (int i; i<_num; ++i)
@@ -84,7 +84,7 @@ class VBOHdr {
     }
 
   private:
-    int _num;
+    size_t _num;
     VBO[] _vboList;
 }
 
