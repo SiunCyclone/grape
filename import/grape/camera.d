@@ -1,11 +1,10 @@
 module grape.camera;
 
-import derelict.opengl3.gl3;
 import std.math;
+import std.stdio;
+import derelict.opengl3.gl3;
 import grape.math;
 import grape.window : WINDOW_X, WINDOW_Y;
-
-import std.stdio;
 
 class Camera {
   public :
@@ -26,7 +25,12 @@ class Camera {
 
     }
 
+    void scale() {
+
+    }
+
     void ortho() {
+
     }
 
     void perspective(in float fovy, in float aspect, in float znear, in float zfar) {
@@ -38,6 +42,10 @@ class Camera {
                  0, f, 0, 0,
                  0, 0, (zfar+znear)/(znear-zfar), -1,
                  0, 0, (2*zfar*znear)/(znear-zfar), 0 );
+    }
+
+    void viewport(in int x, in int y, in int w, in int h) {
+      glViewport(x, y, w, h);
     }
 
     void look_at(Vec3 eye, Vec3 center, Vec3 up) {

@@ -1,7 +1,6 @@
 module grape.math;
 
 import std.math;
-
 import std.stdio;
 
 struct Vec3 {
@@ -139,3 +138,4 @@ struct Mat4 {
   private:
     float[16] _mat;
 }
+

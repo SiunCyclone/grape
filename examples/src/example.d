@@ -10,6 +10,8 @@ void main() {
   Window window = new Window("example", width, height);
 
   Camera camera = new Camera;
+  camera.viewport(0, 0, width/2, height/2);
+
   NormalRenderer renderer = new NormalRenderer;
 
   float[] coords = [ -0.5, -0.5, 0.0,
