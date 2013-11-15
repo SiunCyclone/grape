@@ -5,12 +5,6 @@ import std.stdio;
 
 struct Vec3 {
   public:
-    this() {
-      _x = 1;
-      _y = 1;
-      _z = 1;
-    }
-
     this(in float x, in float y, in float z) {
       set(x, y, z);
     }
@@ -143,5 +137,51 @@ struct Mat4 {
 
   private:
     float[16] _mat;
+}
+
+struct Quaternion {
+  public:
+
+  private:
+}
+
+struct Manipulator {
+  public:
+    void forward(in float distance) {
+    }
+
+    void back(in float distance) {
+    }
+
+    void up(in float distance) {
+    }
+
+    void down(in float distance) {
+    }
+
+    void right(in float distance) {
+    }
+
+    void left(in float distance) {
+    }
+
+    void pitch(in float rad) {
+    }
+
+    void yaw(in float rad) {
+    }
+
+    void roll(in float rad) {
+    }
+
+    void translate(in Vec3 axis, in float distance) {
+    }
+
+    void rotate(in Vec3 axis, in float rad) {
+    }
+
+  private:
+    Quaternion _quat;
+    Quaternion _cquat;
 }
 

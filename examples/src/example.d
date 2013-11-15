@@ -2,7 +2,6 @@ import grape.window;
 import grape.camera;
 import grape.renderer;
 import grape.input;
-import grape.keyboard;
 
 void main() { 
   int width = 640;
@@ -11,7 +10,7 @@ void main() {
 
   Camera camera = new Camera;
   camera.viewport(0, 0, width/2, height/2);
-
+  
   NormalRenderer renderer = new NormalRenderer;
 
   float[] coords = [ -0.5, -0.5, 0.0,

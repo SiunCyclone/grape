@@ -74,12 +74,6 @@ class Camera {
     Mat4 _proj, _view;
 }
 
-struct Quaternion {
-  public:
-
-  private:
-}
-
 /*
 class Camera {
 	public:

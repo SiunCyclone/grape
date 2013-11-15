@@ -1,8 +1,9 @@
 module grape.input;
 
 import std.stdio;
-import grape.event;
 import derelict.sdl2.sdl;
+import grape.event;
+public import grape.keyboard;
 
 class Input {
   public:
