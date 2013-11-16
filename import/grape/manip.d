@@ -18,12 +18,12 @@ struct CoordinateSystem {
 
 struct Manipulator {
   public:
-    this(in Quat vertex) {
+    this(Quat vertex) {
       add(vertex);
     }
 
-    this(in Quat[] vertices) {
-      _vertices = vertices.dup;
+    this(Quat[] vertices) {
+      _vertices = vertices;
     }
 
     this(in Vec3 vertex) {
@@ -35,7 +35,7 @@ struct Manipulator {
     this(in float[] vertices) {
     } 
 
-    void add(in Quat vertex) {
+    void add(Quat vertex) {
       _vertices ~= vertex;
     }
 
@@ -76,6 +76,12 @@ struct Manipulator {
     }
 
     void scale() {
+    }
+
+    @property {
+      Quat[] vertices() {
+        return _vertices;
+      }
     }
 
   private:

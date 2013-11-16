@@ -4,6 +4,7 @@ import std.math;
 import std.stdio;
 import derelict.opengl3.gl3;
 import grape.math;
+import grape.manip;
 import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 
 class Camera {
@@ -44,10 +45,6 @@ class Camera {
                  0, 0, (2*zfar*znear)/(znear-zfar), 0 );
     }
 
-    void viewport(in int x, in int y, in int w, in int h) {
-      glViewport(x, y, w, h);
-    }
-
     void look_at(Vec3 eye, Vec3 center, Vec3 up) {
       Vec3 f = Vec3(center.x-eye.x, center.y-eye.y, center.z-eye.z);
 
@@ -70,6 +67,7 @@ class Camera {
     }
 
   private:
+    Manip _manip;
     Quaternion _quat;
     Mat4 _proj, _view;
 }

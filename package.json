@@ -9,10 +9,10 @@
 
   "dependencies": {
     "derelict:sdl2": "~master",
-    "derelict:opengl3": "~master",
+    "derelict:opengl3": "~master"
   },
 
   "sourcePaths": ["import/grape"],
-  "importPaths": ["import"],
+  "importPaths": ["import"]
 }
 

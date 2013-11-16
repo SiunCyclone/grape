@@ -2,6 +2,7 @@ module grape.window;
 
 import std.exception : enforce;
 import derelict.sdl2.sdl;
+import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 
 import std.stdio;
@@ -52,10 +53,6 @@ private final class WindowUnit {
 
   private:
     void load_opengl() {
-      // TODO 必要なときだけglを読み込む
-      import derelict.opengl3.gl;
-      import derelict.opengl3.gl3;
-
       DerelictGL.load();
       DerelictGL.reload(); // You must create OpenGL Context before calling this function
       DerelictGL3.load();
@@ -114,6 +111,10 @@ class Window {
       _window.swap();
       // other
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void viewport(in int x, in int y, in int w, in int h) {
+      glViewport(x, y, w, h);
     }
 
   private:

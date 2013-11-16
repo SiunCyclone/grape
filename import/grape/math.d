@@ -10,47 +10,47 @@ struct Vec3 {
     }
 
     void set(in float x, in float y, in float z) {
-      _x = x;
-      _y = y;
-      _z = z;
+      _coord = [x, y, z];
     }
 
-    Vec3 cross(Vec3 vec) {
-      return Vec3( _y*vec.z - _z*vec.y,
-                   _z*vec.x - _x*vec.z,
-                   _x*vec.y - _y*vec.x );
+    float dot(Vec3 vec3) {
+      return ( _coord[0]*vec3.x + _coord[1]*vec3.y + _coord[2]*vec3.z );
+    }
+
+    Vec3 cross(Vec3 vec3) {
+      return Vec3( _coord[1]*vec3.z - _coord[2]*vec3.y,
+                   _coord[2]*vec3.x - _coord[0]*vec3.z,
+                   _coord[0]*vec3.y - _coord[1]*vec3.x );
     }
 
     @property {
       float x() {
-        return _x;
+        return _coord[0];
       }
 
       float y() {
-        return _y;
+        return _coord[1];
       }
 
       float z() {
-        return _z;
+        return _coord[2];
       }
 
       float magnitude() {
-        return sqrt(pow(_x, 2) + pow(_y, 2) + pow(_z, 2));
+        return sqrt(pow(_coord[0], 2) + pow(_coord[1], 2) + pow(_coord[2], 2));
       }
 
       void normalize() {
         auto m = magnitude();
         if (m == 0) return;
-        _x = _x / m;
-        _y = _y / m;
-        _z = _z / m;
+        _coord[0] = _coord[0] / m;
+        _coord[1] = _coord[1] / m;
+        _coord[2] = _coord[2] / m;
       }
     }
 
   private:
-    float _x;
-    float _y;
-    float _z;
+    float[3] _coord;
 }
 
 struct Mat4 {
@@ -142,10 +142,31 @@ struct Mat4 {
 struct Quaternion {
   public:
     this(in float rad, Vec3 vec3) {
+      set(rad, vec3);
+    }
 
+    void set(in float rad, Vec3 vec3) {
+      _rad = rad;
+      _vec3 = vec3;
+    }
+
+    void multiply(Quat quat) {
+      _rad = _rad*quat.rad - _vec3.dot(quat.vec3);
+    }
+
+    @property {
+      float rad() {
+        return _rad;
+      }
+
+      Vec3 vec3() {
+        return _vec3;
+      }
     }
 
   private:
+    float _rad;
+    Vec3 _vec3;
 }
 
 alias Quaternion Quat;
