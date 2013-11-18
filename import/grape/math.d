@@ -5,8 +5,30 @@ import std.stdio;
 
 struct Vec3 {
   public:
+    this(in float[] coord) {
+      this(coord[0], coord[1], coord[2]);
+    }
+    
     this(in float x, in float y, in float z) {
       set(x, y, z);
+    }
+
+    Vec3 opBinary(string op)(Vec3 vec3) if (op == "+") {
+      auto tmp = new float[_coord.length];
+      tmp[] = _coord[] + vec3.coord[];
+      auto result = Vec3(tmp);
+      return result;
+    }
+
+    Vec3 opBinary(string op)(float ratio) if (op == "*") {
+      auto tmp = new float[_coord.length];
+      tmp[] = _coord[] * ratio;
+      auto result = Vec3(tmp);
+      return result;
+    }
+
+    Vec3 opBinaryRight(string op)(float ratio) if (op == "*") {
+      return opBinary!op(ratio);
     }
 
     void set(in float x, in float y, in float z) {
@@ -24,6 +46,10 @@ struct Vec3 {
     }
 
     @property {
+      float[3] coord() {
+        return _coord;
+      }
+
       float x() {
         return _coord[0];
       }
@@ -146,12 +172,15 @@ struct Quaternion {
     }
 
     void set(in float rad, Vec3 vec3) {
-      _rad = rad;
-      _vec3 = vec3;
+      _rad = cos(rad / 2);
+      _vec3 = Vec3( vec3.x * sin(rad / 2),
+                    vec3.y * sin(rad / 2),
+                    vec3.z * sin(rad / 2) );
     }
 
     void multiply(Quat quat) {
       _rad = _rad*quat.rad - _vec3.dot(quat.vec3);
+      _vec3 = _rad*quat.vec3 + quat.rad*_vec3 + _vec3.cross(quat.vec3);
     }
 
     @property {
