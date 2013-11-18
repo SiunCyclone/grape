@@ -3,6 +3,10 @@ import grape.camera;
 import grape.renderer;
 import grape.input;
 
+import grape.math;
+import std.math;
+import std.stdio;
+
 void main() { 
   int width = 640;
   int height = 480;
@@ -31,7 +35,7 @@ void main() {
   while (loop) {
     Input.poll();
 
-    camera.rotate();
+    camera.rotate(Vec3(0,1,0), PI_2 / 180.0);
 
     renderer.set_uniform("pvmMatrix", camera.pvMat4.mat, "mat4fv");
     renderer.render();

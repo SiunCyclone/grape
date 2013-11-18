@@ -1,39 +1,27 @@
 module grape.manip;
 
+import std.stdio;
 import grape.math;
 
 struct CoordinateSystem {
   void reset() {
-    origin = Quat(0.0, Vec3(0, 0, 0));
-    x = Quat(0.0, Vec3(1, 0, 0));
-    y = Quat(0.0, Vec3(0, 1, 0));
-    z = Quat(0.0, Vec3(0, 0, 1));
+    origin = Quat(Vec3(0, 0, 0));
+    x = Quat(Vec3(1, 0, 0));
+    y = Quat(Vec3(0, 1, 0));
+    z = Quat(Vec3(0, 0, 1));
   }
 
-  Quat origin = Quat(0.0, Vec3(0, 0, 0));
-  Quat x = Quat(0.0, Vec3(1, 0, 0));
-  Quat y = Quat(0.0, Vec3(0, 1, 0));
-  Quat z = Quat(0.0, Vec3(0, 0, 1));
+  Quat origin = Quat(Vec3(0, 0, 0));
+  Quat x = Quat(Vec3(1, 0, 0));
+  Quat y = Quat(Vec3(0, 1, 0));
+  Quat z = Quat(Vec3(0, 0, 1));
 }
 
 struct Manipulator {
   public:
-    this(Quat vertex) {
-      add(vertex);
+    this(Vec3 vec3) {
+      _localCS.origin = Quat(vec3);
     }
-
-    this(Quat[] vertices) {
-      _vertices = vertices;
-    }
-
-    this(in Vec3 vertex) {
-    } 
-
-    this(in Vec3[] vertices) {
-    } 
-
-    this(in float[] vertices) {
-    } 
 
     void add(Quat vertex) {
       _vertices ~= vertex;
@@ -73,12 +61,25 @@ struct Manipulator {
     }
 
     void rotate(in Vec3 axis, in float rad) {
+      auto quat = Quat(axis, rad);
+
+      // _localCS.originの回転 
+      auto result = quat.conjugate * _localCS.origin * quat;
+      _localCS.origin = result;
+
+
+      // _localCS.xyzの回転 
+      // _verticesの回転
     }
 
     void scale() {
     }
 
     @property {
+      Quat origin() {
+        return _localCS.origin;
+      }
+
       Quat[] vertices() {
         return _vertices;
       }
@@ -86,8 +87,6 @@ struct Manipulator {
 
   private:
     CoordinateSystem _localCS;
-    Quat _quat;
-    Quat _cquat;
     Quat[] _vertices;
 }
 

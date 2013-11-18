@@ -169,20 +169,28 @@ struct Mat4 {
 struct Quaternion {
   public:
     this(Vec3 vec3) {
-      set(0.0, vec3);
+      set(vec3, 0.0);
     }
 
-    this(in float rad, Vec3 vec3) {
-      rotate(rad, vec3);
+    this(Vec3 vec3, in float rad) {
+      rotate(vec3, rad);
     }
 
-    void set(in float rad, Vec3 vec3) {
+    Quat opBinary(string op)(Quat quat) if (op == "*") {
+      auto rad = _rad*quat.rad - _vec3.dot(quat.vec3);
+      auto vec3 = _rad*quat.vec3 + quat.rad*_vec3 + _vec3.cross(quat.vec3);
+      Quat result;
+      result.set(vec3, rad);
+      return result;
+    }
+
+    void set(Vec3 vec3, in float rad) {
       _rad = rad;
       _vec3 = vec3;
     }
 
     // TODO Name
-    void rotate(in float rad, Vec3 vec3) {
+    void rotate(Vec3 vec3, in float rad) {
       vec3.normalize;
 
       _rad = cos(rad / 2);
@@ -191,29 +199,24 @@ struct Quaternion {
                     vec3.z * sin(rad / 2) );
     }
 
-    void multiply(Quat quat) {
-      _rad = _rad*quat.rad - _vec3.dot(quat.vec3);
-      _vec3 = _rad*quat.vec3 + quat.rad*_vec3 + _vec3.cross(quat.vec3);
-    }
-
-    Quat conjugate() {
-      Quat quat;
-      quat.set(rad, Vec3(-_vec3.x, -_vec3.y, -_vec3.z)); // TODO
-      return quat;
-    }
-
-    Mat4 to_mat4() {
-      auto x = _vec3.x;
-      auto y = _vec3.y;
-      auto z = _vec3.z;
-      auto w = _rad;
-      return Mat4( 1-2*y^^2-2*z^^2, 2*x*y-2*w*z, 2*x*z+2*w*y, 0,
-                   2*x*y+2*w*z, 1-2*x^^2-2*z^^2, 2*y*z-2*w*x, 0,
-                   2*x*z-2*w*y, 2*y*z+2*w*x, 1-2*x^^2-2*y^^2, 0,
-                   0, 0, 0, 1 );
-    }
-
     @property {
+      Quat conjugate() {
+        Quat quat;
+        quat.set(Vec3(-_vec3.x, -_vec3.y, -_vec3.z), rad); // TODO
+        return quat;
+      }
+
+      Mat4 to_mat4() {
+        auto x = _vec3.x;
+        auto y = _vec3.y;
+        auto z = _vec3.z;
+        auto w = _rad;
+        return Mat4( 1-2*y^^2-2*z^^2, 2*x*y-2*w*z, 2*x*z+2*w*y, 0,
+                     2*x*y+2*w*z, 1-2*x^^2-2*z^^2, 2*y*z-2*w*x, 0,
+                     2*x*z-2*w*y, 2*y*z+2*w*x, 1-2*x^^2-2*y^^2, 0,
+                     0, 0, 0, 1 );
+      }
+
       float rad() {
         return _rad;
       }
