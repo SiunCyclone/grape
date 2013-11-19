@@ -1,6 +1,6 @@
 module grape.math;
 
-import std.math;
+public import std.math;
 import std.stdio;
 import std.algorithm;
 

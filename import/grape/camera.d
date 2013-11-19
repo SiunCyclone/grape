@@ -8,9 +8,6 @@ import grape.manip;
 import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 
 class Camera {
-  Manip _manip;
-  alias _manip this;
-
   public :
     this() {
       Vec3 eye = Vec3(0, 0, 1);
@@ -19,25 +16,21 @@ class Camera {
 
       perspective(45.0, cast(float)WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100.0);
       look_at(eye, center, up);
+    }
 
-      _manip = Manip(eye);
+    void translate() {
+    }
+
+    void rotate(Vec3 vec3, in float rad) {
+      _manip.rotate(vec3, rad); 
+      look_at(_manip.origin.vec3, _center, _manip.vertices[0].vec3);
     }
 
     /*
-    void translate() {
-
-    }
-
-    void rotate() {
-
-    }
-
     void scale() {
-
     }
 
     void ortho() {
-
     }
     */
 
@@ -53,6 +46,8 @@ class Camera {
     }
 
     void look_at(Vec3 eye, Vec3 center, Vec3 up) {
+      set(eye, center, up);
+
       Vec3 f = Vec3(center.x-eye.x, center.y-eye.y, center.z-eye.z);
 
       f.normalize;
@@ -69,13 +64,20 @@ class Camera {
 
     @property {
       Mat4 pvMat4() {
-        //return _proj.multiply(_view);
-        return _manip.origin.to_mat4;
+        return _proj.multiply(_view);
       }
     }
 
   private:
+    void set(Vec3 eye, Vec3 center, Vec3 up) {
+      _manip = Manip(eye); // TODO 毎回作ってる
+      _center = center;
+      _manip.add(up); // TODO Manipを毎回作ってないと危険
+    }
+
     Mat4 _proj, _view;
+    Vec3 _center;
+    Manip _manip;
 }
 
 /*

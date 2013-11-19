@@ -2,22 +2,18 @@ import grape.window;
 import grape.camera;
 import grape.renderer;
 import grape.input;
-
 import grape.math;
-import std.math;
-import std.stdio;
 
 void main() { 
   int width = 640;
   int height = 480;
   Window window = new Window("title", width, height);
-  //window.viewport(0, 0, width/2, height/2);
 
   Camera camera = new Camera;
-  NormalRenderer renderer = new NormalRenderer;
+  BasicRenderer renderer = new BasicRenderer;
 
-  float[] coords = [ -0.5, -0.5, 0.0,
-                     0.5, -0.5, 0.0,
+  float[] coords = [ -0.4, -0.3, 0.0,
+                     0.4, -0.3, 0.0,
                      0.0, 0.5, 0.0 ];
   float[] color = [ 1.0, 0.0, 0.0, 1.0,
                     0.0, 1.0, 0.0, 1.0,
@@ -32,10 +28,13 @@ void main() {
     loop = false;
   });
 
+  Vec3 axis = Vec3(0, 1, 0);
+  float rad = PI_2 / 180.0;
+
   while (loop) {
     Input.poll();
 
-    camera.rotate(Vec3(0,1,0), PI_2 / 180.0);
+    camera.rotate(axis, rad);
 
     renderer.set_uniform("pvmMatrix", camera.pvMat4.mat, "mat4fv");
     renderer.render();

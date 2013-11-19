@@ -23,8 +23,8 @@ struct Manipulator {
       _localCS.origin = Quat(vec3);
     }
 
-    void add(Quat vertex) {
-      _vertices ~= vertex;
+    void add(Vec3 vec3) {
+      _vertices ~= Quat(vec3);
     }
 
     void remove() {
@@ -66,7 +66,6 @@ struct Manipulator {
       // _localCS.originの回転 
       auto result = quat.conjugate * _localCS.origin * quat;
       _localCS.origin = result;
-
 
       // _localCS.xyzの回転 
       // _verticesの回転
