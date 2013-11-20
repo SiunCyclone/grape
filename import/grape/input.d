@@ -5,8 +5,18 @@ import derelict.sdl2.sdl;
 import grape.event;
 public import grape.keyboard;
 
+/**
+ * ユーザーの入力を管理するクラス
+ *
+ * キーボード、ジョイパッド、マウス等のイベントは全てこのクラスが管理します。
+ */
 class Input {
   public:
+    /**
+     * 入力をpollし、実行
+     *
+     * 毎フレーム呼ぶことが推奨されます。
+     */
     static void poll() {
       while (Event.is_happening) {
         switch (Event.type) {

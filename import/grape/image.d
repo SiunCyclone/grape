@@ -14,6 +14,9 @@ import grape.renderer;
 import grape.shader;
 import grape.window;
 
+/**
+ * 画像クラス
+ */
 class Image {
   public:
     this() {
@@ -29,6 +32,10 @@ class Image {
       _surf = new Surface;
     }
 
+    /** Imageの初期化
+     *
+     * 引数に画像のファイル名を渡すと読み込みます。
+     */
     this(in string file) {
       this();
       load(file);
@@ -40,17 +47,32 @@ class Image {
         IMG_Quit();
     }
 
+    /**
+     * 画像の読み込み
+     *
+     * file:   画像のファイル名
+     */
     void load(in string file) {
       enforce(exists(file), file ~ " does not exist");
       _surf.create({ return IMG_Load(toStringz(file)); });
       enforce(_surf !is null, "IMG_Load() failed");
     }
 
+    /**
+     * 画像テクスチャの作成
+     *
+     * 基本的にユーザーは使いません。
+     */
     void create_texture() {
       _texture.create(_surf);
     }
 
     @property {
+      /**
+       * 画像テクスチャを返す
+       *
+       * 基本的にユーザーは使いません。
+       */
       Texture texture() {
         return _texture;
       }
@@ -63,6 +85,12 @@ class Image {
 }
 
 // Cameraの影響をうけない
+/**
+ * 画像を描画するクラス
+ *
+ * TODO:
+ * Camera使うか
+ */
 class ImageRenderer : Renderer {
   public:
     this(Image image) {
@@ -84,13 +112,28 @@ class ImageRenderer : Renderer {
       set_uniform("tex", 0, "1i");
     }
 
+    /**
+     * 描画する画像のセット
+     *
+     * image: 描画する画像
+     */
     void set_image(Image image) {
       _image = image;
     }
 
     override void render() {}
 
-    // TODO scale is not implemented yet
+    /**
+     * 描画
+     *
+     * x:      描画する左上のx座標
+     * y:      描画する左上のy座標
+     * scale:  倍率(未実装なので基本1.0を指定)
+     *
+     * TODO:
+     * Rendererのrenderを使用してない
+     * scale is not implemented yet
+     */
     void render(in float x, in float y, in float scale) {
       _program.use();
 

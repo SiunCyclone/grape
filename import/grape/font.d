@@ -52,6 +52,11 @@ private final class FontUnit {
     TTF_Font* _font;
 }
 
+/**
+ * Fontを管理するクラス
+ *
+ * FontRendererがあるのでFontをロードする機能くらいしか使わない。
+ */
 final class Font {
   public: 
     this() {
@@ -67,6 +72,11 @@ final class Font {
       _instance ~= this;
     }
 
+    /**
+     * Fontの初期化
+     *
+     * 引数にTTFフォントのファイル名を渡すと読み込みます。
+     */
     this(in string file) {
       this();
       load(file);
@@ -85,11 +95,25 @@ final class Font {
       }
     }
 
+    /**
+     * Fontの読み込み
+     *
+     * file:   TTFフォントのファイル名
+     */
     void load(in string file) {
       foreach (size; FontSizeList)
         _units[size] = new FontUnit(file, size);
     }
 
+    /**
+     * 文字列テクスチャの作成
+     *
+     * 基本的にユーザーは使いません。
+     * 受け取ったtextのテクスチャを作成します。
+     * size:  文字の大きさ
+     * text:  文字列
+     * color: 文字列の色
+     */
     void create_texture(in int size, in string text, in SDL_Color color) {
       _surf.create({ return TTF_RenderUTF8_Solid(_units[size].unit, toStringz(text), color); });
       _surf.convert(SurfaceFormat.abgr8888);
@@ -98,6 +122,11 @@ final class Font {
     }
 
     @property {
+      /**
+       * 文字列テクスチャを返す
+       *
+       * 基本的にユーザーは使いません。
+       */
       Texture texture() {
         return _texture;
       }
@@ -111,6 +140,11 @@ final class Font {
     static bool _initialized = false;
 }
 
+/**
+ * Fontを描画するクラス
+ *
+ * Fontの描画は全てこのクラスが行います。
+ */
 class FontRenderer : Renderer {
   public:
     this() {
@@ -127,16 +161,47 @@ class FontRenderer : Renderer {
       debug(tor) writeln("FontHdr ctor");
     }
 
+    /**
+     * 描画するフォントのセット
+     *
+     * render関数を呼ぶ前に必ず呼ばれる必要があります。
+     * font:  描画するフォント
+     *
+     * TODO:
+     * コンストラクタでやるか
+     */
     void set_font(Font font) {
       _font = font;
     }
 
+    /**
+     * 描画文字色の設定
+     *
+     * 0~255までの値を引数にとります。
+     * r: 赤
+     * g: 緑
+     * b: 青
+     *
+     * TODO:
+     * 引数の値範囲チェック
+     */
     void set_color(in ubyte r, in ubyte g, in ubyte b) {
       _color = SDL_Color(r, g, b);
     }
 
     override void render() {}
 
+    /**
+     * 描画関数
+     *
+     * x:      描画する左上のx座標
+     * y:      描画する左上のy座標
+     * text:   描画する文字列
+     * size:   描画するフォントの大きさ
+     *
+     * TODO:
+     * Rendererのrenderを使ってない
+     */
     //void draw(float x, float y, string text, int size = _font.keys[0]) { // TODO
     void render(in float x, in float y, in string text, in int size) {
       enforce(!find(FontSizeList, size).array.empty, "Called wrong size of the font. These are available FontSizeList.\n" ~ FontSizeList.to!string);
