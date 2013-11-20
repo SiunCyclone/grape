@@ -5,8 +5,21 @@ import grape.renderer;
 import grape.window;
 import derelict.opengl3.gl3;
 
+/**
+ * ポストエフェクト用クラス
+ *
+ * デフォルトセットのFilterじゃ物足りない、自作のポストエフェクトを使いたい
+ * 等といった時にFilterを継承して新たなFilterのSubClassを作成してください。
+ */
 abstract class Filter {
   public:
+    /**
+     * Filterの初期化
+     *
+     * num:    Filterで使うtextureの数
+     * w:      textureの幅
+     * h:      textureの高さ
+     */
     this(in size_t num, in int w, in int h) {
       _w = w;
       _h = h;
@@ -30,12 +43,44 @@ abstract class Filter {
     }
     */
 
+    /**
+     * ポストエフェクトの処理
+     *
+     * 実際にポストエフェクトをかける関数です。
+     * 引数部分で下記のように描画処理をすれば、ポストエフェクトをかけたテクスチャが作成され、
+     * Filter.render();で描画できます。
+     * 
+     * Examples:
+     * ---------------
+     * Filter.filter({
+     *   Renderer.render();
+     * });
+     * ---------------
+     */
     abstract void filter(in void delegate());
 
+    /**
+     * ポストエフェクトがかかったテクスチャの描画
+     *
+     * 単純にテクスチャを描画するだけです。
+     *
+     * TODO:
+     * FilterRenderer所持してるけどどうするか
+     */
     final void render() {
       render(_textures.length-1);
     }
 
+    /**
+     * Filterが内部に所持しているテクスチャの描画
+     *
+     * 基本的にユーザーが呼ぶことはありません。
+     * 引数に受け取った番号のテクスチャを描画します。
+     * BlurFilterならば、
+     * 0:  renderした画面を格納したtexture
+     * 1:  0を横Blurしたtexture
+     * 2:  1を縦Blurしたtexture
+     */
     final void render(in size_t i) {
       assert(i < _textures.length);
 
@@ -44,6 +89,10 @@ abstract class Filter {
       glEnable(GL_DEPTH_TEST);
     }
 
+    /**
+     * ポストエフェクトがかかったテクスチャを適応したスコープ
+     *
+     */
     final void filter_scope(in size_t i, in void delegate() dg) {
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);

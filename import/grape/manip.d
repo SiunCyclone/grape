@@ -3,6 +3,9 @@ module grape.manip;
 import std.stdio;
 import grape.math;
 
+/**
+ * ローカル座標系の構造体
+ */
 struct CoordinateSystem {
   void reset() {
     origin = Quat(Vec3(0, 0, 0));
@@ -17,6 +20,9 @@ struct CoordinateSystem {
   Quat z = Quat(Vec3(0, 0, 1));
 }
 
+/**
+ * 3Dオブジェクトを簡単に操作するクラス
+ */
 struct Manipulator {
   public:
     this(Vec3 vec3) {

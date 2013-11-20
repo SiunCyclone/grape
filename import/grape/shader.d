@@ -1,9 +1,8 @@
 module grape.shader;
 
-import std.exception : enforce;
-//import opengl.glew;
 import derelict.opengl3.gl3;
 
+import std.exception : enforce;
 import std.stdio;
 import std.traits : EnumMembers;
 
@@ -326,30 +325,30 @@ class Shader {
       eliminate();
     }
 
-		void compile(in string shaderCode) {
-			auto fst = &shaderCode[0];
-			int len = cast(int)shaderCode.length; // TODO
-			glShaderSource(_shader, 1, &fst, &len);
-			glCompileShader(_shader);
+    void compile(in string shaderCode) {
+      auto fst = &shaderCode[0];
+      int len = cast(int)shaderCode.length; // TODO
+      glShaderSource(_shader, 1, &fst, &len);
+      glCompileShader(_shader);
 
-			GLint result;
-			glGetShaderiv(_shader, GL_COMPILE_STATUS, &result);
-			enforce(result != GL_FALSE, "glCompileShader() faild");
-		}
+      GLint result;
+      glGetShaderiv(_shader, GL_COMPILE_STATUS, &result);
+      enforce(result != GL_FALSE, "glCompileShader() faild");
+    }
 
-		alias _shader this; // TODO
+    alias _shader this; // TODO
 
   private:
-		void generate(in ShaderType type) {
-			_shader = glCreateShader(type);
-			enforce(_shader, "glCreateShader() faild");
-		}
+    void generate(in ShaderType type) {
+      _shader = glCreateShader(type);
+      enforce(_shader, "glCreateShader() faild");
+    }
 
     void eliminate() {
       glDeleteShader(_shader); 
     }
 
-		GLuint _shader;
+    GLuint _shader;
 }
 
 class ShaderProgram {
@@ -368,17 +367,17 @@ class ShaderProgram {
     }
 
     void attach(T)(in T vs, in T fs) {
-			glAttachShader(_program, vs);
-			glAttachShader(_program, fs);
-			glLinkProgram(_program);
+      glAttachShader(_program, vs);
+      glAttachShader(_program, fs);
+      glLinkProgram(_program);
 
-			int linked;
-			glGetProgramiv(_program, GL_LINK_STATUS, &linked);
-			enforce(linked != GL_FALSE, "glLinkProgram() faild");
+      int linked;
+      glGetProgramiv(_program, GL_LINK_STATUS, &linked);
+      enforce(linked != GL_FALSE, "glLinkProgram() faild");
     }
 
     void use() {
-			glUseProgram(_program);
+      glUseProgram(_program);
     }
 
     alias _program this;
@@ -386,8 +385,8 @@ class ShaderProgram {
 
   private:
     void generate() {
-			_program = glCreateProgram();
-			enforce(_program, "glCreateProgram() faild");
+      _program = glCreateProgram();
+      enforce(_program, "glCreateProgram() faild");
     }
 
     void eliminate() {
@@ -440,7 +439,7 @@ class ShaderSource {
 
 /*
 class ShaderProgramHdr {
-	public:
+  public:
     this(ShaderProgramType[] typeList...) {
       if (typeList.length == 0) {
         foreach(type; EnumMembers!ShaderProgramType)
@@ -451,7 +450,7 @@ class ShaderProgramHdr {
       //writeln(_list.length);
     }
 
-		void use(in ShaderProgramType type) {
+    void use(in ShaderProgramType type) {
       _current = type;
       _list[_current].use();
     }

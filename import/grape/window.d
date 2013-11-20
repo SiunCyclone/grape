@@ -26,6 +26,7 @@ enum WindowFlags {
   Foreign = SDL_WINDOW_FOREIGN
 }
 
+// TODO Windowと合体させるか。マルチウィンドウに対応する。
 private final class WindowUnit {
   public:
     this(in string name, in int x, in int y, in int w, in int h, in WindowFlags flag) {
@@ -64,6 +65,9 @@ private final class WindowUnit {
     WindowFlags _flag;
 }
 
+/**
+ * Windowを管理するクラス
+ */ 
 class Window {
   public:
     this(in int w, in int h) {
@@ -78,6 +82,15 @@ class Window {
       this(name, x, y, w, h, WindowFlags.OpenGL);
     }
 
+    /**
+     * Windowの初期化コンストラクタ
+     *
+     * name: 画面のタイトル
+     * x:    画面左上のx座標 
+     * y:    画面左上のy座標
+     * w:    画面の幅
+     * h:    画面の高さ
+     */
     this(in string name, in int x, in int y, in int w, in int h, in WindowFlags flag) {
       if (!_initialized) {
         _initialized = true;
@@ -107,16 +120,33 @@ class Window {
       }
     }
     
+    /**
+     * 画面の更新
+     */
     void update() {
       _window.swap();
       // other
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
+    /**
+     * Viewportの設定
+     *
+     * 内部でOpenGLのglViewport関数を呼んでいるだけです
+     *
+     * TODO:
+     * 他に移すかも
+     */
     void viewport(in int x, in int y, in int w, in int h) {
       glViewport(x, y, w, h);
     }
 
+    /**
+     * Alphaチャンネルの有効化
+     * 
+     * TODO:
+     * 他に移すかも
+     */
     void enable_alpha() { //TODO
       glEnable(GL_ALPHA_TEST);
       glEnable(GL_BLEND);

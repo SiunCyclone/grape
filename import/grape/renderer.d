@@ -12,11 +12,27 @@ import grape.window;
 public import grape.image : ImageRenderer;
 public import grape.font : FontRenderer;
 
+/**
+ * 描画クラス
+ *
+ * デフォルトセットのRendererじゃ物足りない、自作のシェーダを使いたい
+ * 等といった時にRendererを継承して新たなRendererのSubClass作成してください。
+ */
 abstract class Renderer {
   public:
-    // TODO
-    // Consider args
-    // _ibo should be initialized here.
+    /**
+     * Rendererの初期化
+     *
+     * Rendererを継承したSubClassは必ずこの関数をコンストラクタで呼ぶ必要があります。
+     * dg:       Shaderのソース
+     * locNames: Shaderのattributesの名前の配列
+     * strides:  Shaderのattributesのストライド
+     * drawMode: 描画モード
+     *
+     * TODO:
+     * _iboはここで初期化されるべき
+     * 引数を減らしたい
+     */
     final void init(in void delegate(out string, out string) dg, in string[] locNames, in int[] strides, in DrawMode drawMode) {
       assert(strides.length == locNames.length);
 
@@ -34,17 +50,41 @@ abstract class Renderer {
       _vboHdr.enable_vbo(_locNames, _strides);
     }
 
-    // _ibo must be initialized before calling this function, or cause segv.
+    /**
+     * IBOをセット
+     *
+     * IBOを使って描画する場合、この関数を呼ぶ必要
+     * _ibo must be initialized before calling this function, or cause segv.
+     *
+     * TODO:
+     * final修飾子つけるか
+     */
     void set_ibo(in int[] index) {
       _program.use();
       _ibo.create(index);
     }
 
+    /**
+     * Uniform変数のセット
+     * 
+     * name:    uniformの場所の名前
+     * value:   セットする値
+     * type:     
+     * num:     
+     */
     final void set_uniform(T)(in string name, in T value, in string type, in int num=1) {
       _program.use();
       _uniLoc.attach(name, value, type, num);
     }
 
+    /**
+     * 描画関数
+     *
+     * SubClassで必ずoverrideする必要があります。
+     *
+     * TODO:
+     * ImageRendererでこれ使ってない
+     */
     abstract void render();
 
   protected:
@@ -106,6 +146,14 @@ class FilterRenderer : Renderer {
     float[] _texCoord;
 }
 
+/**
+ * GaussBlur用のRenderer
+ * 
+ * ユーザーが使うことはまずないと思われる
+ *
+ * TODO:
+ * BlurFilter,GlowFilterの内部に移動させるか
+ */
 class GaussianRenderer : Renderer {
   public:
     this(in float[2] resolution) {
@@ -186,6 +234,12 @@ class NormalRenderer : Renderer {
   }
 }
 
+/**
+ * 基本的なRenderer
+ *
+ * TODO:
+ * どんなRendererにするか決まってない
+ */
 class BasicRenderer : Renderer {
   this() {
     string[] locNames = [ "pos", "color" ];
@@ -204,6 +258,12 @@ class BasicRenderer : Renderer {
   }
 }
 
+/**
+ * Textureを描画
+ *
+ * TODO:
+ * ImageRendererとの区別
+ */
 class TextureRenderer : Renderer {
   public:
     this() {
