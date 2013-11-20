@@ -1,13 +1,16 @@
 module grape.renderer;
 
+import derelict.opengl3.gl3;
+
+import std.math;
+import std.stdio;
+
 import grape.buffer;
 import grape.shader;
 import grape.window;
 
-import std.stdio;
-import std.math;
-//import opengl.glew;
-import derelict.opengl3.gl3;
+public import grape.image : ImageRenderer;
+public import grape.font : FontRenderer;
 
 abstract class Renderer {
   public:

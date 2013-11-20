@@ -7,22 +7,29 @@
     "siun"
   ],
 
-	"dependencies": {
+  "dependencies": {
     "derelict:sdl2": "~master",
-    "derelict:opengl3": "~master",
-	},
+    "derelict:opengl3": "~master"
+  },
 
   "configurations": [
     {
-      "name": "example",
-      "targetName": "example",
+      "name": "example_basic",
+      "targetName": "example_basic",
       "targetType": "executable",
       "targetPath": "bin",
-      "sourceFiles": ["src/example.d"],
+      "sourceFiles": ["src/example_basic.d"]
     },
+    {
+      "name": "example_image",
+      "targetName": "example_image",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/example_image.d"]
+    }
   ],
 
   "sourcePaths": ["../import/grape"],
-  "importPaths": ["../import"],
+  "importPaths": ["../import"]
 }
 

@@ -1,10 +1,10 @@
 module grape.window;
 
-import std.exception : enforce;
 import derelict.sdl2.sdl;
 import derelict.opengl3.gl;
 import derelict.opengl3.gl3;
 
+import std.exception : enforce;
 import std.stdio;
 
 shared int WINDOW_WIDTH;
@@ -115,6 +115,20 @@ class Window {
 
     void viewport(in int x, in int y, in int w, in int h) {
       glViewport(x, y, w, h);
+    }
+
+    void enable_alpha() { //TODO
+      glEnable(GL_ALPHA_TEST);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      /*
+      glEnable(GL_DEPTH_TEST);
+
+      glEnable(GL_POLYGON_SMOOTH);
+      glEnable(GL_LINE_SMOOTH);
+      glEnable(GL_POINT_SMOOTH);
+      */
     }
 
   private:

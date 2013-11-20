@@ -41,7 +41,7 @@ class Image {
     }
 
     void load(in string file) {
-      enforce(exists(file), file ~ "does not exist");
+      enforce(exists(file), file ~ " does not exist");
       _surf.create({ return IMG_Load(toStringz(file)); });
       enforce(_surf !is null, "IMG_Load() failed");
     }
@@ -62,6 +62,7 @@ class Image {
     static bool _initialized = false;
 }
 
+// Cameraの影響をうけない
 class ImageRenderer : Renderer {
   public:
     this(Image image) {

@@ -7,7 +7,7 @@ import grape.math;
 void main() { 
   int width = 640;
   int height = 480;
-  Window window = new Window("title", width, height);
+  Window window = new Window("basic_example", width, height);
 
   Camera camera = new Camera;
   BasicRenderer renderer = new BasicRenderer;

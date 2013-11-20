@@ -1,8 +1,10 @@
 module grape.camera;
 
+import derelict.opengl3.gl3;
+
 import std.math;
 import std.stdio;
-import derelict.opengl3.gl3;
+
 import grape.math;
 import grape.manip;
 import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
