@@ -15,12 +15,12 @@ import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 class Camera {
   public :
     /**
-     * カメラ位置の初期化
+     * 初期化
      *
-     * デフォルトで以下の様に初期化されます。
-     * eye:    (0, 0, 1) カメラの座標
+     * デフォルトでは以下の様に初期化されます。
+     * eye:    (0, 0, 1) 視点
      * center: (0, 0, 0) 注視点
-     * up:     (0, 1, 0) カメラの上座標
+     * up:     (0, 1, 0) 上方向
      */
     this() {
       Vec3 eye = Vec3(0, 0, 1);
@@ -35,7 +35,7 @@ class Camera {
     }
 
     /**
-     * カメラの回転
+     * 回転操作
      *
      * vec3:    回転軸となるベクトル
      * rad:     回転する角度
@@ -54,7 +54,13 @@ class Camera {
     */
 
     /**
-     * GLUTのgluPerspectiveと多分同じ
+     * 視界の設定
+     *
+     * GLUTのgluPerspectiveと同じです。
+     * fovy:    視野角
+     * aspect:  縦横比(通常は[画面幅/高さ]です）
+     * znear:   一番近いz座標
+     * zfar:    一番遠いz座標
      */
     void perspective(in float fovy, in float aspect, in float znear, in float zfar) {
       // translate to grape.math
@@ -68,7 +74,12 @@ class Camera {
     }
 
     /**
-     * GLUTのgluLookAtと同じ
+     * 位置、姿勢の設定
+     *
+     * GLUTのgluLookAtと同じです。
+     * eye:    視点
+     * center: 注視点
+     * up:     上方向
      */
     void look_at(Vec3 eye, Vec3 center, Vec3 up) {
       set(eye, center, up);

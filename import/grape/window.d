@@ -67,6 +67,9 @@ private final class WindowUnit {
 
 /**
  * Windowを管理するクラス
+ *
+ * TODO:
+ * マルチウィンドウ
  */ 
 class Window {
   public:
@@ -83,7 +86,7 @@ class Window {
     }
 
     /**
-     * Windowの初期化コンストラクタ
+     * Windowの初期化
      *
      * name: 画面のタイトル
      * x:    画面左上のx座標 
@@ -132,7 +135,11 @@ class Window {
     /**
      * Viewportの設定
      *
-     * 内部でOpenGLのglViewport関数を呼んでいるだけです
+     * 内部でOpenGLのglViewport関数を呼んでいるだけです。
+     * x: 左下のx座標
+     * y: 左下のy座標
+     * w: 画面の幅
+     * h: 画面の高さ
      *
      * TODO:
      * 他に移すかも

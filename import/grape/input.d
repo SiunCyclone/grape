@@ -1,7 +1,7 @@
 module grape.input;
 
-import std.stdio;
 import derelict.sdl2.sdl;
+import std.stdio;
 import grape.event;
 public import grape.keyboard;
 

@@ -1,6 +1,5 @@
 module grape.grape;
 
-//public import grape.manager; // deprecated
 public import grape.window;
 public import grape.shader;
 public import grape.buffer;

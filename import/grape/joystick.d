@@ -59,8 +59,16 @@ private final class JoystickUnit {
     SDL_Joystick* _joystick;
 }
 
+/**
+ * ジョイパッドを管理するクラス
+ */
 class Joystick {
   public:
+    /**
+     * ジョイパッドの読み込み
+     *
+     * deviceIndex: 読み込むジョイパッドの番号
+     */
     this(in int deviceIndex) {
       if (!_initialized) {
         _initialized = true;
@@ -88,6 +96,9 @@ class Joystick {
       }
     }
 
+    /**
+     *
+     */
     float getAxis(in int axis) 
       in {
         assert(0 <= axis && axis <= _numAxes);
@@ -97,6 +108,9 @@ class Joystick {
         return _joystick.getAxis(axis);
       }
 
+    /**
+     *
+     */
     int getButton(in int button) 
       in {
         assert(0 <= button && button <= _numButtons);
@@ -117,6 +131,9 @@ class Joystick {
       }
       */
 
+    /**
+     *
+     */
     int getHat(in int hat)
       in {
         assert(0 <= hat && hat <= _numHats);
@@ -127,24 +144,41 @@ class Joystick {
       }
 
     // rename show_info("num")etc...
+    /**
+     * 情報の表示
+     *
+     * 軸の数、ボタンの数、ボールの数、ハットの数を表示します。
+     */
     void show_info() {
       writef("axes:%d buttons:%d balls:%d hats:%d \n", _numAxes, _numButtons, _numBalls, _numHats);
       // writefln
     }
 
     @property {
+      /**
+       * Returns: 軸の総数
+       */
       int numAxes() {
         return _numAxes;
       }
 
+      /**
+       * Returns: ボタンの総数
+       */
       int numButtons() {
         return _numButtons;
       }
 
+      /**
+       * Returns: ボールの総数
+       */
       int numBalls() {
         return _numBalls;
       }
 
+      /**
+       * Returns: ハットの総数
+       */
       int numHats() {
         return _numHats;
       }

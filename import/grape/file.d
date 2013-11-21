@@ -7,8 +7,20 @@ import std.conv;
 //import std.string;
 
 // obj hdr
+/**
+ * ファイル操作をするクラス
+ *
+ * TODO:
+ * Rename
+ */
 class FileHdr {
   public:
+    /**
+     * objファイルから頂点を読み込む
+     *
+     * objファイルを読み込んで、頂点をfloat[]の配列にして返します。
+     * file: objファイル名
+     */
     float[] make_mesh(in string file) {
       float[] mesh;
       auto f = File(file, "r");
@@ -22,6 +34,12 @@ class FileHdr {
       return mesh;
     }
 
+    /**
+     * objファイルから法線を読み込む
+     *
+     * objを読み込んで、法線をfloat[]の配列にして返します。
+     * file: objファイル名
+     */
     float[] make_normal(in string file) {
       float[][] randomNormal;
       float[] normal;
@@ -48,6 +66,13 @@ class FileHdr {
       return normal;
     }
 
+
+    /**
+     * objファイルからインデックスを読み込む
+     *
+     * objを読み込んで、インデックスをint[]の配列にして返します。
+     * file: objファイル名
+     */
     int[] make_index(in string file) {
       int[] t;
       auto buf = appender(t);
@@ -70,3 +95,4 @@ class FileHdr {
       return buf.data;
     }
 }
+

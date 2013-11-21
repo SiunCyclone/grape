@@ -55,7 +55,7 @@ private final class FontUnit {
 /**
  * Fontを管理するクラス
  *
- * FontRendererがあるのでFontをロードする機能くらいしか使わない。
+ * FontRendererがあるのでFontをロードする機能くらいしか使いません。
  */
 final class Font {
   public: 

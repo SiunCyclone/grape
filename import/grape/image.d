@@ -15,7 +15,7 @@ import grape.shader;
 import grape.window;
 
 /**
- * 画像クラス
+ * 画像を管理するクラス
  */
 class Image {
   public:
@@ -35,6 +35,7 @@ class Image {
     /** Imageの初期化
      *
      * 引数に画像のファイル名を渡すと読み込みます。
+     * file: 画像のファイル名
      */
     this(in string file) {
       this();
@@ -93,6 +94,13 @@ class Image {
  */
 class ImageRenderer : Renderer {
   public:
+    /**
+     * 初期化
+     *
+     * 引数に描画する画像を渡します。
+     * 渡さなかった場合、描画する前に必ずset_image関数を呼ぶ必要があります。
+     * image: 描画する画像
+     */
     this(Image image) {
       this();
       set_image(image);

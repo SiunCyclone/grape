@@ -9,7 +9,7 @@ import derelict.opengl3.gl3;
  * ポストエフェクト用クラス
  *
  * デフォルトセットのFilterじゃ物足りない、自作のポストエフェクトを使いたい
- * 等といった時にFilterを継承して新たなFilterのSubClassを作成してください。
+ * 等といった時はFilterを継承して新たなFilterのSubClassを作成してください。
  */
 abstract class Filter {
   public:

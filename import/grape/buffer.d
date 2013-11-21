@@ -1,12 +1,12 @@
 module grape.buffer;
 
-//import opengl.glew;
 import derelict.opengl3.gl3;
 import derelict.sdl2.sdl;
 import derelict.sdl2.image;
 
-import derelict.sdl2.ttf;
 import std.stdio;
+import std.math;
+
 import grape.window;
 import grape.file;
 import grape.math;
@@ -14,7 +14,9 @@ import grape.camera;
 import grape.surface;
 import grape.shader;
 
-import std.math;
+/**
+ * このモジュールをユーザーが直接使用することはありません。
+ */
 
 enum DrawMode {
   Points = GL_POINTS,
@@ -54,7 +56,7 @@ class Binder {
     void_dg _unbind;
 }
 
-// TODO name
+// TODO Rename
 class VBOHdr {
   public:
     this(in size_t num, in GLuint program) {
