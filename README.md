@@ -11,7 +11,7 @@ Grape is a Cross-Platform Game Library for D.
 ##### Procedure
 ###### -- Recommended way (Require Dub)
 
-  Just add below code to your package.json
+Just add below code to your package.json
 ```
 {
     "dependencies": {
@@ -69,5 +69,7 @@ TODO
 TODO
 
 ### API Reference
-TODO
+* Japanese  
+http://pabekkubb.github.io/grape/
+(Work in progress)
 
