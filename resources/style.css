@@ -136,7 +136,6 @@ code{
   padding:2px;
   border-bottom:1px solid #ddd;
   border-radius:5px;
-  font-size: 100%;
 }
 pre{
   margin:0 1.5em 1.5em;
@@ -145,13 +144,11 @@ pre{
   background:#eee;
   padding:3px 10px;
   overflow:auto;
-  font-size: 100%;
 }
 pre code{
   background:none;
   padding:0;
   border:none;
-  font-size: 100%;
 }
 
 /* menu */
