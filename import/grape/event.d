@@ -1,10 +1,10 @@
-module grape.event;
-
-import derelict.sdl2.sdl;
-
 /**
  * このモジュールをユーザーが直接使用することはありません。
  */
+
+module grape.event;
+
+import derelict.sdl2.sdl;
 
 enum {
   /*

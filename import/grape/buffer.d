@@ -1,3 +1,7 @@
+/**
+ * このモジュールをユーザーが直接使用することはありません。
+ */
+
 module grape.buffer;
 
 import derelict.opengl3.gl3;
@@ -13,10 +17,6 @@ import grape.math;
 import grape.camera;
 import grape.surface;
 import grape.shader;
-
-/**
- * このモジュールをユーザーが直接使用することはありません。
- */
 
 enum DrawMode {
   Points = GL_POINTS,

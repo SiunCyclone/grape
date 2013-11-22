@@ -1,3 +1,7 @@
+/**
+ * このモジュールをユーザーが直接使用することはありません。
+ */
+
 module grape.shader;
 
 import derelict.opengl3.gl3;
@@ -5,10 +9,6 @@ import derelict.opengl3.gl3;
 import std.exception : enforce;
 import std.stdio;
 import std.traits : EnumMembers;
-
-/**
- * このモジュールをユーザーが直接使用することはありません。
- */
 
 enum ShaderType {
   Vertex = GL_VERTEX_SHADER,

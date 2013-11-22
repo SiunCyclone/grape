@@ -2,4 +2,6 @@ lib/*.a
 *.o
 build/build
 issue
+Makefile
+document/
 
