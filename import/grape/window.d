@@ -105,8 +105,8 @@ class Window {
 
       WINDOW_WIDTH = w;
       WINDOW_HEIGHT = h;
-      _window = new WindowUnit(name, x, y, w, h, flag);
 
+      _window = new WindowUnit(name, x, y, w, h, flag);
       _instance ~= this;
     }
 

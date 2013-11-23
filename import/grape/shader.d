@@ -81,6 +81,10 @@ mixin template ClassicTextureShaderSource() {
   };
 }
 
+// pvmMatrixの設定をしていないのでデフォルト座標から見ている...はず
+// eye: (0, 0, 0);
+// center: (0, 0, -1);
+// up: (0, 1, 0);
 mixin template FontShaderSource() {
   void delegate(out string, out string) FontShader = (out string vShader, out string fShader) {
     vShader = q{
