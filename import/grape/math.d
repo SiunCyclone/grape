@@ -189,7 +189,7 @@ struct Quaternion {
       _vec3 = vec3;
     }
 
-    // TODO Name
+    // TODO Rename
     void rotate(Vec3 vec3, in float rad) {
       vec3.normalize;
 
