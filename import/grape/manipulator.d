@@ -1,4 +1,4 @@
-module grape.manip;
+module grape.manipulator;
 
 import std.stdio;
 import grape.math;
