@@ -12,6 +12,40 @@ import grape.window;
 public import grape.image : ImageRenderer;
 public import grape.font : FontRenderer;
 
+class Renderer2 {
+  import grape.scene;
+  import grape.layer;
+  import grape.camera;
+
+  public:
+    this() {
+    }
+
+    void render(Scene scene, Camera camera) {
+      // 1, geometry(入れる値)とmaterial(場所の名前)からvboをセット
+      // 2, geometryからiboをセット
+      // 3, cameraからuniformのpvmMatrixをセット
+      // 4, materialからprogram.use();
+      // 5, iboまたはvboで、materialからdrawMode参照して描画
+      // 6, 以下meshの数だけloop
+    }
+
+    /**
+     * Viewportの設定
+     *
+     * 内部でOpenGLのglViewport関数を呼んでいるだけです。
+     * x: 左下のx座標
+     * y: 左下のy座標
+     * w: 画面の幅
+     * h: 画面の高さ
+     */
+    void viewport(in int x, in int y, in int w, in int h) {
+      glViewport(x, y, w, h);
+    }
+    
+  private:
+}
+
 /**
  * 描画クラス
  *

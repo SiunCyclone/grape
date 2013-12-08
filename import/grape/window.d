@@ -133,22 +133,6 @@ class Window {
     }
 
     /**
-     * Viewportの設定
-     *
-     * 内部でOpenGLのglViewport関数を呼んでいるだけです。
-     * x: 左下のx座標
-     * y: 左下のy座標
-     * w: 画面の幅
-     * h: 画面の高さ
-     *
-     * TODO:
-     * 他に移すかも
-     */
-    void viewport(in int x, in int y, in int w, in int h) {
-      glViewport(x, y, w, h);
-    }
-
-    /**
      * Alphaチャンネルの有効化
      * 
      * TODO:
