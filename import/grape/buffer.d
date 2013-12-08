@@ -383,6 +383,7 @@ deprecated class TexHdr {
     Texture _texture;
 }
 
+/*
 deprecated class FBOHdr {
   public:
     this() {
@@ -441,7 +442,6 @@ deprecated class FBOHdr {
       _uniLoc.attach("invMatrix", invMat4.mat, "mat4fv");
     }
 
-    /*
     void set(GLuint program) {
       _program = program;
 
@@ -459,7 +459,6 @@ deprecated class FBOHdr {
       _ibo = new IBO;
       _ibo.create(_index);
     }
-    */
 
     void draw() {
       _fbo.binded_scope({
@@ -500,6 +499,7 @@ deprecated class FBOHdr {
     VBOHdr _vboHdr;
     IBO _ibo;
 }
+*/
 
 deprecated class GaussHdr {
   public:

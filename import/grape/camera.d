@@ -6,7 +6,7 @@ import std.math;
 import std.stdio;
 
 import grape.math;
-import grape.manip;
+import grape.manipulator;
 import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 
 /**
@@ -17,17 +17,15 @@ class Camera {
     /**
      * 初期化
      *
-     * デフォルトでは以下の様に初期化されます。
-     * eye:    (0, 0, 1) 視点
-     * center: (0, 0, 0) 注視点
-     * up:     (0, 1, 0) 上方向
+     * near:   一番近いz座標
+     * far:    一番遠いz座標
      */
-    this() {
+    this(in float near, in float far) {
       Vec3 eye = Vec3(0, 0, 1);
       Vec3 center = Vec3(0, 0, 0);
       Vec3 up = Vec3(0, 1, 0);
 
-      perspective(45.0, cast(float)WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100.0);
+      perspective(45.0, cast(float)WINDOW_WIDTH/WINDOW_HEIGHT, near, far); //TODO
       look_at(eye, center, up);
     }
 
@@ -59,18 +57,18 @@ class Camera {
      * GLUTのgluPerspectiveと同じです。
      * fovy:    視野角
      * aspect:  縦横比(通常は[画面幅/高さ]です）
-     * znear:   一番近いz座標
-     * zfar:    一番遠いz座標
+     * near:   一番近いz座標
+     * far:    一番遠いz座標
      */
-    void perspective(in float fovy, in float aspect, in float znear, in float zfar) {
+    void perspective(in float fovy, in float aspect, in float near, in float far) {
       // translate to grape.math
       auto cot = delegate float(float x){ return 1 / tan(x); };
       auto f = cot(fovy/2);
 
       _proj.set( f/aspect, 0, 0, 0,
                  0, f, 0, 0,
-                 0, 0, (zfar+znear)/(znear-zfar), -1,
-                 0, 0, (2*zfar*znear)/(znear-zfar), 0 );
+                 0, 0, (far+near)/(near-far), -1,
+                 0, 0, (2*far*near)/(near-far), 0 );
     }
 
     /**

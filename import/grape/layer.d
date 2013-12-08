@@ -10,14 +10,19 @@ class Layer {
 
   public:
     this() {
-      
+      _visible = true; 
     }
 
     void add(T)(T actor) {
       _actors ~= ActorType(actor);
     }
 
+    void visible(in bool flag) {
+      _visible = flag;
+    }
+
   private:
     ActorType[] _actors;
+    bool _visible;
 }
 

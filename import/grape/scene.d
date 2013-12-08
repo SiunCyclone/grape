@@ -2,26 +2,25 @@ module grape.scene;
 
 import grape.layer;
 
-immutable LAYER_MAX_NUM = 20;
-
 class Scene {
   public:
     this() {
-      _current = 0;
       // Basic, Fog, LensFlare 
     }
 
     void add(Layer layer) {
-      _layers[_current] = layer;
+      _layers ~= layer;
     }
 
-    void set_current_layer(int n) {
-      assert(n >= 0 && n < LAYER_MAX_NUM);
-      _current = n;
+    void remove(in int index) {
+      _layers = _layers[0..index] ~ _layers[index..$];
+    }
+
+    void visible(in int index, in bool flag) {
+      _layers[index].visible(flag);
     }
 
   private:
-    Layer[LAYER_MAX_NUM] _layers;
-    int _current;
+    Layer[] _layers;
 }
 
