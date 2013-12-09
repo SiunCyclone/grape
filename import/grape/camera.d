@@ -14,6 +14,15 @@ import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
  */
 class Camera {
   public :
+    this() {
+      Vec3 eye = Vec3(0, 0, 1);
+      Vec3 center = Vec3(0, 0, 0);
+      Vec3 up = Vec3(0, 1, 0);
+
+      perspective(45.0, cast(float)WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100);
+      look_at(eye, center, up);
+    }
+
     /**
      * 初期化
      *

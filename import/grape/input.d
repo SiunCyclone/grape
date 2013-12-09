@@ -21,24 +21,24 @@ class Input {
       while (Event.is_happening) {
         switch (Event.type) {
           case KeyDown:
-            if (Event.scancode in _keyMap) {
-              _keyMap[Event.scancode]();
+            if (Event.scancode in keyMap) {
+              keyMap[Event.scancode]();
             }
             break;
           case JoyAxisMotion:
             writeln("motion");
-            if (Event.axis in _joyAxisMap) {
-              _joyAxisMap[Event.axis]();
+            if (Event.axis in joyAxisMap) {
+              joyAxisMap[Event.axis]();
             }
             break;
           case JoyButtonDown:
             writeln("down");
-            if (Event.button in _joyButtonMap) {
-              _joyButtonMap[Event.button]();
+            if (Event.button in joyButtonMap) {
+              joyButtonMap[Event.button]();
             }
             break;
           case JoyHatMotion:
-            // _joyHatMap();
+            // joyHatMap();
             break;
           default: break;
         }
@@ -46,15 +46,15 @@ class Input {
     }
 
     static void key_down(in int key, in void delegate() callback) {
-      _keyMap[key] = callback;
+      keyMap[key] = callback;
     }
 
     static void axis_move(in int num, in void delegate() callback) {
-      _joyAxisMap[num] = callback;
+      joyAxisMap[num] = callback;
     }
 
     static void button_down(in int num, in void delegate() callback) {
-      _joyButtonMap[num] = callback;
+      joyButtonMap[num] = callback;
     }
 
     static void hat_down() {
@@ -62,9 +62,9 @@ class Input {
     }
 
   private:
-    static void delegate()[int] _keyMap;
-    static void delegate()[int] _joyAxisMap;
-    static void delegate()[int] _joyButtonMap;
-    static void delegate() _joyHatMap;
+    static void delegate()[int] keyMap;
+    static void delegate()[int] joyAxisMap;
+    static void delegate()[int] joyButtonMap;
+    static void delegate() joyHatMap;
 }
 
