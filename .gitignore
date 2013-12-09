@@ -5,4 +5,5 @@ issue
 Makefile
 document/
 examples/.dub
+examples/bin/
 
