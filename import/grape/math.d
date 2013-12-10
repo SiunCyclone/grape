@@ -4,7 +4,8 @@ public import std.math;
 import std.stdio;
 import std.algorithm;
 
-struct Vec3 {
+alias Vector3 Vec3;
+struct Vector3 {
   public:
     this(in float[] coord) {
       this(coord[0], coord[1], coord[2]);
@@ -80,7 +81,8 @@ struct Vec3 {
     float[3] _coord;
 }
 
-struct Mat4 {
+alias Matrix4 Mat4;
+struct Matrix4 {
   public:
     this(in float[] coords...) {
       set(coords);
@@ -166,6 +168,7 @@ struct Mat4 {
     float[16] _mat;
 }
 
+alias Quaternion Quat;
 struct Quaternion {
   public:
     this(Vec3 vec3) {
@@ -230,6 +233,4 @@ struct Quaternion {
     float _rad;
     Vec3 _vec3;
 }
-
-alias Quaternion Quat;
 
