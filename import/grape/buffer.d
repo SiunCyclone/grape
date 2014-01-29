@@ -253,6 +253,58 @@ class VBON {
     //AttributeLocationN _attLoc;
 }
 
+class VBOM {
+  public:
+    this() {
+      _attLoc = new AttributeLocationM;
+      glGenBuffers(1, &_id);
+    }
+
+    ~this() {
+      glDeleteBuffers(1, &_id); 
+    }
+
+    void create(T)(in T data) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+    void attach(in GLuint program, in string name, in int stride, in int i) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      _attLoc.attach(program, name, stride, i);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+    void set(T)(in GLuint program, in T data, in string name, in int stride, in int i) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
+      _attLoc.attach(program, name, stride, i);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+  private:
+    GLuint _id;
+    AttributeLocationM _attLoc;
+}
+
+class AttributeLocationM {
+  public:
+    void attach(in GLuint program, in string name, in int stride, in int i) {
+      glBindAttribLocation(program, i, cast(char*)name);
+      _location = glGetAttribLocation(program, cast(char*)name);
+      locate(stride);
+    }
+
+  private:
+    void locate(in int stride) {
+      glEnableVertexAttribArray(_location);
+      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+
+    GLint _location;
+}
+
 /*
 class AttributeLocationN {
   public:
