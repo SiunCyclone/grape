@@ -22,10 +22,9 @@ class Renderer2 {
 
   public:
     this() {
-      _vbon = new VBON;
       _ibon = new IBON;
-      _vbom = new VBOM;
-      _vbom2 = new VBOM;
+      _vbon ~= new VBON;
+      _vbon ~= new VBON;
     }
 
     void render(Scene scene, Camera camera) {
@@ -54,18 +53,8 @@ class Renderer2 {
         float[4] colorBase = tmp ~ 1.0;
         float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
 
-        /*
-        _vbon.set(program, position, "position", 3, 0);
-        _vbon.set(program, color, "color", 4, 1);
-        */
-        /*
-        _vbom.create(position);
-        _vbom2.create(color);
-        _vbom.attach(program, "position", 3, 0);
-        _vbom2.attach(program, "color", 4, 1);
-        */
-        _vbom.set(program, position, "position", 3, 0);
-        _vbom2.set(program, color, "color", 4, 1);
+        _vbon[0].set(program, position, "position", 3, 0);
+        _vbon[1].set(program, color, "color", 4, 1);
         // color, texture
 
       // 3
@@ -94,9 +83,7 @@ class Renderer2 {
     }
     
   private:
-    VBON _vbon;
-    VBOM _vbom;
-    VBOM _vbom2;
+    VBON[] _vbon;
     IBON _ibon;
     static immutable ColorMax = 255;
 }

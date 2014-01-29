@@ -26,6 +26,13 @@
       "targetType": "executable",
       "targetPath": "bin",
       "sourceFiles": ["src/example_image.d"]
+    },
+    {
+      "name": "example2",
+      "targetName": "example2",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/example2.d"]
     }
   ],
 

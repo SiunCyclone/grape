@@ -29,119 +29,6 @@ enum DrawMode {
   //Quads = GL_QUADS
 }
 
-// TODO Rename
-class VBOHdr {
-  public:
-    this(in size_t num, in GLuint program) {
-      _num = num;
-      _vboList.length = _num;
-      for (int i; i<_num; ++i)
-        _vboList[i] = new VBO(program);
-    }
-
-    void create_vbo(in float[][] list...) {
-      assert(list.length == _num, "Doesn't match the number of vbo attributes");
-
-      foreach(int i, data; list)
-        _vboList[i].create(data);
-    }
-
-    void enable_vbo(in string[] locNames, in int[] strides) {
-      assert(locNames.length == _num);
-      assert(strides.length == _num);
-
-      foreach (int i, vbo; _vboList)
-        vbo.attach(locNames[i], strides[i], i);
-    }
-
-    void draw(in DrawMode mode, in int num) {
-      glDrawArrays(mode, 0, num);
-    }
-
-  private:
-    size_t _num;
-    VBO[] _vboList;
-}
-
-class AttributeLocation {
-  public:
-    this(in GLuint program) {
-      _program = program;
-    }
-
-    void attach(in string name, in int stride, in int i) {
-      glBindAttribLocation(_program, i, cast(char*)name);
-      _location = glGetAttribLocation(_program, cast(char*)name);
-      locate(stride);
-    }
-
-  private:
-    void locate(in int stride) {
-      glEnableVertexAttribArray(_location);
-      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
-    }
-
-    GLuint _program;
-    GLint _location;
-}
-
-class Uniform {
-  public:
-    this(){
-      init();
-    }
-
-    this(string vShader, string fShader) {
-      this();
-      //extract(vShader, fShader);
-    }
-
-    void locate(in string name, in int value, in string type, in int num, in GLint location) {
-      _uniInt[type](location, value);
-    }
-
-    void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
-      _uniFloatV[type](location, value, num);
-    }
-
-  private:
-    void init() {
-      _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
-      _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
-      _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
-      _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
-      _uniFloatV["4fv"] = (location, value, num) { glUniform4fv(location, num, value.ptr); };
-      _uniFloatV["mat4fv"] = (location, value, num) { glUniformMatrix4fv(location, num, GL_FALSE, value.ptr); };
-    }
-
-    // TODO ソースから判別
-    void extract(string vShader, string fShader) {
-    }
-
-    void delegate(in GLint, in int)[string] _uniInt;
-    //void delegate(int[])[string] _uniIntV;
-    //void delegate(float)[string] _uniFloat;
-    void delegate(in GLint, in float[], in int)[string] _uniFloatV;
-}
-
-class UniformLocation {
-  public:
-    this(in GLuint program) {
-      _program = program;
-      _uniform = new Uniform;
-    }
-
-    void attach(T)(in string name, in T value, in string type, in int num=1) {
-      _location = glGetUniformLocation(_program, cast(char*)name); 
-      _uniform.locate(name, value, type, num, _location);
-    }
-
-  private:
-    Uniform _uniform;
-    GLuint _program;
-    GLint _location;
-}
-
 class UniformN {
   public:
     static this() {
@@ -179,34 +66,6 @@ class UniformLocationN {
     static UniformN _uniformN;
 }
 
-class VBO {
-  public:
-    this(in GLuint program) {
-      _attLoc = new AttributeLocation(program);
-      glGenBuffers(1, &_id);
-    }
-
-    ~this() {
-      glDeleteBuffers(1, &_id); 
-    }
-
-    void create(T)(in T data) {
-      glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    }
-
-    void attach(in string name, in int stride, in int i) {
-      glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      _attLoc.attach(name, stride, i);
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    }
-
-  private:
-    GLuint _id;
-    AttributeLocation _attLoc;
-}
-
 class AttributeLocationN {
   public:
     static void attach(in GLuint program, in string name, in int stride, in int i) {
@@ -226,37 +85,7 @@ class AttributeLocationN {
 
 class VBON {
   public:
-    // staticにしたい
     this() {
-      //_attLoc = new AttributeLocationN;
-      glGenBuffers(1, &_id);
-    }
-
-    ~this() {
-      glDeleteBuffers(1, &_id);
-    }
-
-    static void set(T)(in GLuint program, in T data, in string name, in int stride, in int i) {
-      glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
-      //_attLoc.attach(program, name, stride, i);
-      AttributeLocationN.attach(program, name, stride, i);
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    }
-
-    static void draw(in DrawMode mode, in int num) {
-      glDrawArrays(mode, 0, num);
-    }
-  
-  private:
-    static GLuint _id;
-    //AttributeLocationN _attLoc;
-}
-
-class VBOM {
-  public:
-    this() {
-      _attLoc = new AttributeLocationM;
       glGenBuffers(1, &_id);
     }
 
@@ -264,65 +93,16 @@ class VBOM {
       glDeleteBuffers(1, &_id); 
     }
 
-    void create(T)(in T data) {
-      glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    }
-
-    void attach(in GLuint program, in string name, in int stride, in int i) {
-      glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      _attLoc.attach(program, name, stride, i);
-      glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    }
-
     void set(T)(in GLuint program, in T data, in string name, in int stride, in int i) {
       glBindBuffer(GL_ARRAY_BUFFER, _id); 
       glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
-      _attLoc.attach(program, name, stride, i);
+      AttributeLocationN.attach(program, name, stride, i);
       glBindBuffer(GL_ARRAY_BUFFER, 0); 
     }
 
   private:
     GLuint _id;
-    AttributeLocationM _attLoc;
 }
-
-class AttributeLocationM {
-  public:
-    void attach(in GLuint program, in string name, in int stride, in int i) {
-      glBindAttribLocation(program, i, cast(char*)name);
-      _location = glGetAttribLocation(program, cast(char*)name);
-      locate(stride);
-    }
-
-  private:
-    void locate(in int stride) {
-      glEnableVertexAttribArray(_location);
-      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
-    }
-
-    GLint _location;
-}
-
-/*
-class AttributeLocationN {
-  public:
-    static void attach(in GLuint program, in string name, in int stride, in int i) {
-      glBindAttribLocation(program, i, cast(char*)name);
-      _location = glGetAttribLocation(program, cast(char*)name);
-      locate(stride);
-    }
-
-  private:
-    static void locate(in int stride) {
-      glEnableVertexAttribArray(_location);
-      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
-    }
-
-    static GLint _location;
-}
-*/
 
 class IBO {
   public:
@@ -352,7 +132,6 @@ class IBO {
 
 class IBON {
   public:
-    // staticにしたい
     this() {
       glGenBuffers(1, &_id);
     }
@@ -499,4 +278,148 @@ class Texture {
     int _w;
     int _h;
 }
+
+
+/*******************ここから************************/
+class VBOHdr {
+  public:
+    this(in size_t num, in GLuint program) {
+      _num = num;
+      _vboList.length = _num;
+      for (int i; i<_num; ++i)
+        _vboList[i] = new VBO(program);
+    }
+
+    void create_vbo(in float[][] list...) {
+      assert(list.length == _num, "Doesn't match the number of vbo attributes");
+
+      foreach(int i, data; list)
+        _vboList[i].create(data);
+    }
+
+    void enable_vbo(in string[] locNames, in int[] strides) {
+      assert(locNames.length == _num);
+      assert(strides.length == _num);
+
+      foreach (int i, vbo; _vboList)
+        vbo.attach(locNames[i], strides[i], i);
+    }
+
+    void draw(in DrawMode mode, in int num) {
+      glDrawArrays(mode, 0, num);
+    }
+
+  private:
+    size_t _num;
+    VBO[] _vboList;
+}
+
+class VBO {
+  public:
+    this(in GLuint program) {
+      _attLoc = new AttributeLocation(program);
+      glGenBuffers(1, &_id);
+    }
+
+    ~this() {
+      glDeleteBuffers(1, &_id); 
+    }
+
+    void create(T)(in T data) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+    void attach(in string name, in int stride, in int i) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      _attLoc.attach(name, stride, i);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+  private:
+    GLuint _id;
+    AttributeLocation _attLoc;
+}
+
+class AttributeLocation {
+  public:
+    this(in GLuint program) {
+      _program = program;
+    }
+
+    void attach(in string name, in int stride, in int i) {
+      glBindAttribLocation(_program, i, cast(char*)name);
+      _location = glGetAttribLocation(_program, cast(char*)name);
+      locate(stride);
+    }
+
+  private:
+    void locate(in int stride) {
+      glEnableVertexAttribArray(_location);
+      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+
+    GLuint _program;
+    GLint _location;
+}
+
+class Uniform {
+  public:
+    this(){
+      init();
+    }
+
+    this(string vShader, string fShader) {
+      this();
+      //extract(vShader, fShader);
+    }
+
+    void locate(in string name, in int value, in string type, in int num, in GLint location) {
+      _uniInt[type](location, value);
+    }
+
+    void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
+      _uniFloatV[type](location, value, num);
+    }
+
+  private:
+    void init() {
+      _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
+      _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
+      _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
+      _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
+      _uniFloatV["4fv"] = (location, value, num) { glUniform4fv(location, num, value.ptr); };
+      _uniFloatV["mat4fv"] = (location, value, num) { glUniformMatrix4fv(location, num, GL_FALSE, value.ptr); };
+    }
+
+    // TODO ソースから判別
+    void extract(string vShader, string fShader) {
+    }
+
+    void delegate(in GLint, in int)[string] _uniInt;
+    //void delegate(int[])[string] _uniIntV;
+    //void delegate(float)[string] _uniFloat;
+    void delegate(in GLint, in float[], in int)[string] _uniFloatV;
+}
+
+class UniformLocation {
+  public:
+    this(in GLuint program) {
+      _program = program;
+      _uniform = new Uniform;
+    }
+
+    void attach(T)(in string name, in T value, in string type, in int num=1) {
+      _location = glGetUniformLocation(_program, cast(char*)name); 
+      _uniform.locate(name, value, type, num, _location);
+    }
+
+  private:
+    Uniform _uniform;
+    GLuint _program;
+    GLint _location;
+}
+
+/************************ここまでいらない*************/
 
