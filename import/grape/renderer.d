@@ -64,6 +64,12 @@ class Renderer2 {
         UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
 
       // 5
+        auto wireframePtr = material.params["wireframe"].peek!(bool);
+        bool wireframe = *wireframePtr;
+        if (wireframe) {
+          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _ibon.draw(DrawMode.Triangles);
         //_vbon.draw(DrawMode.Triangles, 8);
       }
