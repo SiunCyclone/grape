@@ -1,5 +1,6 @@
 module grape.material;
 
+import derelict.opengl3.gl3;
 import std.variant;
 import std.stdio;
 import grape.shader;
@@ -13,8 +14,19 @@ class Material {
       set_param(params);
     }
 
+    @property {
+      ShaderProgram program() {
+        return _program;
+      }
+
+      ParamType[string] params() {
+        return _params;
+      }
+    }
+
   protected:
     void init() {
+      // TODO
       _params["vertexShader"] = "Set user's vertexShaderSource here";
       _params["fragmentShader"] = "Set user's fragmentShaderSource here";
     }
@@ -50,11 +62,12 @@ class ColorMaterial : Material {
       immutable vertexShaderSource = q{
         attribute vec3 position;
         attribute vec4 color;
+        uniform mat4 pvmMatrix;
         varying vec4 vColor;
 
         void main() {
           vColor = color;
-          gl_Position = vec4(position, 1.0);
+          gl_Position = pvmMatrix * vec4(position, 1.0);
         }
       };
 

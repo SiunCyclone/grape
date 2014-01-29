@@ -14,20 +14,58 @@ public import grape.font : FontRenderer;
 
 class Renderer2 {
   import grape.scene;
-  import grape.layer;
   import grape.camera;
+  import std.conv;
+  import std.algorithm;
+  import std.array;
+  import std.range;
 
   public:
     this() {
+      VBON _vbon = new VBON;
+      IBON _ibon = new IBON;
     }
 
     void render(Scene scene, Camera camera) {
-      // 1, geometry(入れる値)とmaterial(場所の名前)からvboをセット
-      // 2, geometryからiboをセット
-      // 3, cameraからuniformのpvmMatrixをセット
-      // 4, materialからprogram.use();
-      // 5, iboまたはvboで、materialからdrawMode参照して描画
-      // 6, 以下meshの数だけloop
+      foreach (i, mesh; scene.meshes) {
+        // 1, materialからprogram.use();
+        // 2, geometry(入れる値)とmaterial(場所の名前)からvboをセット
+        // 3, geometryからiboをセット
+        // 4, cameraからuniformのpvmMatrixをセット
+        // 5, iboまたはvboで、materialからdrawMode参照して描画
+
+      // 1
+        auto geometry = mesh.geometry;
+        auto material = mesh.material;
+        auto program = material.program;
+        program.use();
+
+      // 2
+        float[] position;
+        foreach (vec3; geometry.vertices) {
+          position ~= vec3.coord;
+        }
+
+        auto colorPtr = material.params["color"].peek!(int[]);
+        auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
+        float[3] tmp = colorRGB[] / ColorMax;
+        float[4] colorBase = tmp ~ 1.0;
+        float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+
+        _vbon.set(program, position, "position", 3, 0);
+        _vbon.set(program, color, "color", 4, 1);
+        // color, texture
+
+      // 3
+        _ibon.create(geometry.indices);
+
+      // 4
+        UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
+
+      // 5
+        _ibon.draw(DrawMode.Triangles);
+        //_vbon.draw(DrawMode.Triangles, 8);
+      }
     }
 
     /**
@@ -44,6 +82,9 @@ class Renderer2 {
     }
     
   private:
+    VBON _vbon;
+    IBON _ibon;
+    static immutable ColorMax = 255;
 }
 
 /**
@@ -71,7 +112,7 @@ abstract class Renderer {
       assert(strides.length == locNames.length);
 
       init_program(dg);
-      _vboHdr = new VBOHdr(strides.length, _program); // TODO Detect the number of attributes from ShaderSource.
+      _vboHdr = new VBOHdr(strides.length, _program); // TODO Detect the number of attributes from a ShaderSource.
       _uniLoc = new UniformLocation(_program);
       _locNames = locNames.dup;
       _strides = strides.dup;

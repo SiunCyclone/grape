@@ -72,6 +72,10 @@ class Geometry {
       Vec3[] vertices() {
         return _vertices;
       }
+
+      int[] indices() {
+        return _indices;
+      }
     }
 
   protected:
@@ -96,12 +100,20 @@ class CubeGeometry : Geometry {
                     Vec3(x, y, z),
                     Vec3(-x, y, z),
                     Vec3(-x, y, -z) ];
+      _indices = [ 0, 1, 2, 0, 2, 3,
+                   0, 1, 4, 1, 4, 5,
+                   1, 2, 5, 2, 5, 6,
+                   0, 3, 4, 3, 4, 7,
+                   4, 5, 6, 4, 6, 7,
+                   2, 3, 7, 2, 7, 6 ];
+      /*
       _indices = [ 0, 1, 2, 1, 2, 3,
                    4, 7, 6, 7, 6, 5,
                    0, 4, 5, 4, 5, 1,
                    1, 5, 6, 5, 6, 2,
                    2, 6, 7, 6, 7, 3,
                    4, 0, 3, 0, 3, 7 ];
+                   */
     }
 }
 

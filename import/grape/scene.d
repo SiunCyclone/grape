@@ -1,26 +1,34 @@
 module grape.scene;
 
-import grape.layer;
+//import std.variant;
+import grape.mesh;
 
 class Scene {
+  //alias ActorType = Algebraic!(Camera, Mesh, Light);
+  //alias ActorType = Algebraic!(Mesh);
+
   public:
     this() {
       // Basic, Fog, LensFlare 
     }
 
-    void add(Layer layer) {
-      _layers ~= layer;
+    //void add(T)(T actor) {
+    void add(Mesh mesh) {
+      _meshes ~= mesh;
+      //_actors ~= ActorType(actor);
     }
 
-    void remove(in int index) {
-      _layers = _layers[0..index] ~ _layers[index..$];
+    void remove() {
     }
 
-    void visible(in int index, in bool flag) {
-      _layers[index].visible(flag);
+    @property {
+      Mesh[] meshes() {
+        return _meshes;
+      }
     }
 
   private:
-    Layer[] _layers;
+    //ActorType[] _actors;
+    Mesh[] _meshes;
 }
 

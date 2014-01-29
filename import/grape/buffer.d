@@ -142,6 +142,43 @@ class UniformLocation {
     GLint _location;
 }
 
+class UniformN {
+  public:
+    static this() {
+      _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
+      _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
+      _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
+      _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
+      _uniFloatV["4fv"] = (location, value, num) { glUniform4fv(location, num, value.ptr); };
+      _uniFloatV["mat4fv"] = (location, value, num) { glUniformMatrix4fv(location, num, GL_FALSE, value.ptr); };
+    }
+
+    static void locate(in string name, in int value, in string type, in int num, in GLint location) {
+      _uniInt[type](location, value);
+    }
+
+    static void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
+      _uniFloatV[type](location, value, num);
+    }
+
+  private:
+    static void delegate(in GLint, in int)[string] _uniInt;
+    static void delegate(in GLint, in float[], in int)[string] _uniFloatV;
+    //static void delegate(in int[])[string] _uniIntV;
+    //static void delegate(in float)[string] _uniFloat;
+}
+
+class UniformLocationN {
+  public:
+    static void attach(T)(in GLuint program, in string name, in T value, in string type, in int num=1) {
+      auto location = glGetUniformLocation(program, cast(char*)name); 
+      _uniformN.locate(name, value, type, num, location);
+    }
+
+  private:
+    static UniformN _uniformN;
+}
+
 class VBO {
   public:
     this(in GLuint program) {
@@ -159,9 +196,9 @@ class VBO {
       glBindBuffer(GL_ARRAY_BUFFER, 0); 
     }
 
-    void attach(in string name, in int stride, in int num) {
+    void attach(in string name, in int stride, in int i) {
       glBindBuffer(GL_ARRAY_BUFFER, _id); 
-      _attLoc.attach(name, stride, num);
+      _attLoc.attach(name, stride, i);
       glBindBuffer(GL_ARRAY_BUFFER, 0); 
     }
 
@@ -169,6 +206,71 @@ class VBO {
     GLuint _id;
     AttributeLocation _attLoc;
 }
+
+class AttributeLocationN {
+  public:
+    static void attach(in GLuint program, in string name, in int stride, in int i) {
+      glBindAttribLocation(program, i, cast(char*)name);
+      _location = glGetAttribLocation(program, cast(char*)name);
+      locate(stride);
+    }
+
+  private:
+    static void locate(in int stride) {
+      glEnableVertexAttribArray(_location);
+      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+
+    static GLint _location;
+}
+
+class VBON {
+  public:
+    // staticにしたい
+    this() {
+      //_attLoc = new AttributeLocationN;
+      glGenBuffers(1, &_id);
+    }
+
+    ~this() {
+      glDeleteBuffers(1, &_id);
+    }
+
+    static void set(T)(in GLuint program, in T data, in string name, in int stride, in int i) {
+      glBindBuffer(GL_ARRAY_BUFFER, _id); 
+      glBufferData(GL_ARRAY_BUFFER, data[0].sizeof*data.length, data.ptr, GL_STREAM_DRAW);
+      //_attLoc.attach(program, name, stride, i);
+      AttributeLocationN.attach(program, name, stride, i);
+      glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    }
+
+    static void draw(in DrawMode mode, in int num) {
+      glDrawArrays(mode, 0, num);
+    }
+  
+  private:
+    static GLuint _id;
+    //AttributeLocationN _attLoc;
+}
+
+/*
+class AttributeLocationN {
+  public:
+    static void attach(in GLuint program, in string name, in int stride, in int i) {
+      glBindAttribLocation(program, i, cast(char*)name);
+      _location = glGetAttribLocation(program, cast(char*)name);
+      locate(stride);
+    }
+
+  private:
+    static void locate(in int stride) {
+      glEnableVertexAttribArray(_location);
+      glVertexAttribPointer(_location, stride, GL_FLOAT, GL_FALSE, 0, null);
+    }
+
+    static GLint _location;
+}
+*/
 
 class IBO {
   public:
@@ -194,6 +296,33 @@ class IBO {
   private: 
     GLuint _id;
     int[] _index;
+}
+
+class IBON {
+  public:
+    // staticにしたい
+    this() {
+      glGenBuffers(1, &_id);
+    }
+
+    ~this() {
+      glDeleteBuffers(1, &_id);
+    }
+
+    static void create(in int[] index) {
+      _index = index.dup;
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id); 
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STREAM_DRAW);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); 
+    }
+
+    static void draw(in DrawMode mode) { 
+      glDrawElements(mode, cast(int)_index.length, GL_UNSIGNED_INT, _index.ptr);
+    }
+
+  private: 
+    static GLuint _id;
+    static int[] _index;
 }
 
 class RBO {
