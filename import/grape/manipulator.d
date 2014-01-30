@@ -4,11 +4,12 @@ import std.stdio;
 import grape.math;
 import grape.geometry;
 
+/*
 alias Manipulator Manip;
 deprecated struct Manipulator {
   public:
     this(Vec3 vec3) {
-      _localCS.origin = Quat(vec3);
+      _localCS._origin = Quat(vec3);
     }
 
     void add(Vec3 vec3) {
@@ -52,8 +53,8 @@ deprecated struct Manipulator {
       auto quat = Quat(axis, rad);
 
       // _localCS.originの回転 
-      auto result = quat.conjugate * _localCS.origin * quat;
-      _localCS.origin = result;
+      auto result = quat.conjugate * _localCS._origin * quat;
+      _localCS._origin = result;
 
       // _localCS.xyzの回転 
       // _verticesの回転
@@ -64,7 +65,7 @@ deprecated struct Manipulator {
 
     @property {
       Quat origin() {
-        return _localCS.origin;
+        return _localCS._origin;
       }
 
       Quat[] vertices() {
@@ -76,4 +77,5 @@ deprecated struct Manipulator {
     CoordinateSystem _localCS;
     Quat[] _vertices;
 }
+*/
 

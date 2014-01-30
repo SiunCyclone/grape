@@ -6,7 +6,7 @@ import std.math;
 import std.stdio;
 
 import grape.math;
-import grape.manipulator;
+//import grape.manipulator;
 import grape.window : WINDOW_WIDTH, WINDOW_HEIGHT;
 
 /**
@@ -48,8 +48,8 @@ class Camera {
      * rad:     回転する角度
      */
     void rotate(Vec3 vec3, in float rad) {
-      _manip.rotate(vec3, rad); 
-      look_at(_manip.origin.vec3, _center, _manip.vertices[0].vec3);
+      //_manip.rotate(vec3, rad); 
+      //look_at(_manip.origin.vec3, _center, _manip.vertices[0].vec3);
     }
 
     /*
@@ -118,13 +118,13 @@ class Camera {
 
   private:
     void set(Vec3 eye, Vec3 center, Vec3 up) {
-      _manip = Manip(eye); // TODO 毎回作ってる
+      //_manip = Manip(eye); // TODO 毎回作ってる
       _center = center;
-      _manip.add(up); // TODO Manipを毎回作ってないと危険
+      //_manip.add(up); // TODO Manipを毎回作ってないと危険
     }
 
     Mat4 _proj, _view;
     Vec3 _center;
-    Manip _manip;
+    //Manip _manip;
 }
 

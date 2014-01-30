@@ -15,6 +15,8 @@ void main() {
   Camera camera;
   bool loop = true;
 
+  Geometry geometry;
+
   void delegate() init = {
     int width = 640;
     int height = 480;
@@ -24,12 +26,21 @@ void main() {
     camera = new Camera(1, 100);
     camera.look_at(Vec3(0, 0, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
-    auto geometry = new CubeGeometry(1, 1, 1);
+    geometry = new CubeGeometry(1, 1, 1);
     auto material = new ColorMaterial(
       "color", [ 100, 100, 150],
       "wireframe", true
     );
     auto mesh = new Mesh(geometry, material);
+    scene.add(mesh);
+
+    geometry = new CubeGeometry(0.5, 1, 0.5);
+    geometry.set_position(Vec3(1, 0, 0));
+    material = new ColorMaterial(
+      "color", [ 200, 50, 50],
+      "wireframe", true
+    );
+    mesh = new Mesh(geometry, material);
     scene.add(mesh);
 
     Input.key_down(KEY_Q, {
@@ -44,7 +55,8 @@ void main() {
     while (loop) {
       Input.poll();
 
-      camera.rotate(axis, rad);
+      //camera.rotate(axis, rad);
+      geometry.rotate(axis, rad);
       renderer.render(scene, camera);
 
       window.update();

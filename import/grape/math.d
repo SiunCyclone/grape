@@ -8,7 +8,7 @@ alias Vector3 Vec3;
 struct Vector3 {
   public:
     this(in float[] coord) {
-      this(coord[0], coord[1], coord[2]);
+      set(coord);
     }
     
     this(in float x, in float y, in float z) {
@@ -22,6 +22,13 @@ struct Vector3 {
       return result;
     }
 
+    Vec3 opBinary(string op)(Vec3 vec3) if (op == "-") {
+      auto tmp = new float[_coord.length];
+      tmp[] = _coord[] - vec3.coord[];
+      auto result = Vec3(tmp);
+      return result;
+    }
+
     Vec3 opBinary(string op)(float ratio) if (op == "*") {
       auto tmp = new float[_coord.length];
       tmp[] = _coord[] * ratio;
@@ -31,6 +38,10 @@ struct Vector3 {
 
     Vec3 opBinaryRight(string op)(float ratio) if (op == "*") {
       return opBinary!op(ratio);
+    }
+
+    void set(in float[] coord) {
+      _coord = coord.dup;
     }
 
     void set(in float x, in float y, in float z) {
@@ -175,7 +186,7 @@ struct Quaternion {
       set(vec3, 0.0);
     }
 
-    this(Vec3 vec3, in float rad) {
+    this(Vec3 vec3, in float rad) { // 回転行列の生成
       rotate(vec3, rad);
     }
 
@@ -187,12 +198,19 @@ struct Quaternion {
       return result;
     }
 
-    void set(Vec3 vec3, in float rad) {
+    void set(in Vec3 vec3) {
+      _vec3 = vec3;
+    }
+
+    void set(in float rad) {
+      _rad = rad;
+    }
+
+    void set(in Vec3 vec3, in float rad) {
       _rad = rad;
       _vec3 = vec3;
     }
 
-    // TODO Rename
     void rotate(Vec3 vec3, in float rad) {
       vec3.normalize;
 
@@ -230,7 +248,7 @@ struct Quaternion {
     }
 
   private:
-    float _rad;
     Vec3 _vec3;
+    float _rad;
 }
 

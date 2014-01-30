@@ -6,4 +6,5 @@ Makefile
 document/
 examples/.dub
 examples/bin/
+three/
 

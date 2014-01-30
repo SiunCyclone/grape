@@ -1,23 +1,78 @@
 module grape.geometry;
 
 import grape.math;
+import std.stdio;
+import std.algorithm;
+import std.array;
 
 struct CoordinateSystem {
-  void reset() {
-    origin = Quat(Vec3(0, 0, 0));
-    x = Quat(Vec3(1, 0, 0));
-    y = Quat(Vec3(0, 1, 0));
-    z = Quat(Vec3(0, 0, 1));
-  }
+  public:
+    CoordinateSystem opBinary(string op)(Vec3 vec3) if (op == "+") {
+      CoordinateSystem result;
+      result.set_position( _list[0].vec3 + vec3,
+                           _list[1].vec3 + vec3,
+                           _list[2].vec3 + vec3,
+                           _list[3].vec3 + vec3 );
+      return result;
+    }
 
-  Quat origin = Quat(Vec3(0, 0, 0));
-  Quat x = Quat(Vec3(1, 0, 0));
-  Quat y = Quat(Vec3(0, 1, 0));
-  Quat z = Quat(Vec3(0, 0, 1));
+    CoordinateSystem opBinaryRight(string op)(Vec3 vec3) if (op == "+") {
+      return opBinary!op(vec3);
+    }
+
+    ref CoordinateSystem opOpAssign(string op)(Vec3 vec3) if (op == "+") {
+      _list[0].set(_list[0].vec3 + vec3);
+      _list[1].set(_list[1].vec3 + vec3);
+      _list[2].set(_list[2].vec3 + vec3);
+      _list[3].set(_list[3].vec3 + vec3);
+      return this;
+    }
+
+    void set_position(Vec3 origin, Vec3 x, Vec3 y, Vec3 z) {
+      _list = [ Quat(origin), Quat(x), Quat(y), Quat(z) ];
+    }
+
+    void set_position(Quat origin, Quat x, Quat y, Quat z) {
+      _list = [ origin, x, y, z ];
+    }
+
+    void rotate(Quat rotQuat) {
+      _list = map!(pos => rotQuat.conjugate * pos * rotQuat)(_list).array;
+    }
+
+    @property {
+      Quat origin() {
+        return _list[0];
+      }
+
+      Quat x() {
+        return _list[1];
+      }
+
+      Quat y() {
+        return _list[2];
+      }
+
+      Quat z() {
+        return _list[3];
+      }
+    }
+
+  private:
+    Quat[] _list = [ Quat(Vec3(0, 0, 0)),
+                     Quat(Vec3(1, 0, 0)),
+                     Quat(Vec3(0, 1, 0)),
+                     Quat(Vec3(0, 0, 1)) ];
 }
 
 class Geometry {
   public:
+    void set_position(Vec3 vec3) {
+      auto distance = vec3 - _localCS.origin.vec3;
+      _localCS += distance;
+      _vertices = map!(x => x + distance)(_vertices).array; 
+    }
+
     void forward(in float distance) {
     }
 
@@ -49,25 +104,23 @@ class Geometry {
     }
 
     void rotate(in Vec3 axis, in float rad) {
-      auto quat = Quat(axis, rad);
+      auto rotQuat = Quat(axis, rad);
 
-      // _localCS.originの回転 
-      auto result = quat.conjugate * _localCS.origin * quat;
-      _localCS.origin = result;
+      // _localCSの回転 
+      _localCS.rotate(rotQuat);
 
-      // _localCS.xyzの回転 
       // _verticesの回転
+      auto tmp = map!(vec3 => Quat(vec3))(_vertices);
+      _vertices = map!(pos => (rotQuat.conjugate * pos * rotQuat).vec3)(tmp).array;
     }
 
     void scale() {
     }
 
     @property {
-      /*
       Quat origin() {
         return _localCS.origin;
       }
-      */
 
       Vec3[] vertices() {
         return _vertices;
@@ -106,14 +159,6 @@ class CubeGeometry : Geometry {
                    0, 3, 4, 3, 4, 7,
                    4, 5, 6, 4, 6, 7,
                    2, 3, 7, 2, 7, 6 ];
-      /*
-      _indices = [ 0, 1, 2, 1, 2, 3,
-                   4, 7, 6, 7, 6, 5,
-                   0, 4, 5, 4, 5, 1,
-                   1, 5, 6, 5, 6, 2,
-                   2, 6, 7, 6, 7, 3,
-                   4, 0, 3, 0, 3, 7 ];
-                   */
     }
 }
 
