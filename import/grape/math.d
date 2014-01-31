@@ -59,7 +59,7 @@ struct Vector3 {
     }
 
     @property {
-      float[3] coord() {
+      float[] coord() {
         return _coord;
       }
 

@@ -51,12 +51,14 @@ void main() {
   void delegate() animate = {
     Vec3 axis = Vec3(0, 1, 0);
     float rad = PI_2 / 180.0;
+    geometry.rotate(axis, PI);
 
     while (loop) {
       Input.poll();
 
       //camera.rotate(axis, rad);
-      geometry.rotate(axis, rad);
+      //geometry.rotate(axis, rad);
+      geometry.pitch(rad);
       renderer.render(scene, camera);
 
       window.update();

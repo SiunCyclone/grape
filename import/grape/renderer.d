@@ -66,9 +66,8 @@ class Renderer2 {
       // 5 
         auto wireframePtr = material.params["wireframe"].peek!(bool);
         bool wireframe = *wireframePtr;
-        if (wireframe) { // TODO
-          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        }
+
+        if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         _ibon.draw(DrawMode.Triangles);
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
       }

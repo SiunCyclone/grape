@@ -112,6 +112,10 @@ class Geometry {
     }
 
     @property {
+      Quat origin() {
+        return _origin;
+      }
+
       Vec3[] vertices() {
         return _vertices;
       }
@@ -125,6 +129,9 @@ class Geometry {
     void rotate_impl(in Vec3 axis, in float rad, in Vec3 pos) {
       void delegate() impl = {
         auto rotQuat = Quat(axis, rad);
+
+        // _originの回転
+        if (pos != _origin.vec3) _origin = rotQuat.conjugate * _origin * rotQuat;
 
         // _localCSの回転 
         _localCS.rotate(rotQuat);
@@ -168,5 +175,32 @@ class CubeGeometry : Geometry {
                    4, 5, 6, 4, 6, 7,
                    2, 3, 7, 2, 7, 6 ];
     }
+}
+
+unittest {
+  import std.range : zip;
+
+  bool nearly_equal(Vec3 a, Vec3 b) {
+    foreach (v; zip(a.coord, b.coord))
+      if (v[0] - v[1] > 0.001) return false;
+    return true;
+  }
+
+  Geometry geometry = new CubeGeometry(1, 1, 1);
+  assert(geometry.origin.vec3 == Vec3(0, 0, 0));
+  assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
+
+  geometry.set_position(Vec3(1, 0, 0));
+  assert(geometry.origin.vec3 == Vec3(1, 0, 0));
+
+  geometry.rotate(Vec3(0, 1, 0), PI);
+  assert(nearly_equal(geometry.origin.vec3, Vec3(-1, 0, 0)));
+
+  /*
+  geometry.pitch(PI_2);
+  geometry.yaw(PI_2);
+  geometry.roll(PI_2);
+  geometry.rotate(Vec3(0, 1, 0), PI, Vec3(1, 1, 1));
+  */
 }
 
