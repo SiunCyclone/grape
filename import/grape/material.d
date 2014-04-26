@@ -6,7 +6,7 @@ import std.stdio;
 import grape.shader;
 
 class Material {
-  alias ParamType = Algebraic!(int[], bool, string);
+  alias ParamType = Algebraic!(int[], bool, string, int);
 
   public:
     this(T...)(T params) {
@@ -58,27 +58,6 @@ class ColorMaterial : Material {
   public:
     this(T...)(T params) {
       super(params);
-
-      immutable vertexShaderSource = q{
-        attribute vec3 position;
-        attribute vec4 color;
-        uniform mat4 pvmMatrix;
-        varying vec4 vColor;
-
-        void main() {
-          vColor = color;
-          gl_Position = pvmMatrix * vec4(position, 1.0);
-        }
-      };
-
-      immutable fragmentShaderSource = q{
-        varying vec4 vColor;
-
-        void main() {
-          gl_FragColor = vColor;
-        }
-      };
-
       create_program(vertexShaderSource, fragmentShaderSource);
     }
 
@@ -87,5 +66,105 @@ class ColorMaterial : Material {
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec4 color;
+      uniform mat4 pvmMatrix;
+      varying vec4 vColor;
+
+      void main() {
+        vColor = color;
+        gl_Position = pvmMatrix * vec4(position, 1.0);
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      varying vec4 vColor;
+
+      void main() {
+        gl_FragColor = vColor;
+      }
+    };
+}
+
+class DiffuseMaterial : Material {
+  public:
+    this(T...)(T params) {
+      super(params);
+      create_program(vertexShaderSource, fragmentShaderSource);
+    }
+
+  protected:
+    override void init() {
+      _params["color"] = [ 255, 255, 255 ];
+      _params["wireframe"] = false;
+    }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec3 normal;
+      attribute vec4 color;
+
+      uniform vec3 lightPosition;
+
+      uniform mat4 pvmMatrix;
+      uniform mat4 invMatrix;
+
+      varying vec4 vColor;
+      
+      void main() {
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
+        float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
+        vColor = color * vec4(vec3(diffuse), 1.0);
+        gl_Position = pvmMatrix * vec4(position, 1.0); 
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      varying vec4 vColor;
+
+      void main() {
+        gl_FragColor = vColor;
+      }
+    };
+}
+
+class EmissiveMaterial : Material {
+  public:
+    this(T...)(T params) {
+      super(params);
+      create_program(vertexShaderSource, fragmentShaderSource);
+    }
+
+  protected:
+    override void init() {
+      //_params["color"] = [ 255, 255, 255 ];
+      //_params["wireframe"] = false;
+      _params["intensity"] = 50;
+    }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec4 color;
+      uniform mat4 pvmMatrix;
+      varying vec4 vColor;
+
+      void main() {
+        vColor = color;
+        gl_Position = pvmMatrix * vec4(position, 1.0);
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      varying vec4 vColor;
+
+      void main() {
+        gl_FragColor = vColor;
+      }
+    };
 }
 

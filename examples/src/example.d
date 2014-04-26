@@ -15,7 +15,8 @@ void main() {
   Camera camera;
   bool loop = true;
 
-  Geometry geometry;
+  Geometry cubeG;
+  Geometry cuboidG;
 
   void delegate() init = {
     int width = 640;
@@ -24,24 +25,24 @@ void main() {
     renderer = new Renderer2;
     scene = new Scene;
     camera = new Camera(1, 100);
-    camera.look_at(Vec3(0, 0, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
+    camera.look_at(Vec3(0, 1, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
-    geometry = new CubeGeometry(1, 1, 1);
-    auto material = new ColorMaterial(
-      "color", [ 100, 100, 150],
+    cubeG = new CubeGeometry(1, 1, 1);
+    auto cubeM = new ColorMaterial(
+      "color", [ 100, 200, 250],
       "wireframe", true
     );
-    auto mesh = new Mesh(geometry, material);
-    scene.add(mesh);
+    auto cube = new Mesh(cubeG, cubeM);
+    scene.add(cube);
 
-    geometry = new CubeGeometry(0.5, 1, 0.5);
-    geometry.set_position(Vec3(1, 0, 0));
-    material = new ColorMaterial(
-      "color", [ 200, 50, 50],
+    cuboidG = new CubeGeometry(0.5, 1, 0.5);
+    cuboidG.set_position(Vec3(1, 0, 0));
+    auto cubioidM = new ColorMaterial(
+      "color", [ 100, 250, 50],
       "wireframe", true
     );
-    mesh = new Mesh(geometry, material);
-    scene.add(mesh);
+    auto cubioid = new Mesh(cuboidG, cubioidM);
+    scene.add(cubioid);
 
     Input.key_down(KEY_Q, {
       loop = false;
@@ -49,16 +50,16 @@ void main() {
   };
 
   void delegate() animate = {
-    Vec3 axis = Vec3(0, 1, 0);
+    Vec3 axis = Vec3(0, 0, 1);
     float rad = PI_2 / 180.0;
-    geometry.rotate(axis, PI);
 
     while (loop) {
       Input.poll();
 
       //camera.rotate(axis, rad);
-      //geometry.rotate(axis, rad);
-      geometry.pitch(rad);
+      cubeG.yaw(rad);
+      cuboidG.rotate(axis, rad);
+      cuboidG.yaw(rad);
       renderer.render(scene, camera);
 
       window.update();

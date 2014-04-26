@@ -63,6 +63,7 @@ class Geometry {
   public:
     void set_position(Vec3 vec3) {
       auto distance = vec3 - _origin.vec3;
+
       _origin.set(_origin.vec3 + distance);
       _vertices = map!(x => x + distance)(_vertices).array; 
     }
@@ -186,7 +187,7 @@ unittest {
     return true;
   }
 
-  Geometry geometry = new CubeGeometry(1, 1, 1);
+  auto geometry = new CubeGeometry(1, 1, 1);
   assert(geometry.origin.vec3 == Vec3(0, 0, 0));
   assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
 

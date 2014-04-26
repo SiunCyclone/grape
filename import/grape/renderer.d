@@ -15,6 +15,7 @@ public import grape.font : FontRenderer;
 class Renderer2 {
   import grape.scene;
   import grape.camera;
+  import grape.mesh;
   import std.conv;
   import std.algorithm;
   import std.array;
@@ -29,47 +30,11 @@ class Renderer2 {
 
     void render(Scene scene, Camera camera) {
       foreach (i, mesh; scene.meshes) {
-        // 1, materialからprogram.use();
-        // 2, geometry(入れる値)とmaterial(場所の名前)からvboをセット
-        // 3, geometryからiboをセット
-        // 4, cameraからuniformのpvmMatrixをセット
-        // 5, iboまたはvboで、materialからdrawMode参照して描画
+        // 光源のリストアップ
 
-      // 1
-        auto geometry = mesh.geometry;
-        auto material = mesh.material;
-        auto program = material.program;
-        program.use();
-
-      // 2
-        float[] position;
-        foreach (vec3; geometry.vertices) {
-          position ~= vec3.coord;
-        }
-
-        auto colorPtr = material.params["color"].peek!(int[]);
-        auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
-        float[3] tmp = colorRGB[] / ColorMax;
-        float[4] colorBase = tmp ~ 1.0;
-        float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
-
-        _vbon[0].set(program, position, "position", 3, 0);
-        _vbon[1].set(program, color, "color", 4, 1);
-        // color, texture
-
-      // 3
-        _ibon.create(geometry.indices);
-
-      // 4
-        UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
-
-      // 5 
-        auto wireframePtr = material.params["wireframe"].peek!(bool);
-        bool wireframe = *wireframePtr;
-
-        if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        _ibon.draw(DrawMode.Triangles);
-        glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+        // Material型の判定
+        color_render_impl(mesh, camera);
+        //diffuse_render_impl(mesh);
       }
     }
 
@@ -87,6 +52,46 @@ class Renderer2 {
     }
     
   private:
+    void color_render_impl(Mesh mesh, Camera camera) {
+      auto geometry = mesh.geometry;
+      auto material = mesh.material;
+      auto program = material.program;
+      program.use();
+
+      float[] position;
+      foreach (vec3; geometry.vertices) {
+        position ~= vec3.coord;
+      }
+
+      auto colorPtr = material.params["color"].peek!(int[]);
+      auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
+      float[3] tmp = colorRGB[] / ColorMax;
+      float[4] colorBase = tmp ~ 1.0;
+      float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+
+      _vbon[0].set(program, position, "position", 3, 0);
+      _vbon[1].set(program, color, "color", 4, 1);
+      // color, texture
+
+      _ibon.create(geometry.indices);
+
+      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
+
+      auto wireframePtr = material.params["wireframe"].peek!(bool);
+      bool wireframe = *wireframePtr;
+
+      if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      _ibon.draw(DrawMode.Triangles);
+      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+    }
+
+    void diffuse_render_impl(Mesh mesh) {
+      auto geometry = mesh.geometry;
+      auto material = mesh.material;
+      auto program = material.program;
+      program.use();
+    }
+
     VBON[] _vbon;
     IBON _ibon;
     static immutable ColorMax = 255;
