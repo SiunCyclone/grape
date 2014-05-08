@@ -103,7 +103,7 @@ class Renderer2 {
  * デフォルトセットのRendererじゃ物足りない、自作のシェーダを使いたい
  * 等といった時にRendererを継承して新たなRendererのSubClass作成してください。
  */
-abstract class Renderer {
+deprecated abstract class Renderer {
   public:
     /**
      * Rendererの初期化
@@ -195,7 +195,7 @@ abstract class Renderer {
     int[] _strides;
 }
 
-class FilterRenderer : Renderer {
+deprecated class FilterRenderer : Renderer {
   public:
     this() {
       string[] locNames = [ "pos", "texCoord" ];
@@ -239,7 +239,7 @@ class FilterRenderer : Renderer {
  * TODO:
  * BlurFilter,GlowFilterの内部に移動させるか
  */
-class GaussianRenderer : Renderer {
+deprecated class GaussianRenderer : Renderer {
   public:
     this(in float[2] resolution) {
       string[] locNames = [ "pos", "texCoord" ];
@@ -301,7 +301,7 @@ class GaussianRenderer : Renderer {
     float[] _texCoord;
 }
 
-class NormalRenderer : Renderer {
+deprecated class NormalRenderer : Renderer {
   this() {
     string[] locNames = [ "pos", "color" ];
     int[] strides = [ 3, 4 ];
@@ -325,7 +325,7 @@ class NormalRenderer : Renderer {
  * TODO:
  * どんなRendererにするか決まってない
  */
-class BasicRenderer : Renderer {
+deprecated class BasicRenderer : Renderer {
   this() {
     string[] locNames = [ "pos", "color" ];
     int[] strides = [ 3, 4 ];
@@ -349,7 +349,7 @@ class BasicRenderer : Renderer {
  * TODO:
  * ImageRendererとの区別
  */
-class TextureRenderer : Renderer {
+deprecated class TextureRenderer : Renderer {
   public:
     this() {
       string[] locNames = [ "pos", "texCoord" ];

@@ -21,7 +21,7 @@ void main() {
   void delegate() init = {
     int width = 640;
     int height = 480;
-    window = new Window("example2", width, height);
+    window = new Window("example", width, height);
     renderer = new Renderer2;
     scene = new Scene;
     camera = new Camera(1, 100);

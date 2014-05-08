@@ -3,6 +3,9 @@ Grape
 
 Grape is a Cross-Platform Game Library for D.
 
+### Status
+Very Alpha
+
 ### Building
 
 ##### Requirement
