@@ -1,12 +1,4 @@
-import grape.window;
-import grape.camera;
-import grape.renderer;
-import grape.input;
-import grape.scene;
-import grape.geometry;
-import grape.material;
-import grape.mesh;
-import grape.math;
+import grape;
 
 void main() {
   Window window;
@@ -56,7 +48,6 @@ void main() {
     while (loop) {
       Input.poll();
 
-      //camera.rotate(axis, rad);
       cubeG.yaw(rad);
       cuboidG.rotate(axis, rad);
       cuboidG.yaw(rad);
