@@ -6,6 +6,9 @@ Grape is a Cross-Platform 3D Game Library for D.
 ### Status
 Very Alpha
 
+### Example(glow)
+![](http://i.imgur.com/0tjoxMa.png)
+
 ### Building
 
 ##### Requirement
