@@ -130,32 +130,6 @@ class IBO {
     int[] _index;
 }
 
-class IBON {
-  public:
-    this() {
-      glGenBuffers(1, &_id);
-    }
-
-    ~this() {
-      glDeleteBuffers(1, &_id);
-    }
-
-    static void create(in int[] index) {
-      _index = index.dup;
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id); 
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, _index[0].sizeof*_index.length, _index.ptr, GL_STREAM_DRAW);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); 
-    }
-
-    static void draw(in DrawMode mode) { 
-      glDrawElements(mode, cast(int)_index.length, GL_UNSIGNED_INT, _index.ptr);
-    }
-
-  private: 
-    static GLuint _id;
-    static int[] _index;
-}
-
 class RBO {
   public: 
     this() {
@@ -281,7 +255,7 @@ class Texture {
 
 
 /*******************ここから************************/
-class VBOHdr {
+deprecated class VBOHdr {
   public:
     this(in size_t num, in GLuint program) {
       _num = num;
@@ -314,7 +288,7 @@ class VBOHdr {
     VBO[] _vboList;
 }
 
-class VBO {
+deprecated class VBO {
   public:
     this(in GLuint program) {
       _attLoc = new AttributeLocation(program);
@@ -342,7 +316,7 @@ class VBO {
     AttributeLocation _attLoc;
 }
 
-class AttributeLocation {
+deprecated class AttributeLocation {
   public:
     this(in GLuint program) {
       _program = program;
@@ -364,7 +338,7 @@ class AttributeLocation {
     GLint _location;
 }
 
-class Uniform {
+deprecated class Uniform {
   public:
     this(){
       init();
@@ -403,7 +377,7 @@ class Uniform {
     void delegate(in GLint, in float[], in int)[string] _uniFloatV;
 }
 
-class UniformLocation {
+deprecated class UniformLocation {
   public:
     this(in GLuint program) {
       _program = program;

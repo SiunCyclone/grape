@@ -178,6 +178,13 @@ class CubeGeometry : Geometry {
     }
 }
 
+class TextureGeometry : Geometry {
+  public:
+    this() {
+
+    }
+}
+
 unittest {
   import std.range : zip;
 

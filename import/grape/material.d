@@ -89,6 +89,42 @@ class ColorMaterial : Material {
     };
 }
 
+// This is for Filter so a user don't use this.
+class TextureMaterial : Material {
+  public:
+    this(T...)(T params) {
+      super(params);
+      create_program(vertexShaderSource, fragmentShaderSource);
+    }
+
+  protected:
+    override void init() {
+    }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 pos;
+      attribute vec2 texCoord;
+      varying vec2 vTexCoord;
+      uniform mat4 pvmMatrix;
+
+      void main() {
+        vTexCoord = texCoord;
+        gl_Position = pvmMatrix * vec4(pos, 1.0); 
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      uniform sampler2D tex;
+      varying vec2 vTexCoord;
+
+      void main() {
+        vec4 smpColor = texture(tex, vTexCoord);
+        gl_FragColor = smpColor;
+      }
+    };
+}
+
 class DiffuseMaterial : Material {
   public:
     this(T...)(T params) {

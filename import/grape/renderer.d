@@ -16,6 +16,7 @@ class Renderer2 {
   import grape.scene;
   import grape.camera;
   import grape.mesh;
+  import grape.filter;
   import std.conv;
   import std.algorithm;
   import std.array;
@@ -23,18 +24,33 @@ class Renderer2 {
 
   public:
     this() {
-      _ibon = new IBON;
+      _ibo = new IBO;
       _vbon ~= new VBON;
       _vbon ~= new VBON;
     }
 
+    void enable_smooth(in string[] names...) {
+      foreach (name; names) {
+        if (name == "polygon") glEnable(GL_POLYGON_SMOOTH);
+        else if (name == "line") glEnable(GL_LINE_SMOOTH);
+        else writeln("Warning: " ~ name ~ " is not a smooth parameter's name. Check your enable_smooth()");
+      }
+    }
+
+    void disable_smooth(in string[] names...) {
+      foreach (name; names) {
+        if (name == "polygon") glDisable(GL_POLYGON_SMOOTH);
+        else if (name == "line") glDisable(GL_LINE_SMOOTH);
+        else writeln("Warning: " ~ name ~ " is not a smooth parameter's name. Check your disable_smooth()");
+      }
+    }
+
     void render(Scene scene, Camera camera) {
+      update(scene);
+
       foreach (i, mesh; scene.meshes) {
         // 光源のリストアップ
-
-        // Material型の判定
-        color_render_impl(mesh, camera);
-        //diffuse_render_impl(mesh);
+        render_impl(mesh, camera);
       }
     }
 
@@ -52,17 +68,23 @@ class Renderer2 {
     }
     
   private:
-    void color_render_impl(Mesh mesh, Camera camera) {
+    void update(Scene scene) {
+     
+    }
+
+    void render_impl(Mesh mesh, Camera camera) {
       auto geometry = mesh.geometry;
       auto material = mesh.material;
       auto program = material.program;
       program.use();
 
+      // VBO: Position
       float[] position;
       foreach (vec3; geometry.vertices) {
         position ~= vec3.coord;
       }
 
+      // VBO: Color
       auto colorPtr = material.params["color"].peek!(int[]);
       auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
       float[3] tmp = colorRGB[] / ColorMax;
@@ -71,29 +93,22 @@ class Renderer2 {
 
       _vbon[0].set(program, position, "position", 3, 0);
       _vbon[1].set(program, color, "color", 4, 1);
-      // color, texture
 
-      _ibon.create(geometry.indices);
+      _ibo.create(geometry.indices);
 
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
 
+      // Wireframe
       auto wireframePtr = material.params["wireframe"].peek!(bool);
       bool wireframe = *wireframePtr;
-
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      _ibon.draw(DrawMode.Triangles);
-      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
-    }
+      scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
 
-    void diffuse_render_impl(Mesh mesh) {
-      auto geometry = mesh.geometry;
-      auto material = mesh.material;
-      auto program = material.program;
-      program.use();
+      _ibo.draw(DrawMode.Triangles);
     }
 
     VBON[] _vbon;
-    IBON _ibon;
+    IBO _ibo;
     static immutable ColorMax = 255;
 }
 

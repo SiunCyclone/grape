@@ -1,6 +1,6 @@
 {
   "name": "grape",
-  "description": "Cross-Platform Game Library for D",
+  "description": "Cross-Platform 3D Game Library for D",
   "homepage": "https://github.com/SiunCyclone/grape",
   "license": "MIT",
   "authors": [

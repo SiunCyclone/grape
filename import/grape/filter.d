@@ -33,16 +33,6 @@ abstract class Filter {
       }
     }
 
-    /*
-    final void set_camera(in float[] mat) {
-      _renderer.set_uniform("pvmMatrix", mat, "mat4fv");
-    }
-
-    // Enables user to respecify a filtered area. Note that the area is the whole screen by default.
-    final void set_area(in float x, in float y, in float w, in float h) {
-    }
-    */
-
     /**
      * ポストエフェクトの処理
      *

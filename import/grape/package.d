@@ -23,3 +23,4 @@ public import grape.math;
 public import grape.image;
 public import grape.filter;
 
+public import derelict.opengl3.gl3;

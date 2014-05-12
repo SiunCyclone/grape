@@ -1,7 +1,7 @@
 Grape
 ======
 
-Grape is a Cross-Platform Game Library for D.
+Grape is a Cross-Platform 3D Game Library for D.
 
 ### Status
 Very Alpha

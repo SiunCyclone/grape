@@ -22,6 +22,16 @@
     }
   ],
 
+  "configurations": [
+    {
+      "name": "glow",
+      "targetName": "glow",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/glow.d"]
+    }
+  ],
+
   "sourcePaths": ["../import/grape"],
   "importPaths": ["../import"]
 }
