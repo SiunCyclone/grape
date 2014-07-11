@@ -16,6 +16,8 @@ class Renderer2 {
   import grape.scene;
   import grape.camera;
   import grape.mesh;
+  import grape.geometry;
+  import grape.material;
   import grape.filter;
   import std.conv;
   import std.algorithm;
@@ -25,8 +27,11 @@ class Renderer2 {
   public:
     this() {
       _ibo = new IBO;
-      _vbon ~= new VBON;
-      _vbon ~= new VBON;
+      for (int i; i<MaxNumVBO; ++i) {
+        _vbon ~= new VBON;
+      }
+      
+      _renderImplCaller["color"] = (program, geometry, material, camera) { render_impl_color(program, geometry, material, camera); };
     }
 
     void enable_smooth(in string[] names...) {
@@ -45,12 +50,18 @@ class Renderer2 {
       }
     }
 
-    void render(Scene scene, Camera camera) {
-      update(scene);
+    void set_MaxNumVBO(in int n) {
+      MaxNumVBO = n;
+    }
 
+    void render(Scene scene, Camera camera) {
       foreach (i, mesh; scene.meshes) {
-        // 光源のリストアップ
-        render_impl(mesh, camera);
+        auto geometry = mesh.geometry;
+        auto material = mesh.material;
+        auto program = material.program;
+        program.use();
+
+        _renderImplCaller[material.name](program, geometry, material, camera);
       }
     }
 
@@ -68,16 +79,7 @@ class Renderer2 {
     }
     
   private:
-    void update(Scene scene) {
-     
-    }
-
-    void render_impl(Mesh mesh, Camera camera) {
-      auto geometry = mesh.geometry;
-      auto material = mesh.material;
-      auto program = material.program;
-      program.use();
-
+    void render_impl_color(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
       // VBO: Position
       float[] position;
       foreach (vec3; geometry.vertices) {
@@ -98,7 +100,7 @@ class Renderer2 {
 
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
 
-      // Wireframe
+      // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);
       bool wireframe = *wireframePtr;
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -107,9 +109,11 @@ class Renderer2 {
       _ibo.draw(DrawMode.Triangles);
     }
 
+    static immutable ColorMax = 255;
+    int MaxNumVBO = 10;
     VBON[] _vbon;
     IBO _ibo;
-    static immutable ColorMax = 255;
+    static void delegate(ShaderProgram, Geometry, Material, Camera)[string] _renderImplCaller;
 }
 
 /**

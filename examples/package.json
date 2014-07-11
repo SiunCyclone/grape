@@ -26,6 +26,13 @@
       "targetType": "executable",
       "targetPath": "bin",
       "sourceFiles": ["src/glow.d"]
+    },
+    {
+      "name": "test",
+      "targetName": "test",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/test.d"]
     }
   ],
 

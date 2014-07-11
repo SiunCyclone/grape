@@ -29,7 +29,7 @@ void main() {
     void delegate() initCube = {
       cubeG = new CubeGeometry(1, 1, 1);
       auto cubeM = new ColorMaterial(
-        "color", [ 100, 200, 250],
+        "color", [ 200, 250, 160],
         "wireframe", true
       );
       auto cube = new Mesh(cubeG, cubeM);
@@ -41,8 +41,8 @@ void main() {
       cuboidG = new CubeGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
       auto cubioidM = new ColorMaterial(
-        "color", [ 100, 250, 50],
-        "wireframe", true
+        "color", [ 200, 150, 250],
+        "wireframe", false 
       );
       auto cubioid = new Mesh(cuboidG, cubioidM);
 

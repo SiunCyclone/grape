@@ -22,11 +22,16 @@ class Material {
       ParamType[string] params() {
         return _params;
       }
+
+      string name() {
+        return _name;
+      }
     }
 
   protected:
     void init() {
       // TODO
+      _name = "none";
       _params["vertexShader"] = "Set user's vertexShaderSource here";
       _params["fragmentShader"] = "Set user's fragmentShaderSource here";
     }
@@ -52,6 +57,7 @@ class Material {
 
     ParamType[string] _params;
     ShaderProgram _program;
+    string _name;
 }
 
 class ColorMaterial : Material {
@@ -63,6 +69,7 @@ class ColorMaterial : Material {
 
   protected:
     override void init() {
+      _name = "color";
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
@@ -99,6 +106,7 @@ class TextureMaterial : Material {
 
   protected:
     override void init() {
+      _name = "texture";
     }
 
   private:
@@ -134,6 +142,7 @@ class DiffuseMaterial : Material {
 
   protected:
     override void init() {
+      _name = "diffuse";
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
@@ -177,6 +186,7 @@ class EmissiveMaterial : Material {
 
   protected:
     override void init() {
+      _name = "emissive";
       //_params["color"] = [ 255, 255, 255 ];
       //_params["wireframe"] = false;
       _params["intensity"] = 50;
