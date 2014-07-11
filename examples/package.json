@@ -19,10 +19,7 @@
       "targetType": "executable",
       "targetPath": "bin",
       "sourceFiles": ["src/example.d"]
-    }
-  ],
-
-  "configurations": [
+    },
     {
       "name": "glow",
       "targetName": "glow",
