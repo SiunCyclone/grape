@@ -22,7 +22,7 @@ void main() {
     camera = new Camera(1, 100);
     camera.look_at(Vec3(0, 1, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
-    cubeG = new CubeGeometry(1, 1, 1);
+    cubeG = new BoxGeometry(1, 1, 1);
     auto cubeM = new ColorMaterial(
       "color", [ 100, 200, 250],
       "wireframe", true
@@ -30,7 +30,7 @@ void main() {
     auto cube = new Mesh(cubeG, cubeM);
     scene.add(cube);
 
-    cuboidG = new CubeGeometry(0.5, 1, 0.5);
+    cuboidG = new BoxGeometry(0.5, 1, 0.5);
     cuboidG.set_position(Vec3(1, 0, 0));
     auto cubioidM = new ColorMaterial(
       "color", [ 250, 200, 50],

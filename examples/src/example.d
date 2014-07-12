@@ -27,7 +27,7 @@ void main() {
     };
 
     void delegate() initCube = {
-      cubeG = new CubeGeometry(1, 1, 1);
+      cubeG = new BoxGeometry(1, 1, 1);
       auto cubeM = new ColorMaterial(
         "color", [ 100, 200, 250],
         "wireframe", true
@@ -38,7 +38,7 @@ void main() {
     };
 
     void delegate() initCubioid = {
-      cuboidG = new CubeGeometry(0.5, 1, 0.5);
+      cuboidG = new BoxGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
       auto cubioidM = new ColorMaterial(
         "color", [ 100, 250, 50],

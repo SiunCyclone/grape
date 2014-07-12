@@ -162,7 +162,7 @@ class Geometry {
     Vec3[] _normals;
 }
 
-class CubeGeometry : Geometry {
+class BoxGeometry : Geometry {
   public:
     this(in float width, in float height, in float depth) {
       auto x = width / 2;
@@ -210,7 +210,7 @@ unittest {
     return true;
   }
 
-  auto geometry = new CubeGeometry(1, 1, 1);
+  auto geometry = new BoxGeometry(1, 1, 1);
   assert(geometry.origin.vec3 == Vec3(0, 0, 0));
   assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
 
