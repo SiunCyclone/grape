@@ -144,7 +144,7 @@ class Renderer2 {
       
       // VBO: Normal
       float[] normal;
-      foreach (vec3; geometry.vertex_normals) {
+      foreach (vec3; geometry.normals) {
         normal ~= vec3.coord;
       }
 
@@ -158,10 +158,9 @@ class Renderer2 {
 
       // Uniform Setting
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
-      // TODO ModelMatrixのinvMatrixを設定する
       UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv", 1);
       // TODO sceneの中にlight置くようにする
-      UniformLocationN.attach(program, "lightPosition", [2.0f, 0.0f, 0.0f], "3fv", 1);
+      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv", 1);
 
       // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);

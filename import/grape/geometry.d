@@ -125,12 +125,8 @@ class Geometry {
         return _indices;
       }
 
-      Vec3[] face_normals() {
-        return _faceNormals;
-      }
-
-      Vec3[] vertex_normals() {
-        return _vertexNormals;
+      Vec3[] normals() {
+        return _normals;
       }
     }
 
@@ -148,6 +144,10 @@ class Geometry {
         // _verticesの回転
         auto tmp = map!(vec3 => Quat(vec3))(_vertices);
         _vertices = map!(pos => (rotQuat.conjugate * pos * rotQuat).vec3)(tmp).array;
+
+        // _normalsの回転
+        auto tmp2 = map!(vec3 => Quat(vec3))(_normals);
+        _normals = map!(pos => (rotQuat.conjugate * pos * rotQuat).vec3)(tmp2).array;
       };
 
       _vertices = map!(x => x - pos)(_vertices).array;
@@ -159,8 +159,7 @@ class Geometry {
     Quat _origin = Quat(Vec3(0, 0, 0));
     Vec3[] _vertices;
     int[] _indices;
-    Vec3[] _vertexNormals;
-    Vec3[] _faceNormals;
+    Vec3[] _normals;
 }
 
 class CubeGeometry : Geometry {
@@ -184,20 +183,14 @@ class CubeGeometry : Geometry {
                    0, 3, 4, 3, 4, 7,
                    4, 5, 6, 4, 6, 7,
                    2, 3, 7, 2, 7, 6 ];
-      _faceNormals = [ Vec3(0.0, -1.0, 0.0),
-                       Vec3(0.0, 1.0, 0.0),
-                       Vec3(1.0, 0.0, 0.0),
-                       Vec3(0.0, 0.0, 1.0),
-                       Vec3(-1.0, 0.0, 0.0),
-                       Vec3(0.0, 0.0, -1.0) ];
-      _vertexNormals = [ Vec3(1.0, -1.0, -1.0),
-                         Vec3(1.0, -1.0, 1.0),
-                         Vec3(-1.0, -1.0, 1.0),
-                         Vec3(-1.0, -1.0, -1.0),
-                         Vec3(1.0, 1.0, -1.0),
-                         Vec3(1.0, 1.0, 1.0),
-                         Vec3(-1.0, 1.0, 1.0),
-                         Vec3(-1.0, 1.0, -1.0) ];
+      _normals= [ Vec3(1.0, -1.0, -1.0),
+                  Vec3(1.0, -1.0, 1.0),
+                  Vec3(-1.0, -1.0, 1.0),
+                  Vec3(-1.0, -1.0, -1.0),
+                  Vec3(1.0, 1.0, -1.0),
+                  Vec3(1.0, 1.0, 1.0),
+                  Vec3(-1.0, 1.0, 1.0),
+                  Vec3(-1.0, 1.0, -1.0) ];
     }
 }
 
