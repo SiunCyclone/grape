@@ -6,6 +6,7 @@ import std.stdio;
 import std.conv;
 //import std.string;
 
+import grape.math;
 // obj hdr
 /**
  * ファイル操作をするクラス
@@ -18,29 +19,35 @@ class FileHdr {
     /**
      * objファイルから頂点を読み込む
      *
-     * objファイルを読み込んで、頂点をfloat[]の配列にして返します。
+     * objファイルを読み込んで、頂点をVec3[]の配列にして返します。
      * file: objファイル名
      */
-    float[] make_mesh(in string file) {
-      float[] mesh;
+    Vec3[] make_vertices(in string file) {
+      Vec3[] vertices;
       auto f = File(file, "r");
 
+      float[] coord;
       foreach (string line; lines(f)) {
         if (line.split[0] != "v") continue;
-        foreach (float coord; line.split[1..$].map!(x => to!(float)(x)).array)
-          mesh ~= coord;
+        foreach (float value; line.split[1..$].map!(x => to!(float)(x)).array) {
+          coord ~= value;
+        }
+        vertices ~= Vec3(coord);
+        coord.length = 0;
       }
 
-      return mesh;
+      return vertices;
     }
 
     /**
      * objファイルから法線を読み込む
      *
-     * objを読み込んで、法線をfloat[]の配列にして返します。
+     * objを読み込んで、法線をVec3[]の配列にして返します。
      * file: objファイル名
      */
-    float[] make_normal(in string file) {
+    // FIXME listの最後にnanが入ってる。
+    Vec3[] make_normals(in string file) {
+      Vec3[] list;
       float[][] randomNormal;
       float[] normal;
       auto f = File(file, "r");
@@ -63,7 +70,11 @@ class FileHdr {
         }
       }
 
-      return normal;
+      for(int i; i<normal.length/3; ++i) {
+        list ~= Vec3([normal[i*3], normal[i*3+1], normal[i*3+2]]);
+      }
+
+      return list;
     }
 
 
@@ -73,7 +84,7 @@ class FileHdr {
      * objを読み込んで、インデックスをint[]の配列にして返します。
      * file: objファイル名
      */
-    int[] make_index(in string file) {
+    int[] make_indices(in string file) {
       int[] t;
       auto buf = appender(t);
       auto f = File(file, "r");
@@ -84,8 +95,8 @@ class FileHdr {
         string[] u = line.split[1..$];
         auto k = u.map!(x => x.split("//"));
         int[] index = (k[0].length < 2) ?
-                      u.map!(x => to!(int)(x)-1).array :
-                      k.map!(x => x[0]).map!(y => to!(int)(y)-1).array;
+                       u.map!(x => to!(int)(x)-1).array :
+                       k.map!(x => x[0]).map!(y => to!(int)(y)-1).array;
 
         buf.put([index[0], index[1], index[2]]);
         if (index.length > 3)

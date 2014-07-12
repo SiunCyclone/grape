@@ -183,14 +183,18 @@ class BoxGeometry : Geometry {
                    0, 3, 4, 3, 4, 7,
                    4, 5, 6, 4, 6, 7,
                    2, 3, 7, 2, 7, 6 ];
-      _normals= [ Vec3(1.0, -1.0, -1.0),
-                  Vec3(1.0, -1.0, 1.0),
-                  Vec3(-1.0, -1.0, 1.0),
-                  Vec3(-1.0, -1.0, -1.0),
-                  Vec3(1.0, 1.0, -1.0),
-                  Vec3(1.0, 1.0, 1.0),
-                  Vec3(-1.0, 1.0, 1.0),
-                  Vec3(-1.0, 1.0, -1.0) ];
+      _normals = [ Vec3(1.0, -1.0, -1.0),
+                   Vec3(1.0, -1.0, 1.0),
+                   Vec3(-1.0, -1.0, 1.0),
+                   Vec3(-1.0, -1.0, -1.0),
+                   Vec3(1.0, 1.0, -1.0),
+                   Vec3(1.0, 1.0, 1.0),
+                   Vec3(-1.0, 1.0, 1.0),
+                   Vec3(-1.0, 1.0, -1.0) ];
+    }
+
+    this(in float width, in float height, in float depth, in int widthSegments=1, in int heightSegments=1, in int depthSegments=1) {
+      this(width, height, depth);
     }
 }
 
@@ -198,6 +202,15 @@ class TextureGeometry : Geometry {
   public:
     this() {
 
+    }
+}
+
+class CustomGeometry : Geometry {
+  public:
+    this(Vec3[] vertices, int[] indices, Vec3[] normals) {
+      _vertices = vertices;
+      _indices = indices;
+      _normals = normals;
     }
 }
 

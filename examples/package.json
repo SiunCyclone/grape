@@ -28,6 +28,13 @@
       "sourceFiles": ["src/glow.d"]
     },
     {
+      "name": "obj_read",
+      "targetName": "obj_read",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/obj_read.d"]
+    },
+    {
       "name": "test",
       "targetName": "test",
       "targetType": "executable",
