@@ -30,8 +30,9 @@ class Material {
 
   protected:
     void init() {
-      // TODO
       _name = "none";
+      _shading = "gauraud";
+      // TODO
       _params["vertexShader"] = "Set user's vertexShaderSource here";
       _params["fragmentShader"] = "Set user's fragmentShaderSource here";
     }
@@ -58,6 +59,7 @@ class Material {
     ParamType[string] _params;
     ShaderProgram _program;
     string _name;
+    string _shading;
 }
 
 class ColorMaterial : Material {
@@ -70,6 +72,7 @@ class ColorMaterial : Material {
   protected:
     override void init() {
       _name = "color";
+      _params["shading"] = _shading;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
@@ -84,6 +87,103 @@ class ColorMaterial : Material {
       void main() {
         vColor = color;
         gl_Position = pvmMatrix * vec4(position, 1.0);
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      varying vec4 vColor;
+
+      void main() {
+        gl_FragColor = vColor;
+      }
+    };
+}
+
+class DiffuseMaterial : Material {
+  public:
+    this(T...)(T params) {
+      super(params);
+      create_program(vertexShaderSource, fragmentShaderSource);
+    }
+
+  protected:
+    override void init() {
+      _name = "diffuse";
+      _params["shading"] = _shading;
+      _params["color"] = [ 255, 255, 255 ];
+      _params["wireframe"] = false;
+    }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec3 normal;
+      attribute vec4 color;
+
+      uniform vec3 lightPosition;
+
+      uniform mat4 pvmMatrix;
+      uniform mat4 invMatrix;
+
+      varying vec4 vColor;
+      
+      void main() {
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
+        float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
+        vColor = color * vec4(vec3(diffuse), 1.0);
+        gl_Position = pvmMatrix * vec4(position, 1.0); 
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      varying vec4 vColor;
+
+      void main() {
+        gl_FragColor = vColor;
+      }
+    };
+}
+
+class ADSMaterial : Material {
+  public:
+    this(T...)(T params) {
+      super(params);
+      create_program(vertexShaderSource, fragmentShaderSource);
+    }
+
+  protected:
+    override void init() {
+      _name = "ads";
+      _params["shading"] = _shading;
+      _params["color"] = [ 255, 255, 255 ];
+      _params["wireframe"] = false;
+      _params["ambientColor"] = [ 0, 0, 0 ];
+    }
+
+  private:
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec3 normal;
+      attribute vec4 color;
+
+      uniform vec3 lightPosition;
+      uniform vec3 eyePosition;
+      uniform vec4 ambientColor;
+
+      uniform mat4 pvmMatrix;
+      uniform mat4 invMatrix;
+
+      varying vec4 vColor;
+      
+      void main() {
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
+        vec3 invEye = normalize(invMatrix * vec4(eyePosition, 0.0)).xyz;
+        vec3 halfLE = normalize(invLight + invEye);
+        float diffuse = clamp(dot(normal, invLight), 0.0, 1.0);
+        float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0);
+        vec4 light = color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
+        vColor = light + ambientColor;
+        gl_Position = pvmMatrix * vec4(position, 1.0); 
       }
     };
 
@@ -129,101 +229,6 @@ class TextureMaterial : Material {
       void main() {
         vec4 smpColor = texture(tex, vTexCoord);
         gl_FragColor = smpColor;
-      }
-    };
-}
-
-class DiffuseMaterial : Material {
-  public:
-    this(T...)(T params) {
-      super(params);
-      create_program(vertexShaderSource, fragmentShaderSource);
-    }
-
-  protected:
-    override void init() {
-      _name = "diffuse";
-      _params["color"] = [ 255, 255, 255 ];
-      _params["wireframe"] = false;
-    }
-
-  private:
-    static immutable vertexShaderSource = q{
-      attribute vec3 position;
-      attribute vec3 normal;
-      attribute vec4 color;
-
-      uniform vec3 lightPosition;
-
-      uniform mat4 pvmMatrix;
-      uniform mat4 invMatrix;
-
-      varying vec4 vColor;
-      
-      void main() {
-        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
-        float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
-        vColor = color * vec4(vec3(diffuse), 1.0);
-        gl_Position = pvmMatrix * vec4(position, 1.0); 
-      }
-    };
-
-    static immutable fragmentShaderSource = q{
-      varying vec4 vColor;
-
-      void main() {
-        gl_FragColor = vColor;
-      }
-    };
-}
-
-class ADSMaterial : Material {
-  public:
-    this(T...)(T params) {
-      super(params);
-      create_program(vertexShaderSource, fragmentShaderSource);
-    }
-
-  protected:
-    override void init() {
-      _name = "ads";
-      _params["color"] = [ 255, 255, 255 ];
-      _params["wireframe"] = false;
-      _params["ambientColor"] = [ 0, 0, 0 ];
-    }
-
-  private:
-    static immutable vertexShaderSource = q{
-      attribute vec3 position;
-      attribute vec3 normal;
-      attribute vec4 color;
-
-      uniform vec3 lightPosition;
-      uniform vec3 eyePosition;
-      uniform vec4 ambientColor;
-
-      uniform mat4 pvmMatrix;
-      uniform mat4 invMatrix;
-
-      varying vec4 vColor;
-      
-      void main() {
-        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
-        vec3 invEye = normalize(invMatrix * vec4(eyePosition, 0.0)).xyz;
-        vec3 halfLE = normalize(invLight + invEye);
-        float diffuse = clamp(dot(normal, invLight), 0.0, 1.0);
-        float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0);
-        vec4 light = color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
-        vColor = light + ambientColor;
-        gl_Position = pvmMatrix * vec4(position, 1.0); 
-      }
-    };
-
-    static immutable fragmentShaderSource = q{
-      varying vec4 vColor;
-
-      void main() {
-        gl_FragColor = vColor;
       }
     };
 }

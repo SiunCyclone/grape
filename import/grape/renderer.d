@@ -38,6 +38,12 @@ class Renderer2 {
     }
 
     void enable_smooth(in string[] names...) {
+      if (cast(int)names.length == 0) {
+        glEnable(GL_POLYGON_SMOOTH);
+        glEnable(GL_LINE_SMOOTH);
+        return;
+      }
+
       foreach (name; names) {
         if (name == "polygon") glEnable(GL_POLYGON_SMOOTH);
         else if (name == "line") glEnable(GL_LINE_SMOOTH);
@@ -50,6 +56,12 @@ class Renderer2 {
     }
 
     void disable_smooth(in string[] names...) {
+      if (cast(int)names.length == 0) {
+        glDisable(GL_POLYGON_SMOOTH);
+        glDisable(GL_LINE_SMOOTH);
+        return;
+      }
+
       foreach (name; names) {
         if (name == "polygon") glDisable(GL_POLYGON_SMOOTH);
         else if (name == "line") glDisable(GL_LINE_SMOOTH);
@@ -97,8 +109,10 @@ class Renderer2 {
     
   private:
     void render_impl_color(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
-      // VBO: Position
       float[] position;
+      float[] color;
+
+      // VBO: Position
       foreach (vec3; geometry.vertices) {
         position ~= vec3.coord;
       }
@@ -108,14 +122,14 @@ class Renderer2 {
       auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
       float[3] tmp = colorRGB[] / ColorMax;
       float[4] colorBase = tmp ~ 1.0;
-      float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+      color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+
+      // IBO Setting
+      _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
       _vbon[0].set(program, position, "position", 3, 0);
       _vbon[1].set(program, color, "color", 4, 1);
-
-      // IBO Setting
-      _ibo.create(geometry.indices);
 
       // Uniform Setting
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
@@ -130,10 +144,18 @@ class Renderer2 {
     }
 
     void render_impl_diffuse(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
-      // VBO: Position
       float[] position;
+      float[] normal;
+      float[] color;
+
+      // VBO: Position
       foreach (vec3; geometry.vertices) {
         position ~= vec3.coord;
+      }
+
+      // VBO: Normal
+      foreach (vec3; geometry.normals) {
+        normal ~= vec3.coord;
       }
 
       // VBO: Color
@@ -141,21 +163,15 @@ class Renderer2 {
       auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
       float[3] tmp = colorRGB[] / ColorMax;
       float[4] colorBase = tmp ~ 1.0;
-      float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+      color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
       
-      // VBO: Normal
-      float[] normal;
-      foreach (vec3; geometry.normals) {
-        normal ~= vec3.coord;
-      }
+      // IBO Setting
+      _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
       _vbon[0].set(program, position, "position", 3, 0);
       _vbon[1].set(program, color, "color", 4, 1);
       _vbon[2].set(program, normal, "normal", 3, 2);
-
-      // IBO Setting
-      _ibo.create(geometry.indices);
 
       // Uniform Setting
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
@@ -173,8 +189,11 @@ class Renderer2 {
     }
 
     void render_impl_ads(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
-      // VBO: Position
       float[] position;
+      float[] color;
+      float[] normal;
+
+      // VBO: Position
       foreach (vec3; geometry.vertices) {
         position ~= vec3.coord;
       }
@@ -184,21 +203,20 @@ class Renderer2 {
       auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
       float[3] tmp = colorRGB[] / ColorMax;
       float[4] colorBase = tmp ~ 1.0;
-      float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+      color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
       
       // VBO: Normal
-      float[] normal;
       foreach (vec3; geometry.normals) {
         normal ~= vec3.coord;
       }
+
+      // IBO Setting
+      _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
       _vbon[0].set(program, position, "position", 3, 0);
       _vbon[1].set(program, color, "color", 4, 1);
       _vbon[2].set(program, normal, "normal", 3, 2);
-
-      // IBO Setting
-      _ibo.create(geometry.indices);
 
       // Uniform: ambientColor
       auto ambientColorPtr = material.params["ambientColor"].peek!(int[]);
