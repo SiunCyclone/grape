@@ -10,33 +10,21 @@ void main() {
   int height = 480;
   bool loop = true;
 
-  Geometry cuboidG;
   Geometry sphereG;
 
   void delegate() init = {
     void delegate() initCore = {
       window = new Window("obj_read", width, height);
       renderer = new Renderer2;
+      renderer.enable_smooth;
       renderer.enable_depth;
       scene = new Scene;
       camera = new Camera(1, 100);
-      camera.look_at(Vec3(0, 1, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
+      camera.look_at(Vec3(0, 1, 2), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
       Input.key_down(KEY_Q, {
         loop = false;
       });
-    };
-
-    void delegate() initCubioid = {
-      cuboidG = new BoxGeometry(0.5, 1, 0.5);
-      cuboidG.set_position(Vec3(1.5, 0, 0));
-      auto cubioidM = new DiffuseMaterial(
-        "color", [ 200, 150, 250],
-        "wireframe", true
-      );
-      auto cubioid = new Mesh(cuboidG, cubioidM);
-
-      scene.add(cubioid);
     };
 
     void delegate() initSphere = {
@@ -57,7 +45,6 @@ void main() {
     };
 
     initCore();
-    initCubioid();
     initSphere();
   };
 
@@ -68,9 +55,7 @@ void main() {
     while (loop) {
       Input.poll();
 
-      sphereG.yaw(rad);
-      cuboidG.rotate(axis, rad);
-      cuboidG.yaw(rad);
+      sphereG.yaw(rad/4);
 
       renderer.render(scene, camera);
 
