@@ -124,6 +124,14 @@ class Geometry {
       int[] indices() {
         return _indices;
       }
+
+      Vec3[] face_normals() {
+        return _faceNormals;
+      }
+
+      Vec3[] vertex_normals() {
+        return _vertexNormals;
+      }
     }
 
   protected:
@@ -151,7 +159,8 @@ class Geometry {
     Quat _origin = Quat(Vec3(0, 0, 0));
     Vec3[] _vertices;
     int[] _indices;
-    // normal;
+    Vec3[] _vertexNormals;
+    Vec3[] _faceNormals;
 }
 
 class CubeGeometry : Geometry {
@@ -175,6 +184,20 @@ class CubeGeometry : Geometry {
                    0, 3, 4, 3, 4, 7,
                    4, 5, 6, 4, 6, 7,
                    2, 3, 7, 2, 7, 6 ];
+      _faceNormals = [ Vec3(0.0, -1.0, 0.0),
+                       Vec3(0.0, 1.0, 0.0),
+                       Vec3(1.0, 0.0, 0.0),
+                       Vec3(0.0, 0.0, 1.0),
+                       Vec3(-1.0, 0.0, 0.0),
+                       Vec3(0.0, 0.0, -1.0) ];
+      _vertexNormals = [ Vec3(1.0, -1.0, -1.0),
+                         Vec3(1.0, -1.0, 1.0),
+                         Vec3(-1.0, -1.0, 1.0),
+                         Vec3(-1.0, -1.0, -1.0),
+                         Vec3(1.0, 1.0, -1.0),
+                         Vec3(1.0, 1.0, 1.0),
+                         Vec3(-1.0, 1.0, 1.0),
+                         Vec3(-1.0, 1.0, -1.0) ];
     }
 }
 

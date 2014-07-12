@@ -173,6 +173,13 @@ struct Matrix4 {
       float[16] mat() {
         return _mat;
       }
+
+      Mat4 identity() {
+        return Mat4( 1, 0, 0, 0,
+                     0, 1, 0, 0,
+                     0, 0, 1, 0,
+                     0, 0, 0, 1 );
+      }
     }
 
   private:

@@ -17,6 +17,7 @@ void main() {
     void delegate() initCore = {
       window = new Window("example", width, height);
       renderer = new Renderer2;
+      renderer.enable_depth;
       scene = new Scene;
       camera = new Camera(1, 100);
       camera.look_at(Vec3(0, 1, 3), Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -28,9 +29,8 @@ void main() {
 
     void delegate() initCube = {
       cubeG = new CubeGeometry(1, 1, 1);
-      auto cubeM = new ColorMaterial(
-        "color", [ 200, 250, 160],
-        "wireframe", true
+      auto cubeM = new DiffuseMaterial(
+        "color", [ 200, 250, 160]
       );
       auto cube = new Mesh(cubeG, cubeM);
 
@@ -40,9 +40,8 @@ void main() {
     void delegate() initCubioid = {
       cuboidG = new CubeGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
-      auto cubioidM = new ColorMaterial(
-        "color", [ 200, 150, 250],
-        "wireframe", false 
+      auto cubioidM = new DiffuseMaterial(
+        "color", [ 200, 150, 250]
       );
       auto cubioid = new Mesh(cuboidG, cubioidM);
 
