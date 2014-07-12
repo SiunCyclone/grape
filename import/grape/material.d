@@ -111,14 +111,14 @@ class TextureMaterial : Material {
 
   private:
     static immutable vertexShaderSource = q{
-      attribute vec3 pos;
+      attribute vec3 position;
       attribute vec2 texCoord;
       varying vec2 vTexCoord;
       uniform mat4 pvmMatrix;
 
       void main() {
         vTexCoord = texCoord;
-        gl_Position = pvmMatrix * vec4(pos, 1.0); 
+        gl_Position = pvmMatrix * vec4(position, 1.0); 
       }
     };
 
@@ -177,7 +177,7 @@ class DiffuseMaterial : Material {
     };
 }
 
-class EmissiveMaterial : Material {
+class ADSMaterial : Material {
   public:
     this(T...)(T params) {
       super(params);
@@ -186,22 +186,36 @@ class EmissiveMaterial : Material {
 
   protected:
     override void init() {
-      _name = "emissive";
-      //_params["color"] = [ 255, 255, 255 ];
-      //_params["wireframe"] = false;
-      _params["intensity"] = 50;
+      _name = "ads";
+      _params["color"] = [ 255, 255, 255 ];
+      _params["wireframe"] = false;
+      _params["ambientColor"] = [ 0, 0, 0 ];
     }
 
   private:
     static immutable vertexShaderSource = q{
       attribute vec3 position;
+      attribute vec3 normal;
       attribute vec4 color;
-      uniform mat4 pvmMatrix;
-      varying vec4 vColor;
 
+      uniform vec3 lightPosition;
+      uniform vec3 eyePosition;
+      uniform vec4 ambientColor;
+
+      uniform mat4 pvmMatrix;
+      uniform mat4 invMatrix;
+
+      varying vec4 vColor;
+      
       void main() {
-        vColor = color;
-        gl_Position = pvmMatrix * vec4(position, 1.0);
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
+        vec3 invEye = normalize(invMatrix * vec4(eyePosition, 0.0));
+        vec3 halfLE = normalize(invLight + invEye);
+        float diffuse = clamp(dot(normal, invLight), 0.0, 1.0);
+        float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0);
+        vec4 light = color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0);
+        vColor = light + ambientColor;
+        gl_Position = pvmMatrix * vec4(position, 1.0); 
       }
     };
 

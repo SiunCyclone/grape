@@ -29,8 +29,9 @@ void main() {
 
     void delegate() initCube = {
       cubeG = new CubeGeometry(1, 1, 1);
-      auto cubeM = new DiffuseMaterial(
-        "color", [ 200, 250, 160]
+      auto cubeM = new ADSMaterial(
+        "color", [ 200, 150, 250],
+        "ambientColor", [ 0, 50, 150 ]
       );
       auto cube = new Mesh(cubeG, cubeM);
 

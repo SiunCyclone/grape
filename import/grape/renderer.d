@@ -34,6 +34,7 @@ class Renderer2 {
       
       _renderImplCaller["color"] = (program, geometry, material, camera) { render_impl_color(program, geometry, material, camera); };
       _renderImplCaller["diffuse"] = (program, geometry, material, camera) { render_impl_diffuse(program, geometry, material, camera); };
+      _renderImplCaller["ads"] = (program, geometry, material, camera) { render_impl_ads(program, geometry, material, camera); };
     }
 
     void enable_smooth(in string[] names...) {
@@ -161,6 +162,58 @@ class Renderer2 {
       UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv", 1);
       // TODO sceneの中にlight置くようにする
       UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv", 1);
+
+      // Wireframe Checking
+      auto wireframePtr = material.params["wireframe"].peek!(bool);
+      bool wireframe = *wireframePtr;
+      if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+
+      _ibo.draw(DrawMode.Triangles);
+    }
+
+    void render_impl_ads(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
+      // VBO: Position
+      float[] position;
+      foreach (vec3; geometry.vertices) {
+        position ~= vec3.coord;
+      }
+
+      // VBO: Color
+      auto colorPtr = material.params["color"].peek!(int[]);
+      auto colorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*colorPtr)).array;
+      float[3] tmp = colorRGB[] / ColorMax;
+      float[4] colorBase = tmp ~ 1.0;
+      float[] color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
+      
+      // VBO: Normal
+      float[] normal;
+      foreach (vec3; geometry.normals) {
+        normal ~= vec3.coord;
+      }
+
+      // Attach VBOs to the program
+      _vbon[0].set(program, position, "position", 3, 0);
+      _vbon[1].set(program, color, "color", 4, 1);
+      _vbon[2].set(program, normal, "normal", 3, 2);
+
+      // IBO Setting
+      _ibo.create(geometry.indices);
+
+      // Uniform: ambientColor
+      auto ambientColorPtr = material.params["ambientColor"].peek!(int[]);
+      auto ambientColorRGB = map!(x => x > ColorMax ? ColorMax : x)(map!(to!float)(*ambientColorPtr)).array;
+      float[3] tmp2 = ambientColorRGB[] / ColorMax;
+      float[4] ambientColor = tmp2 ~ 1.0;
+
+      // Uniform Setting
+      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
+      UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv", 1);
+      // TODO sceneの中にlight置くようにする
+      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv", 1);
+      // TODO camera実装してcameraの位置入れる
+      UniformLocationN.attach(program, "eyePosition", [0.0f, 1.0f, 3.0f], "3fv", 1);
+      UniformLocationN.attach(program, "ambientColor", ambientColor, "4fv", 1);
 
       // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);
