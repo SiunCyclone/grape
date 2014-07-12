@@ -161,7 +161,7 @@ class DiffuseMaterial : Material {
       varying vec4 vColor;
       
       void main() {
-        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
         float diffuse = clamp(dot(normal, invLight), 0.1, 1.0);
         vColor = color * vec4(vec3(diffuse), 1.0);
         gl_Position = pvmMatrix * vec4(position, 1.0); 
@@ -208,8 +208,8 @@ class ADSMaterial : Material {
       varying vec4 vColor;
       
       void main() {
-        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0));
-        vec3 invEye = normalize(invMatrix * vec4(eyePosition, 0.0));
+        vec3 invLight = normalize(invMatrix * vec4(lightPosition, 0.0)).xyz;
+        vec3 invEye = normalize(invMatrix * vec4(eyePosition, 0.0)).xyz;
         vec3 halfLE = normalize(invLight + invEye);
         float diffuse = clamp(dot(normal, invLight), 0.0, 1.0);
         float specular = pow(clamp(dot(normal, halfLE), 0.0, 1.0), 50.0);
