@@ -5,12 +5,6 @@ import grape.buffer;
 import grape.renderer;
 import grape.window;
 
-/**
- * ポストエフェクト用クラス
- *
- * デフォルトセットのFilterじゃ物足りない、自作のポストエフェクトを使いたい
- * 等といった時はFilterを継承して新たなFilterのSubClassを作成してください。
- */
 abstract class Filter {
   public:
     /**
@@ -37,8 +31,7 @@ abstract class Filter {
      * ポストエフェクトの処理
      *
      * 実際にポストエフェクトをかける関数です。
-     * 引数部分で下記のように描画処理をすれば、ポストエフェクトをかけたテクスチャが作成され、
-     * Filter.render();で描画できます。
+     * 引数部分で下記のように描画処理をすれば、ポストエフェクトがかかった状態で描画されます。
      * 
      * Examples:
      * ---------------
@@ -47,7 +40,16 @@ abstract class Filter {
      * });
      * ---------------
      */
-    abstract void filter(in void delegate());
+    final void filter(in void delegate() dg) {
+      black_filter(dg);
+      render();
+    }
+
+    /**
+     * filterが処理後の最終結果をrenderするのに対し、
+     * black_filterはrenderしない。
+     */
+    abstract void black_filter(in void delegate());
 
     /**
      * ポストエフェクトがかかったテクスチャの描画
@@ -64,7 +66,8 @@ abstract class Filter {
     /**
      * Filterが内部に所持しているテクスチャの描画
      *
-     * 基本的にユーザーが呼ぶことはありません。
+     * 基本的に使うことはありません
+     * filter()の途中で生成されるtextureを確認したいときに使えます。
      * 引数に受け取った番号のテクスチャを描画します。
      * BlurFilterならば、
      * 0:  renderした画面を格納したtexture
@@ -110,6 +113,7 @@ abstract class Filter {
     void fbo_scope(in void delegate() dg) {
       _fbo.binded_scope({
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ZERO); // default blend
         glViewport(0, 0, _w, _h);
@@ -132,8 +136,13 @@ class BlurFilter : Filter {
       _renderer = new GaussianRenderer([w, h]);
     }
 
-    override void filter(in void delegate() dg) {
-      create_filter(0, dg);
+    override void black_filter(in void delegate() dg) {
+      auto raw_render = {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        dg();
+      };
+
+      create_filter(0, raw_render);
       create_filter(1, {
         filter_scope(0, {
           _renderer.set_type(0);
@@ -163,9 +172,14 @@ class GlowFilter : Filter {
       _blurFilter = new BlurFilter(w2, h2);
     }
 
-    override void filter(in void delegate() dg) {
-      create_filter(0, dg);
-      _blurFilter.filter(dg);
+    override void black_filter(in void delegate() dg) {
+      auto raw_render = {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        dg();
+      };
+
+      create_filter(0, raw_render);
+      _blurFilter.black_filter(raw_render);
 
       create_filter(1, { 
         glBlendFunc(GL_ONE, GL_ONE);

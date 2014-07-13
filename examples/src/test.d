@@ -3,6 +3,7 @@ import grape;
 void main() {
   Window window;
   Renderer2 renderer;
+  BlurFilter filter;
   Scene scene;
   Camera camera;
 
@@ -14,14 +15,14 @@ void main() {
   Geometry cuboidG;
   Geometry sphereG;
 
-  GlowFilter filter;
-
   void delegate() init = {
     void delegate() initCore = {
       window = new Window("obj_read", width, height);
       renderer = new Renderer2;
       renderer.enable_depth;
       renderer.enable_smooth;
+      //filter = new GlowFilter(width, height, 128, 128);
+      filter = new BlurFilter(width, height);
       scene = new Scene;
       camera = new Camera(1, 100);
       camera.look_at(Vec3(1, 1, 2), Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -30,7 +31,6 @@ void main() {
         loop = false;
       });
 
-      filter = new GlowFilter(width, height, 128, 128);
     };
 
     void delegate() initCube = {
@@ -86,13 +86,13 @@ void main() {
     while (loop) {
       Input.poll();
 
-      //cubeG.pitch(rad);
       sphereG.yaw(rad/4);
       cuboidG.rotate(axis, rad);
       cuboidG.yaw(rad);
 
-      scene.filter(filter, renderer, camera);
-      filter.render();
+      filter.filter({
+        renderer.render(scene, camera);
+      });
 
       window.update();
     }

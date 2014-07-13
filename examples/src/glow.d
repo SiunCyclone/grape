@@ -57,8 +57,9 @@ void main() {
       cuboidG.rotate(axis, rad);
       cuboidG.yaw(rad);
 
-      scene.filter(filter, renderer, camera);
-      filter.render();
+      filter.filter({
+        renderer.render(scene, camera);
+      });
 
       window.update();
     }
