@@ -109,7 +109,10 @@ class Geometry {
       rotate_impl(axis, rad, pos);
     }
 
-    void scale() {
+    void scale(in float ratio) {
+      foreach (ref vertex; _vertices) {
+        vertex = vertex * ratio; 
+      } 
     }
 
     @property {
@@ -207,7 +210,7 @@ class TextureGeometry : Geometry {
 
 class CustomGeometry : Geometry {
   public:
-    this(Vec3[] vertices, int[] indices, Vec3[] normals) {
+    this(Vec3[] vertices=[], int[] indices=[], Vec3[] normals=[]) {
       _vertices = vertices;
       _indices = indices;
       _normals = normals;
