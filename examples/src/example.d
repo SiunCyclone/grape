@@ -10,7 +10,6 @@ void main() {
   int height = 480;
   bool loop = true;
 
-  Geometry cubeG;
   Geometry cuboidG;
 
   void delegate() init = {
@@ -26,22 +25,11 @@ void main() {
       });
     };
 
-    void delegate() initCube = {
-      cubeG = new BoxGeometry(1, 1, 1);
-      auto cubeM = new ColorMaterial(
-        "color", [ 100, 200, 250],
-        "wireframe", true
-      );
-      auto cube = new Mesh(cubeG, cubeM);
-
-      scene.add(cube);
-    };
-
     void delegate() initCubioid = {
       cuboidG = new BoxGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
       auto cubioidM = new ColorMaterial(
-        "color", [ 100, 250, 50],
+        "color", [ 255, 0, 255],
         "wireframe", true
       );
       auto cubioid = new Mesh(cuboidG, cubioidM);
@@ -50,7 +38,6 @@ void main() {
     };
 
     initCore();
-    initCube();
     initCubioid();
   };
 
@@ -61,7 +48,6 @@ void main() {
     while (loop) {
       Input.poll();
 
-      cubeG.yaw(rad);
       cuboidG.rotate(axis, rad);
       cuboidG.yaw(rad);
 

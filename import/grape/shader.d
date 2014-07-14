@@ -72,8 +72,8 @@ mixin template ClassicTextureShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        vec4 smpColor = texture(tex, vTexCoord);
-        // vec4 smpColor = texture(tex, vTexCoord);
+        vec4 smpColor = texture2D(tex, vTexCoord);
+        // vec4 smpColor = texture2D(tex, vTexCoord);
         gl_FragColor = smpColor;
         //gl_FragColor = vColor * smpColor;
       }
@@ -103,7 +103,7 @@ mixin template FontShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        vec4 smpColor = texture(tex, vTexCoord);
+        vec4 smpColor = texture2D(tex, vTexCoord);
         gl_FragColor = smpColor;
       }
     };
@@ -157,7 +157,7 @@ mixin template TextureShaderSource() {
       //varying vec4 vColor;
 
       void main() {
-        vec4 smpColor = texture(tex, vTexCoord);
+        vec4 smpColor = texture2D(tex, vTexCoord);
         //gl_FragColor = smpColor + vec4(1.0, 1.0, 1.0, 0.0);;
         gl_FragColor = smpColor;
         //gl_FragColor = smpColor + vec4(0.2, 0.2, 0.2, 0.0);
@@ -269,17 +269,17 @@ mixin template GaussianShaderSource() {
 
       void main() {
         vec2 t = vec2(1.0) / resolution;
-        vec4 color = texture(tex, vTexCoord) * weight[0];
+        vec4 color = texture2D(tex, vTexCoord) * weight[0];
 
         if (type == 0) {
-          for (int i=1; i<weight.length(); ++i) {
-            color += texture(tex, (gl_FragCoord.xy + vec2(-1.0*i, 0.0)) * t) * weight[i];
-            color += texture(tex, (gl_FragCoord.xy + vec2(1.0*i, 0.0)) * t) * weight[i];
+          for (int i=1; i<8; ++i) {
+            color += texture2D(tex, (gl_FragCoord.xy + vec2(-1*i, 0)) * t) * weight[i];
+            color += texture2D(tex, (gl_FragCoord.xy + vec2(1*i, 0)) * t) * weight[i];
           }
         } else if (type == 1) {
-          for (int i=1; i<weight.length(); ++i) {
-            color += texture(tex, (gl_FragCoord.xy + vec2(0.0, -1.0*i)) * t) * weight[i];
-            color += texture(tex, (gl_FragCoord.xy + vec2(0.0, 1.0*i)) * t) * weight[i];
+          for (int i=1; i<8; ++i) {
+            color += texture2D(tex, (gl_FragCoord.xy + vec2(0, -1*i)) * t) * weight[i];
+            color += texture2D(tex, (gl_FragCoord.xy + vec2(0, 1*i)) * t) * weight[i];
           }
         }
 
@@ -309,7 +309,7 @@ mixin template FilterShaderSource() {
       varying vec2 vTexCoord;
 
       void main() {
-        vec4 smpColor = texture(tex, vTexCoord);
+        vec4 smpColor = texture2D(tex, vTexCoord);
         gl_FragColor = smpColor;
         //gl_FragColor = (smpColor.rgb, 0.2);
         //gl_FragColor = smpColor + vec4(0.2, 0.0, 0.0, 1.0);

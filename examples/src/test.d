@@ -3,7 +3,7 @@ import grape;
 void main() {
   Window window;
   Renderer2 renderer;
-  BlurFilter filter;
+  GlowFilter filter;
   Scene scene;
   Camera camera;
 
@@ -21,8 +21,8 @@ void main() {
       renderer = new Renderer2;
       renderer.enable_depth;
       renderer.enable_smooth;
-      //filter = new GlowFilter(width, height, 128, 128);
-      filter = new BlurFilter(width, height);
+      filter = new GlowFilter(width, height, 256, 256);
+      //filter = new BlurFilter(width, height);
       scene = new Scene;
       camera = new Camera(1, 100);
       camera.look_at(Vec3(1, 1, 2), Vec3(0, 0, 0), Vec3(0, 1, 0));
@@ -65,7 +65,7 @@ void main() {
       sphereG = new CustomGeometry(vertices, indices, vertices);
       auto sphereM = new ADSMaterial(
         "color", [ 200, 150, 250],
-        "ambientColor", [ 150, 50, 50 ],
+        "ambientColor", [ 0, 50, 150 ],
         "wireframe", true
       );
       auto sphere = new Mesh(sphereG, sphereM);
