@@ -92,7 +92,7 @@ class Image {
  * TODO:
  * Camera使うか
  */
-class ImageRenderer : Renderer {
+class ImageRenderer : Old_Renderer {
   public:
     /**
      * 初期化

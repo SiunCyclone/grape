@@ -145,7 +145,7 @@ final class Font {
  *
  * Fontの描画は全てこのクラスが行います。
  */
-class FontRenderer : Renderer {
+class FontRenderer : Old_Renderer {
   public:
     this() {
       string[] locNames = ["pos", "texCoord"];

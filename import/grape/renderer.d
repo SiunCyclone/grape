@@ -12,7 +12,7 @@ import grape.window;
 public import grape.image : ImageRenderer;
 public import grape.font : FontRenderer;
 
-class Renderer2 {
+class Renderer {
   import grape.scene;
   import grape.camera;
   import grape.mesh;
@@ -260,7 +260,7 @@ class Renderer2 {
  * デフォルトセットのRendererじゃ物足りない、自作のシェーダを使いたい
  * 等といった時にRendererを継承して新たなRendererのSubClass作成してください。
  */
-deprecated abstract class Renderer {
+deprecated abstract class Old_Renderer {
   public:
     /**
      * Rendererの初期化
@@ -352,7 +352,7 @@ deprecated abstract class Renderer {
     int[] _strides;
 }
 
-deprecated class FilterRenderer : Renderer {
+deprecated class FilterRenderer : Old_Renderer {
   public:
     this() {
       string[] locNames = [ "pos", "texCoord" ];
@@ -396,7 +396,7 @@ deprecated class FilterRenderer : Renderer {
  * TODO:
  * BlurFilter,GlowFilterの内部に移動させるか
  */
-deprecated class GaussianRenderer : Renderer {
+deprecated class GaussianRenderer : Old_Renderer {
   public:
     this(in float[2] resolution) {
       string[] locNames = [ "pos", "texCoord" ];
@@ -458,7 +458,7 @@ deprecated class GaussianRenderer : Renderer {
     float[] _texCoord;
 }
 
-deprecated class NormalRenderer : Renderer {
+deprecated class NormalRenderer : Old_Renderer {
   this() {
     string[] locNames = [ "pos", "color" ];
     int[] strides = [ 3, 4 ];
@@ -482,7 +482,7 @@ deprecated class NormalRenderer : Renderer {
  * TODO:
  * どんなRendererにするか決まってない
  */
-deprecated class BasicRenderer : Renderer {
+deprecated class BasicRenderer : Old_Renderer {
   this() {
     string[] locNames = [ "pos", "color" ];
     int[] strides = [ 3, 4 ];
@@ -506,7 +506,7 @@ deprecated class BasicRenderer : Renderer {
  * TODO:
  * ImageRendererとの区別
  */
-deprecated class TextureRenderer : Renderer {
+deprecated class TextureRenderer : Old_Renderer {
   public:
     this() {
       string[] locNames = [ "pos", "texCoord" ];
