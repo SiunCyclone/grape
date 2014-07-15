@@ -25,20 +25,20 @@ void main() {
       });
     };
 
-    void delegate() initCubioid = {
+    void delegate() initCuboid = {
       cuboidG = new BoxGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
-      auto cubioidM = new ColorMaterial(
+      auto cuboidM = new ColorMaterial(
         "color", [ 255, 0, 255],
         "wireframe", true
       );
-      auto cubioid = new Mesh(cuboidG, cubioidM);
+      auto cuboid = new Mesh(cuboidG, cuboidM);
 
-      scene.add(cubioid);
+      scene.add(cuboid);
     };
 
     initCore();
-    initCubioid();
+    initCuboid();
   };
 
   void delegate() animate = {

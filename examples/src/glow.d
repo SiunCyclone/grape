@@ -40,21 +40,21 @@ void main() {
       scene.add(cube);
     };
 
-    void delegate() initCubioid = {
+    void delegate() initCuboid = {
       cuboidG = new BoxGeometry(0.5, 1, 0.5);
       cuboidG.set_position(Vec3(1, 0, 0));
-      auto cubioidM = new ColorMaterial(
+      auto cuboidM = new ColorMaterial(
         "color", [ 250, 200, 50],
         "wireframe", true
       );
-      auto cubioid = new Mesh(cuboidG, cubioidM);
+      auto cuboid = new Mesh(cuboidG, cuboidM);
 
-      scene.add(cubioid);
+      scene.add(cuboid);
     };
 
     initCore();
     initCube();
-    initCubioid();
+    initCuboid();
   };
 
   void delegate() animate = {

@@ -40,12 +40,38 @@ struct Vector3 {
       return opBinary!op(ratio);
     }
 
+    Vec3 opOpAssign(string op)(Vec3 vec3) if (op == "+") {
+      auto tmp = new float[_coord.length];
+      tmp[] = _coord[] + vec3.coord[];
+      _coord = tmp;
+      return this;
+    }
+
+    Vec3 opOpAssign(string op)(Vec3 vec3) if (op == "-") {
+      auto tmp = new float[_coord.length];
+      tmp[] = _coord[] - vec3.coord[];
+      _coord = tmp;
+      return this;
+    }
+
     void set(in float[] coord) {
       _coord = coord.dup;
     }
 
     void set(in float x, in float y, in float z) {
       _coord = [x, y, z];
+    }
+
+    void set_x(in float x) {
+      _coord[0] = x;
+    }
+
+    void set_y(in float y) {
+      _coord[1] = y;
+    }
+
+    void set_z(in float z) {
+      _coord[2] = z;
     }
 
     float dot(Vec3 vec3) {

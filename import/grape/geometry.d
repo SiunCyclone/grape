@@ -39,16 +39,16 @@ struct CoordinateSystem {
     }
 
     @property {
-      Quat x() {
-        return _list[0];
+      Vec3 x() {
+        return _list[0].vec3;
       }
 
-      Quat y() {
-        return _list[1];
+      Vec3 y() {
+        return _list[1].vec3;
       }
 
-      Quat z() {
-        return _list[2];
+      Vec3 z() {
+        return _list[2].vec3;
       }
     }
 
@@ -69,61 +69,55 @@ class Geometry {
     }
 
     void forward(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x, vertex.y, vertex.z + distance);
-      }
+      auto distanceVec3 = _localCS.z * distance;
+      move_impl(distanceVec3);
     }
 
     void back(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x, vertex.y, vertex.z - distance);
-      }
+      auto distanceVec3 = _localCS.z * (-distance);
+      move_impl(distanceVec3);
     }
 
     void up(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x, vertex.y + distance, vertex.z);
-      }
+      auto distanceVec3 = _localCS.y * distance;
+      move_impl(distanceVec3);
     }
 
     void down(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x, vertex.y - distance, vertex.z);
-      }
+      auto distanceVec3 = _localCS.y * (-distance);
+      move_impl(distanceVec3);
     }
 
     void right(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x + distance, vertex.y, vertex.z);
-      }
+      auto distanceVec3 = _localCS.x * distance;
+      move_impl(distanceVec3);
     }
 
     void left(in float distance) {
-      foreach (ref vertex; _vertices) {
-        vertex = Vec3(vertex.x - distance, vertex.y, vertex.z);
-      }
+      auto distanceVec3 = _localCS.x * (-distance);
+      move_impl(distanceVec3);
     }
 
     void pitch(in float rad) {
-      rotate_impl(_localCS.x.vec3, rad, _origin.vec3);
+      rotate_impl(_localCS.x, rad, _origin.vec3);
     }
 
     void yaw(in float rad) {
-      rotate_impl(_localCS.y.vec3, rad, _origin.vec3);
+      rotate_impl(_localCS.y, rad, _origin.vec3);
     }
 
     void roll(in float rad) {
-      rotate_impl(_localCS.z.vec3, rad, _origin.vec3);
+      rotate_impl(_localCS.z, rad, _origin.vec3);
     }
 
-    void translate(in Vec3 axis, in float distance) {
+    // 任意の直線の方向に移動
+    void translate(Vec3 axis, in float distance) {
+      auto distanceVec3 = axis * distance;
+      move_impl(distanceVec3);
     }
 
-    void rotate(in Vec3 axis, in float rad) {
-      rotate_impl(axis, rad, Vec3(0, 0, 0));
-    }
-
-    void rotate(in Vec3 axis, in float rad, in Vec3 pos) {
+    // 任意の点(pos)を通る直線(axis)を中心軸に回転
+    void rotate(in Vec3 axis, in float rad, in Vec3 pos=Vec3(0, 0, 0)) {
       rotate_impl(axis, rad, pos);
     }
 
@@ -152,6 +146,13 @@ class Geometry {
     }
 
   protected:
+    void move_impl(in Vec3 distanceVec3) {
+      foreach (ref vertex; _vertices) {
+        vertex += distanceVec3;
+      }
+      _origin.set(_origin.vec3 + distanceVec3);
+    }
+
     void rotate_impl(in Vec3 axis, in float rad, in Vec3 pos) {
       void delegate() impl = {
         auto rotQuat = Quat(axis, rad);
