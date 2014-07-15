@@ -20,6 +20,9 @@ public import grape.file;
 public import grape.math;
 
 
+public import grape.buffer;
+
+
 public import grape.image;
 public import grape.filter;
 

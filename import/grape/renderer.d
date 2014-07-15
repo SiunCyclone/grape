@@ -140,7 +140,8 @@ class Renderer2 {
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
 
-      _ibo.draw(DrawMode.Triangles);
+      auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
+      _ibo.draw(*drawModePtr);
     }
 
     void render_impl_diffuse(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
@@ -185,7 +186,8 @@ class Renderer2 {
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
 
-      _ibo.draw(DrawMode.Triangles);
+      auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
+      _ibo.draw(*drawModePtr);
     }
 
     void render_impl_ads(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
@@ -239,7 +241,8 @@ class Renderer2 {
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
 
-      _ibo.draw(DrawMode.Triangles);
+      auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
+      _ibo.draw(*drawModePtr);
     }
 
     static immutable ColorMax = 255;

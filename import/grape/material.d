@@ -4,9 +4,10 @@ import derelict.opengl3.gl3;
 import std.variant;
 import std.stdio;
 import grape.shader;
+import grape.buffer;
 
 class Material {
-  alias ParamType = Algebraic!(int[], bool, string, int);
+  alias ParamType = Algebraic!(int[], bool, string, int, DrawMode);
 
   public:
     this(T...)(T params) {
@@ -32,6 +33,7 @@ class Material {
     void init() {
       _name = "none";
       _shading = "gauraud";
+      _params["drawMode"] = DrawMode.Triangles;
       // TODO
       _params["vertexShader"] = "Set user's vertexShaderSource here";
       _params["fragmentShader"] = "Set user's fragmentShaderSource here";
@@ -73,6 +75,7 @@ class ColorMaterial : Material {
     override void init() {
       _name = "color";
       _params["shading"] = _shading;
+      _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
@@ -110,6 +113,7 @@ class DiffuseMaterial : Material {
     override void init() {
       _name = "diffuse";
       _params["shading"] = _shading;
+      _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
     }
@@ -155,6 +159,7 @@ class ADSMaterial : Material {
     override void init() {
       _name = "ads";
       _params["shading"] = _shading;
+      _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
       _params["ambientColor"] = [ 0, 0, 0 ];
