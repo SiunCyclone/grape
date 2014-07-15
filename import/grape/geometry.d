@@ -69,21 +69,39 @@ class Geometry {
     }
 
     void forward(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x, vertex.y, vertex.z + distance);
+      }
     }
 
     void back(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x, vertex.y, vertex.z - distance);
+      }
     }
 
     void up(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x, vertex.y + distance, vertex.z);
+      }
     }
 
     void down(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x, vertex.y - distance, vertex.z);
+      }
     }
 
     void right(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x + distance, vertex.y, vertex.z);
+      }
     }
 
     void left(in float distance) {
+      foreach (ref vertex; _vertices) {
+        vertex = Vec3(vertex.x - distance, vertex.y, vertex.z);
+      }
     }
 
     void pitch(in float rad) {

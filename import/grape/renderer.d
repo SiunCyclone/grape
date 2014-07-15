@@ -73,7 +73,9 @@ class Renderer2 {
       glDisable(GL_DEPTH_TEST);
     }
 
-
+    void set_point_size(in float size) {
+      glPointSize(size);
+    }
 
     void set_MaxNumVBO(in int n) {
       MaxNumVBO = n;
