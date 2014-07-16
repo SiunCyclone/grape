@@ -2,7 +2,7 @@ import grape;
 
 void main() {
   Window window;
-  Renderer2 renderer;
+  Renderer renderer;
   Scene scene;
   Camera camera;
 
@@ -15,7 +15,7 @@ void main() {
   void delegate() init = {
     void delegate() initCore = {
       window = new Window("obj_read", width, height);
-      renderer = new Renderer2;
+      renderer = new Renderer;
       renderer.enable_smooth;
       renderer.enable_depth;
       scene = new Scene;

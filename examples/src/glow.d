@@ -2,7 +2,7 @@ import grape;
 
 void main() {
   Window window;
-  Renderer2 renderer;
+  Renderer renderer;
   GlowFilter filter;
   Scene scene;
   Camera camera;
@@ -17,7 +17,7 @@ void main() {
   void delegate() init = {
     void delegate() initCore = {
       window = new Window("glow", width, height);
-      renderer = new Renderer2;
+      renderer = new Renderer;
       renderer.enable_smooth("line", "polygon");
       filter = new GlowFilter(width, height, 100, 100);
       scene = new Scene;
