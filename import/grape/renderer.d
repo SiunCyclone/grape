@@ -29,7 +29,7 @@ class Renderer {
     this() {
       _ibo = new IBO;
       for (int i; i<MaxNumVBO; ++i) {
-        _vbon ~= new VBON;
+        _vboList ~= new VBO;
       }
       
       _renderImplCaller["color"] = (program, geometry, material, camera) { render_impl_color(program, geometry, material, camera); };
@@ -79,9 +79,9 @@ class Renderer {
 
     void set_MaxNumVBO(in int n) {
       MaxNumVBO = n;
-      _vbon.length = 0;
+      _vboList.length = 0;
       for (int i; i<MaxNumVBO; ++i) {
-        _vbon ~= new VBON;
+        _vboList ~= new VBO;
       }
     }
 
@@ -130,8 +130,8 @@ class Renderer {
       _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
-      _vbon[0].set(program, position, "position", 3, 0);
-      _vbon[1].set(program, color, "color", 4, 1);
+      _vboList[0].set(program, position, "position", 3, 0);
+      _vboList[1].set(program, color, "color", 4, 1);
 
       // Uniform Setting
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
@@ -172,9 +172,9 @@ class Renderer {
       _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
-      _vbon[0].set(program, position, "position", 3, 0);
-      _vbon[1].set(program, color, "color", 4, 1);
-      _vbon[2].set(program, normal, "normal", 3, 2);
+      _vboList[0].set(program, position, "position", 3, 0);
+      _vboList[1].set(program, color, "color", 4, 1);
+      _vboList[2].set(program, normal, "normal", 3, 2);
 
       // Uniform Setting
       UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
@@ -218,9 +218,9 @@ class Renderer {
       _ibo.create(geometry.indices);
 
       // Attach VBOs to the program
-      _vbon[0].set(program, position, "position", 3, 0);
-      _vbon[1].set(program, color, "color", 4, 1);
-      _vbon[2].set(program, normal, "normal", 3, 2);
+      _vboList[0].set(program, position, "position", 3, 0);
+      _vboList[1].set(program, color, "color", 4, 1);
+      _vboList[2].set(program, normal, "normal", 3, 2);
 
       // Uniform: ambientColor
       auto ambientColorPtr = material.params["ambientColor"].peek!(int[]);
@@ -249,7 +249,7 @@ class Renderer {
 
     static immutable ColorMax = 255;
     int MaxNumVBO = 10;
-    VBON[] _vbon;
+    VBO[] _vboList;
     IBO _ibo;
     static void delegate(ShaderProgram, Geometry, Material, Camera)[string] _renderImplCaller;
 }

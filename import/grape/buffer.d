@@ -83,7 +83,7 @@ class AttributeLocationN {
     static GLint _location;
 }
 
-class VBON {
+class VBO {
   public:
     this() {
       glGenBuffers(1, &_id);
@@ -261,7 +261,7 @@ deprecated class VBOHdr {
       _num = num;
       _vboList.length = _num;
       for (int i; i<_num; ++i)
-        _vboList[i] = new VBO(program);
+        _vboList[i] = new OldVBO(program);
     }
 
     void create_vbo(in float[][] list...) {
@@ -285,10 +285,10 @@ deprecated class VBOHdr {
 
   private:
     size_t _num;
-    VBO[] _vboList;
+    OldVBO[] _vboList;
 }
 
-deprecated class VBO {
+deprecated class OldVBO {
   public:
     this(in GLuint program) {
       _attLoc = new AttributeLocation(program);
