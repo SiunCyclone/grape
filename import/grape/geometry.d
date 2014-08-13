@@ -69,12 +69,12 @@ class Geometry {
     }
 
     void forward(in float distance) {
-      auto distanceVec3 = _localCS.z * distance;
+      auto distanceVec3 = _localCS.x * distance;
       move_impl(distanceVec3);
     }
 
     void back(in float distance) {
-      auto distanceVec3 = _localCS.z * (-distance);
+      auto distanceVec3 = _localCS.x * (-distance);
       move_impl(distanceVec3);
     }
 
@@ -89,12 +89,12 @@ class Geometry {
     }
 
     void right(in float distance) {
-      auto distanceVec3 = _localCS.x * distance;
+      auto distanceVec3 = _localCS.z * distance;
       move_impl(distanceVec3);
     }
 
     void left(in float distance) {
-      auto distanceVec3 = _localCS.x * (-distance);
+      auto distanceVec3 = _localCS.z * (-distance);
       move_impl(distanceVec3);
     }
 
@@ -220,9 +220,9 @@ class BoxGeometry : Geometry {
     }
 }
 
-class TextureGeometry : Geometry {
+class PlaneGeometry : Geometry {
   public:
-    this() {
+    this(in float width, in float height, in int widthSegments=1, in int heightSegments=1) {
 
     }
 }
@@ -251,11 +251,33 @@ unittest {
 
   geometry.set_position(Vec3(1, 0, 0));
   assert(geometry.origin.vec3 == Vec3(1, 0, 0));
+  assert(geometry.vertices == [ Vec3([1.5, -0.5, -0.5]), Vec3([1.5, -0.5, 0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([0.5, -0.5, -0.5]), Vec3([1.5, 0.5, -0.5]), Vec3([1.5, 0.5, 0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([0.5, 0.5, -0.5])]);
 
+  geometry.set_position(Vec3(0, 0, 0));
+  geometry.forward(1.0);
+  assert(geometry.origin.vec3 == Vec3(1, 0, 0));
+  assert(geometry.vertices == [ Vec3([1.5, -0.5, -0.5]), Vec3([1.5, -0.5, 0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([0.5, -0.5, -0.5]), Vec3([1.5, 0.5, -0.5]), Vec3([1.5, 0.5, 0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([0.5, 0.5, -0.5])]);
+  geometry.back(1.0);
+  assert(geometry.origin.vec3 == Vec3(0, 0, 0));
+  assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
+  geometry.right(1.0);
+  assert(geometry.origin.vec3 == Vec3(0, 0, 1));
+  assert(geometry.vertices == [ Vec3([0.5, -0.5, 0.5]), Vec3([0.5, -0.5, 1.5]), Vec3([-0.5, -0.5, 1.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([0.5, 0.5, 1.5]), Vec3([-0.5, 0.5, 1.5]), Vec3([-0.5, 0.5, 0.5])]);
+  geometry.left(1.0);
+  assert(geometry.origin.vec3 == Vec3(0, 0, 0));
+  assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
+  geometry.up(1.0);
+  assert(geometry.origin.vec3 == Vec3(0, 1, 0));
+  assert(geometry.vertices == [ Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5]), Vec3([0.5, 1.5, -0.5]), Vec3([0.5, 1.5, 0.5]), Vec3([-0.5, 1.5, 0.5]), Vec3([-0.5, 1.5, -0.5])]);
+  geometry.down(1.0);
+  assert(geometry.origin.vec3 == Vec3(0, 0, 0));
+  assert(geometry.vertices == [ Vec3([0.5, -0.5, -0.5]), Vec3([0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, 0.5]), Vec3([-0.5, -0.5, -0.5]), Vec3([0.5, 0.5, -0.5]), Vec3([0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, 0.5]), Vec3([-0.5, 0.5, -0.5])]);
+
+
+  /*
   geometry.rotate(Vec3(0, 1, 0), PI);
   assert(nearly_equal(geometry.origin.vec3, Vec3(-1, 0, 0)));
 
-  /*
   geometry.pitch(PI_2);
   geometry.yaw(PI_2);
   geometry.roll(PI_2);
