@@ -13,6 +13,8 @@
   },
 
   "sourcePaths": ["import/grape"],
-  "importPaths": ["import"]
+  "importPaths": ["import"],
+
+  "targetType": "sourceLibrary"
 }
 
