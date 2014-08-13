@@ -15,7 +15,7 @@ Very Alpha
 
 ##### Procedure
 
-Just add below code to your package.json
+Just add below code to your dub.json
 
 ```
 {

@@ -2,7 +2,7 @@ import grape;
 
 void main() {
   Window window;
-  Renderer2 renderer;
+  Renderer renderer;
   GlowFilter filter;
   Scene scene;
   Camera camera;
@@ -17,8 +17,8 @@ void main() {
 
   void delegate() init = {
     void delegate() initCore = {
-      window = new Window("obj_read", width, height);
-      renderer = new Renderer2;
+      window = new Window("test", width, height);
+      renderer = new Renderer;
       renderer.enable_depth;
       renderer.enable_smooth;
       filter = new GlowFilter(width, height, 256, 256);
