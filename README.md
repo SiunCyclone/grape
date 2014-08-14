@@ -1,7 +1,7 @@
 Grape
 ======
 
-Grape is a Cross-Platform 3D Game Library for D.
+Grape is a Cross-Platform 3D Library for D.
 
 ### Status
 Very Alpha
@@ -21,7 +21,9 @@ Just add below code to your dub.json
 {
     "dependencies": {
         "grape": "~master"
-    }
+    },
+    
+    "targetType": "executable"
 }
 ```
 
