@@ -10,6 +10,7 @@ import derelict.sdl2.image;
 
 import std.stdio;
 import std.math;
+import std.conv;
 
 import grape.window;
 import grape.file;
@@ -166,9 +167,9 @@ class FBO {
       glDeleteFramebuffers(1, &_id);
     }
 
-    void create(T)(in T texture) {
+    void create(T)(in T texture, GLenum attachment=GL_COLOR_ATTACHMENT0) {
       glBindFramebuffer(GL_FRAMEBUFFER, _id);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture, 0);
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 

@@ -32,7 +32,6 @@ class Material {
   protected:
     void init() {
       _name = "none";
-      _shading = "gauraud";
       _params["drawMode"] = DrawMode.Triangles;
       // TODO
       _params["vertexShader"] = "Set user's vertexShaderSource here";
@@ -61,7 +60,6 @@ class Material {
     ParamType[string] _params;
     ShaderProgram _program;
     string _name;
-    string _shading;
 }
 
 class ColorMaterial : Material {
@@ -74,7 +72,6 @@ class ColorMaterial : Material {
   protected:
     override void init() {
       _name = "color";
-      _params["shading"] = _shading;
       _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
@@ -112,7 +109,6 @@ class DiffuseMaterial : Material {
   protected:
     override void init() {
       _name = "diffuse";
-      _params["shading"] = _shading;
       _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
@@ -158,7 +154,6 @@ class ADSMaterial : Material {
   protected:
     override void init() {
       _name = "ads";
-      _params["shading"] = _shading;
       _params["drawMode"] = DrawMode.Triangles;
       _params["color"] = [ 255, 255, 255 ];
       _params["wireframe"] = false;
@@ -201,17 +196,11 @@ class ADSMaterial : Material {
     };
 }
 
-// This is for Filter so a user don't use this.
 class TextureMaterial : Material {
   public:
     this(T...)(T params) {
       super(params);
       create_program(vertexShaderSource, fragmentShaderSource);
-    }
-
-  protected:
-    override void init() {
-      _name = "texture";
     }
 
   private:
@@ -223,7 +212,7 @@ class TextureMaterial : Material {
 
       void main() {
         vTexCoord = texCoord;
-        gl_Position = pvmMatrix * vec4(position, 1.0); 
+        gl_Position = vec4(position, 1.0); 
       }
     };
 

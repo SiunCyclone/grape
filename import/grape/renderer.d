@@ -96,6 +96,26 @@ class Renderer {
       }
     }
 
+    void render(Texture texture) {
+      auto material = new TextureMaterial;
+      auto program = material.program;
+      program.use();
+
+      float[] position = [ -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0 ];
+      float[] texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
+      int[] index = [ 0, 1, 2, 0, 2, 3 ];
+
+      _ibo.create(index);
+      _vboList[0].set(program, position, "position", 3, 0);
+      _vboList[1].set(program, texCoord, "texCoord", 2, 1);
+
+      UniformLocationN.attach(program, "tex", 0, "1i");
+
+      texture.texture_scope({
+        _ibo.draw(DrawMode.Triangles);
+      });
+    }
+
     /**
      * Viewportの設定
      *

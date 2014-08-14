@@ -6,5 +6,6 @@ Makefile
 document/
 examples/.dub
 examples/bin/
+examples/build.bat
 three/
 

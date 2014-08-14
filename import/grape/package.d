@@ -22,6 +22,8 @@ public import grape.math;
 
 public import grape.buffer;
 
+public import grape.effectComposer;
+
 
 public import grape.image;
 public import grape.filter;
