@@ -166,8 +166,11 @@ class Renderer {
             break;
           case "float[8]":
             UniformLocationN.attach(program, name, *value.peek!(float[8]), *data["type"].peek!(string), 8);
+          case "float[16]":
+            UniformLocationN.attach(program, name, *value.peek!(float[16]), *data["type"].peek!(string));
             break;
           default:
+            writeln("ShaderMaterial.uniforms setting is wrong");
             break;
         }
       }
