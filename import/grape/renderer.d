@@ -148,6 +148,7 @@ class Renderer {
       auto attributes = *material.params["attributes"].peek!(AttributeType[string][string]);
       int i = 1;
       foreach(name, data; attributes) {
+        if (name == "position") break;
         _vboList[i].set(program, *data["value"].peek!(float[]), name, *data["type"].peek!(int), i);
         ++i;
       }
@@ -156,10 +157,14 @@ class Renderer {
       //UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv");
       auto uniforms = *material.params["uniforms"].peek!(UniformType[string][string]);
       foreach(name, data; uniforms) {
+        if (name == "pvmMatrix") break;
         auto value = data["value"];
         switch (value.type.toString) {
           case "int":
             UniformLocationN.attach(program, name, *value.peek!(int), *data["type"].peek!(string));
+            break;
+          case "float":
+            UniformLocationN.attach(program, name, *value.peek!(float), *data["type"].peek!(string));
             break;
           case "float[2]":
             UniformLocationN.attach(program, name, *value.peek!(float[2]), *data["type"].peek!(string));

@@ -36,6 +36,7 @@ class UniformN {
       _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
       _uniIntV["1iv"] = (location, value, num) { glUniform1iv(location, num, value.ptr); };
       _uniIntV["2iv"] = (location, value, num) { glUniform2iv(location, num, value.ptr); };
+      _uniFloat["1f"] = (location, value) { glUniform1f(location, value); };
       _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
       _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
       _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
@@ -51,6 +52,10 @@ class UniformN {
       _uniIntV[type](location, value, num);
     }
 
+    static void locate(in string name, in float value, in string type, in int num, in GLint location) {
+      _uniFloat[type](location, value);
+    }
+
     static void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
       _uniFloatV[type](location, value, num);
     }
@@ -58,8 +63,8 @@ class UniformN {
   private:
     static void delegate(in GLint, in int)[string] _uniInt;
     static void delegate(in GLint, in int[], in int)[string] _uniIntV;
+    static void delegate(in GLint, in float)[string] _uniFloat;
     static void delegate(in GLint, in float[], in int)[string] _uniFloatV;
-    //static void delegate(in float)[string] _uniFloat;
 }
 
 class UniformLocationN {

@@ -7,7 +7,7 @@ import grape.shader;
 import grape.buffer;
 
 alias AttributeType = Algebraic!(float[], int);
-alias UniformType = Algebraic!(float[16], string, int, float[2], float[8]);
+alias UniformType = Algebraic!(float[16], string, int, float[2], float[8], float);
 
 class Material {
   alias ParamType = Algebraic!(int[], bool, string, int, DrawMode, Texture, AttributeType[string][string], UniformType[string][string]);
