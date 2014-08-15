@@ -1,11 +1,16 @@
 module grape.effectComposer;
 
 import std.variant;
+import std.stdio;
+import std.math;
 import grape.renderer;
 import grape.scene;
 import grape.camera;
 import grape.shader;
 import grape.buffer;
+import grape.geometry;
+import grape.material;
+import grape.mesh;
 import derelict.opengl3.gl3;
 
 class EffectComposer {
@@ -61,11 +66,12 @@ class EffectComposer {
 }
 
 class Pass {
-  protected:
+  public:
     this() {
       _fbo = new FBO;
     }
 
+  protected:
     abstract void render(Renderer, Texture, Texture);
 
     void create_fbo(Texture writeTexture) {
@@ -87,6 +93,9 @@ class Pass {
       });
     }
 
+    Scene _scene;
+    Camera _camera;
+
   private:
     FBO _fbo;
 }
@@ -105,45 +114,117 @@ class RenderPass : Pass {
         renderer.render(_scene, _camera);
       }, writeTexture.w, writeTexture.h);
     }
-
-  private:
-    Scene _scene;
-    Camera _camera;
 }
 
 class BlurPass : Pass {
   public:
-    this(in int width, in int height) {
-      _width = width;
-      _height = height;
+    this(int width, int height, in float weight=50.0) {
+      _widthBlurTexture = new Texture;
+      _widthBlurTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT, null, GL_RGBA);
+
+      _scene = new Scene;
+      _camera = new Camera(1, 100);
+      _geometry = new PlaneGeometry(2, 2);
+      float[2] resolution = [ WINDOW_WIDTH, WINDOW_HEIGHT ];
+      _material = new ShaderMaterial(
+        "vertexShader", q{
+          attribute vec3 position;
+          attribute vec2 texCoord;
+          varying vec2 vTexCoord;
+
+          void main() {
+            vTexCoord = texCoord;
+            gl_Position = vec4(position, 1.0); 
+          }
+        },
+        "fragmentShader", q{
+          uniform sampler2D tex;
+          uniform float weight[8];
+          uniform int type;
+          uniform vec2 resolution;
+          varying vec2 vTexCoord;
+
+          void main() {
+            vec2 t = vec2(1.0) / resolution;
+            vec4 color = texture(tex, vTexCoord) * weight[0];
+
+            if (type == 0) {
+              for (int i=1; i<8; ++i) {
+                color += texture(tex, (gl_FragCoord.xy + vec2(-1*i, 0)) * t) * weight[i];
+                color += texture(tex, (gl_FragCoord.xy + vec2(1*i, 0)) * t) * weight[i];
+              }
+
+            } else if (type == 1) {
+              for (int i=1; i<8; ++i) {
+                color += texture(tex, (gl_FragCoord.xy + vec2(0, -1*i)) * t) * weight[i];
+                color += texture(tex, (gl_FragCoord.xy + vec2(0, 1*i)) * t) * weight[i];
+              }
+            }
+
+            gl_FragColor = color;
+          }
+        },
+        "uniforms", [
+          "tex": [ "type": UniformType("1i"), "value": UniformType(0) ],
+          "weight": [ "type": UniformType("1fv"), "value": UniformType(gauss_weight(weight)) ],
+          "type": [ "type": UniformType("1i"), "value": UniformType(0) ],
+          "resolution": [ "type": UniformType("2fv"), "value": UniformType(resolution) ]
+        ],
+        "attributes", [
+          "texCoord": [ "type": AttributeType(2), "value": AttributeType([ 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f ]) ]
+        ]
+      );
+      _mesh = new Mesh(_geometry, _material);
+      _scene.add(_mesh);
     }
 
     override void render(Renderer renderer, Texture writeTexture, Texture readTexture) {
       auto widthBlur = {
-        auto tmp = new Texture;
-        tmp.create(writeTexture.w, writeTexture.h, null, GL_RGBA);
-
-        create_fbo(tmp);
+        create_fbo(_widthBlurTexture);
+        _material.set_param("map", readTexture);
+        _material.change_uniform("type", 0);
 
         binded_scope({
-          renderer.render(readTexture);
-        }, tmp.w, tmp.h);
+          renderer.render(_scene, _camera);
+        }, _widthBlurTexture.w, _widthBlurTexture.h);
       };
 
       auto heightBlur = {
         create_fbo(writeTexture);
+        _material.set_param("map", _widthBlurTexture);
+        _material.change_uniform("type", 1);
 
         binded_scope({
-          renderer.render(readTexture);
+          renderer.render(_scene, _camera);
         }, writeTexture.w, writeTexture.h);
       };
 
-      widthBlur();
-      heightBlur();
+     widthBlur();
+     heightBlur();
     }
 
   private:
-    int _width, _height;
+    float[8] gauss_weight(in float eRange) {
+      float[8] weight;
+      float t = 0.0;
+      float d = eRange^^2 / 100;
+      for (int i=0; i<weight.length; ++i) {
+        float r = 1.0 + 2.0*i;
+        float w = exp(-0.5 * r^^2 / d);
+        weight[i] = w;
+        if (i > 0) w *= 2.0;
+          t += w;
+      }
+      for (int i=0; i<weight.length; ++i){
+        weight[i] /= t;
+      }
+      return weight;
+    }
+
+    PlaneGeometry _geometry;
+    ShaderMaterial _material;
+    Mesh _mesh;
+    Texture _widthBlurTexture;
 }
 
 /*
@@ -157,16 +238,16 @@ class GlowPass : Pass {
 
   private:
 }
+*/
 
 class ShaderPass : Pass {
   public:
-    this(Shader shader) {
+    this(Shader vShader, Shader fShader) {
     }
 
-    override void render(Renderer renderer) {
+    override void render(Renderer renderer, Texture writeTexture, Texture readTexture) {
     }
 
   private:
 }
-*/
 

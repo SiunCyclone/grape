@@ -223,7 +223,14 @@ class BoxGeometry : Geometry {
 class PlaneGeometry : Geometry {
   public:
     this(in float width, in float height, in int widthSegments=1, in int heightSegments=1) {
+      auto x = width / 2;
+      auto y = height / 2;
 
+      _vertices = [ Vec3(-x, y, 0),
+                    Vec3(x, y, 0),
+                    Vec3(x, -y, 0),
+                    Vec3(-x, -y, 0) ];
+      _indices = [ 0, 1, 2, 0, 2, 3 ];
     }
 }
 

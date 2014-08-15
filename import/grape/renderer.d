@@ -4,6 +4,7 @@ import derelict.opengl3.gl3;
 
 import std.math;
 import std.stdio;
+import std.traits;
 
 import grape.buffer;
 import grape.shader;
@@ -32,6 +33,7 @@ class Renderer {
         _vboList ~= new VBO;
       }
       
+      _renderImplCaller["shader"] = (program, geometry, material, camera) { render_impl_shader(program, geometry, material, camera); };
       _renderImplCaller["color"] = (program, geometry, material, camera) { render_impl_color(program, geometry, material, camera); };
       _renderImplCaller["diffuse"] = (program, geometry, material, camera) { render_impl_diffuse(program, geometry, material, camera); };
       _renderImplCaller["ads"] = (program, geometry, material, camera) { render_impl_ads(program, geometry, material, camera); };
@@ -96,23 +98,23 @@ class Renderer {
       }
     }
 
-    void render(Texture texture) {
-      auto material = new TextureMaterial;
+    void render(Texture texture, Material material = new TextureMaterial) {
       auto program = material.program;
       program.use();
 
-      float[] position = [ -1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1.0, 0.0, -1.0, -1.0, 0.0 ];
+      float[] position = [ -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0 ];
       float[] texCoord = [ 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 ];
       int[] index = [ 0, 1, 2, 0, 2, 3 ];
 
       _ibo.create(index);
-      _vboList[0].set(program, position, "position", 3, 0);
+      _vboList[0].set(program, position, "position", 2, 0);
       _vboList[1].set(program, texCoord, "texCoord", 2, 1);
 
       UniformLocationN.attach(program, "tex", 0, "1i");
 
       texture.texture_scope({
-        _ibo.draw(DrawMode.Triangles);
+        auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
+        _ibo.draw(*drawModePtr);
       });
     }
 
@@ -130,6 +132,52 @@ class Renderer {
     }
     
   private:
+    void render_impl_shader(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
+      float[] position;
+
+      // VBO: Position
+      foreach (vec3; geometry.vertices) {
+        position ~= vec3.coord;
+      }
+
+      // IBO Setting
+      _ibo.create(geometry.indices);
+
+      // Attach VBOs to the program
+      _vboList[0].set(program, position, "position", 3, 0);
+      auto attributes = *material.params["attributes"].peek!(AttributeType[string][string]);
+      int i = 1;
+      foreach(name, data; attributes) {
+        _vboList[i].set(program, *data["value"].peek!(float[]), name, *data["type"].peek!(int), i);
+        ++i;
+      }
+
+      // Uniform Setting
+      //UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv");
+      auto uniforms = *material.params["uniforms"].peek!(UniformType[string][string]);
+      foreach(name, data; uniforms) {
+        auto value = data["value"];
+        switch (value.type.toString) {
+          case "int":
+            UniformLocationN.attach(program, name, *value.peek!(int), *data["type"].peek!(string));
+            break;
+          case "float[2]":
+            UniformLocationN.attach(program, name, *value.peek!(float[2]), *data["type"].peek!(string));
+            break;
+          case "float[8]":
+            UniformLocationN.attach(program, name, *value.peek!(float[8]), *data["type"].peek!(string), 8);
+            break;
+          default:
+            break;
+        }
+      }
+
+      (*material.params["map"].peek!(Texture)).texture_scope({
+        auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
+        _ibo.draw(*drawModePtr);
+      });
+    }
+
     void render_impl_color(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
       float[] position;
       float[] color;
@@ -154,7 +202,7 @@ class Renderer {
       _vboList[1].set(program, color, "color", 4, 1);
 
       // Uniform Setting
-      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
+      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv");
 
       // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);
@@ -197,10 +245,10 @@ class Renderer {
       _vboList[2].set(program, normal, "normal", 3, 2);
 
       // Uniform Setting
-      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
-      UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv", 1);
+      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv");
+      UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv");
       // TODO sceneの中にlight置くようにする
-      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv", 1);
+      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv");
 
       // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);
@@ -249,13 +297,13 @@ class Renderer {
       float[4] ambientColor = tmp2 ~ 1.0;
 
       // Uniform Setting
-      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv", 1);
-      UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv", 1);
+      UniformLocationN.attach(program, "pvmMatrix", camera.pvMat4.mat, "mat4fv");
+      UniformLocationN.attach(program, "invMatrix", camera.pvMat4.inverse.mat, "mat4fv");
       // TODO sceneの中にlight置くようにする
-      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv", 1);
+      UniformLocationN.attach(program, "lightPosition", [2.0f, 2.0f, -2.0f], "3fv");
       // TODO camera実装してcameraの位置入れる
-      UniformLocationN.attach(program, "eyePosition", [0.0f, 1.0f, 3.0f], "3fv", 1);
-      UniformLocationN.attach(program, "ambientColor", ambientColor, "4fv", 1);
+      UniformLocationN.attach(program, "eyePosition", [0.0f, 1.0f, 3.0f], "3fv");
+      UniformLocationN.attach(program, "ambientColor", ambientColor, "4fv");
 
       // Wireframe Checking
       auto wireframePtr = material.params["wireframe"].peek!(bool);

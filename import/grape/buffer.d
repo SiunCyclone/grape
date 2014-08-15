@@ -34,6 +34,8 @@ class UniformN {
   public:
     static this() {
       _uniInt["1i"] = (location, value) { glUniform1i(location, value); };
+      _uniIntV["1iv"] = (location, value, num) { glUniform1iv(location, num, value.ptr); };
+      _uniIntV["2iv"] = (location, value, num) { glUniform2iv(location, num, value.ptr); };
       _uniFloatV["1fv"] = (location, value, num) { glUniform1fv(location, num, value.ptr); };
       _uniFloatV["2fv"] = (location, value, num) { glUniform2fv(location, num, value.ptr); };
       _uniFloatV["3fv"] = (location, value, num) { glUniform3fv(location, num, value.ptr); };
@@ -45,14 +47,18 @@ class UniformN {
       _uniInt[type](location, value);
     }
 
+    static void locate(in string name, in int[] value, in string type, in int num, in GLint location) {
+      _uniIntV[type](location, value, num);
+    }
+
     static void locate(in string name, in float[] value, in string type, in int num, in GLint location) {
       _uniFloatV[type](location, value, num);
     }
 
   private:
     static void delegate(in GLint, in int)[string] _uniInt;
+    static void delegate(in GLint, in int[], in int)[string] _uniIntV;
     static void delegate(in GLint, in float[], in int)[string] _uniFloatV;
-    //static void delegate(in int[])[string] _uniIntV;
     //static void delegate(in float)[string] _uniFloat;
 }
 
@@ -167,7 +173,7 @@ class FBO {
       glDeleteFramebuffers(1, &_id);
     }
 
-    void create(T)(in T texture, GLenum attachment=GL_COLOR_ATTACHMENT0) {
+    void create(T)(in T texture, GLenum attachment = GL_COLOR_ATTACHMENT0) {
       glBindFramebuffer(GL_FRAMEBUFFER, _id);
       glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture, 0);
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
