@@ -182,7 +182,7 @@ class BlurPass : Pass {
       auto widthBlur = {
         create_fbo(_widthBlurTexture);
         _material.set_param("map", readTexture);
-        _material.change_uniform("type", 0);
+        _material.set_uniform("type", 0);
 
         binded_scope({
           renderer.render(_scene, _camera);
@@ -192,7 +192,7 @@ class BlurPass : Pass {
       auto heightBlur = {
         create_fbo(writeTexture);
         _material.set_param("map", _widthBlurTexture);
-        _material.change_uniform("type", 1);
+        _material.set_uniform("type", 1);
 
         binded_scope({
           renderer.render(_scene, _camera);

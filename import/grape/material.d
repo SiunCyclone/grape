@@ -240,7 +240,7 @@ class ShaderMaterial : Material {
       create_program(*_params["vertexShader"].peek!(string), *_params["fragmentShader"].peek!(string));
     }
 
-    void change_uniform(T)(string key, T value) {
+    void set_uniform(T)(string key, T value) {
       (*_params["uniforms"].peek!(UniformType[string][string]))[key]["value"] = value;
     }
 
