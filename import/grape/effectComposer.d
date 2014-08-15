@@ -127,43 +127,8 @@ class BlurPass : Pass {
       _geometry = new PlaneGeometry(2, 2);
       float[2] resolution = [ WINDOW_WIDTH, WINDOW_HEIGHT ];
       _material = new ShaderMaterial(
-        "vertexShader", q{
-          attribute vec3 position;
-          attribute vec2 texCoord;
-          varying vec2 vTexCoord;
-
-          void main() {
-            vTexCoord = texCoord;
-            gl_Position = vec4(position, 1.0); 
-          }
-        },
-        "fragmentShader", q{
-          uniform sampler2D tex;
-          uniform float weight[8];
-          uniform int type;
-          uniform vec2 resolution;
-          varying vec2 vTexCoord;
-
-          void main() {
-            vec2 t = vec2(1.0) / resolution;
-            vec4 color = texture(tex, vTexCoord) * weight[0];
-
-            if (type == 0) {
-              for (int i=1; i<8; ++i) {
-                color += texture(tex, (gl_FragCoord.xy + vec2(-1*i, 0)) * t) * weight[i];
-                color += texture(tex, (gl_FragCoord.xy + vec2(1*i, 0)) * t) * weight[i];
-              }
-
-            } else if (type == 1) {
-              for (int i=1; i<8; ++i) {
-                color += texture(tex, (gl_FragCoord.xy + vec2(0, -1*i)) * t) * weight[i];
-                color += texture(tex, (gl_FragCoord.xy + vec2(0, 1*i)) * t) * weight[i];
-              }
-            }
-
-            gl_FragColor = color;
-          }
-        },
+        "vertexShader", vertexShaderSource,
+        "fragmentShader", fragmentShaderSource,
         "uniforms", [
           "tex": [ "type": UniformType("1i"), "value": UniformType(0) ],
           "weight": [ "type": UniformType("1fv"), "value": UniformType(gauss_weight(weight)) ],
@@ -220,6 +185,45 @@ class BlurPass : Pass {
       }
       return weight;
     }
+
+    static immutable vertexShaderSource = q{
+      attribute vec3 position;
+      attribute vec2 texCoord;
+      varying vec2 vTexCoord;
+
+      void main() {
+        vTexCoord = texCoord;
+        gl_Position = vec4(position, 1.0); 
+      }
+    };
+
+    static immutable fragmentShaderSource = q{
+      uniform sampler2D tex;
+      uniform float weight[8];
+      uniform int type;
+      uniform vec2 resolution;
+      varying vec2 vTexCoord;
+
+      void main() {
+        vec2 t = vec2(1.0) / resolution;
+        vec4 color = texture(tex, vTexCoord) * weight[0];
+
+        if (type == 0) {
+          for (int i=1; i<8; ++i) {
+            color += texture(tex, (gl_FragCoord.xy + vec2(-1*i, 0)) * t) * weight[i];
+            color += texture(tex, (gl_FragCoord.xy + vec2(1*i, 0)) * t) * weight[i];
+          }
+
+        } else if (type == 1) {
+          for (int i=1; i<8; ++i) {
+            color += texture(tex, (gl_FragCoord.xy + vec2(0, -1*i)) * t) * weight[i];
+            color += texture(tex, (gl_FragCoord.xy + vec2(0, 1*i)) * t) * weight[i];
+          }
+        }
+
+        gl_FragColor = color;
+      }
+    };
 
     PlaneGeometry _geometry;
     ShaderMaterial _material;

@@ -40,6 +40,20 @@
       "targetType": "executable",
       "targetPath": "bin",
       "sourceFiles": ["src/test.d"]
+    },
+    {
+      "name": "frag",
+      "targetName": "frag",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/frag.d"]
+    },
+    {
+      "name": "voronoise",
+      "targetName": "voronoise",
+      "targetType": "executable",
+      "targetPath": "bin",
+      "sourceFiles": ["src/voronoise.d"]
     }
   ],
 
