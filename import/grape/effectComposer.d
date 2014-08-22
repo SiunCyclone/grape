@@ -123,7 +123,7 @@ class BlurPass : Pass {
       _widthBlurTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT, null, GL_RGBA);
 
       _scene = new Scene;
-      _camera = new Camera(1, 100);
+      _camera = new OrthographicCamera(-cast(float)width/height, cast(float)width/height, -1, 1, 1, 100);
       _geometry = new PlaneGeometry(2, 2);
       float[2] resolution = [ WINDOW_WIDTH, WINDOW_HEIGHT ];
       _material = new ShaderMaterial(
@@ -193,7 +193,7 @@ class BlurPass : Pass {
 
       void main() {
         vTexCoord = texCoord;
-        gl_Position = vec4(position, 1.0); 
+        gl_Position = vec4(position, 1.0);
       }
     };
 
