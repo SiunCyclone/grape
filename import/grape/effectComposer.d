@@ -139,8 +139,8 @@ class BlurPass : Pass {
           "texCoord": [ "type": AttributeType(2), "value": AttributeType([ 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f ]) ]
         ]
       );
-      _mesh = new Mesh(_geometry, _material);
-      _scene.add(_mesh);
+      _screen = new Mesh(_geometry, _material);
+      _scene.add(_screen);
     }
 
     override void render(Renderer renderer, Texture writeTexture, Texture readTexture) {
@@ -227,11 +227,10 @@ class BlurPass : Pass {
 
     PlaneGeometry _geometry;
     ShaderMaterial _material;
-    Mesh _mesh;
+    Mesh _screen;
     Texture _widthBlurTexture;
 }
 
-/*
 class GlowPass : Pass {
   public:
     this(in int w, in int h, in int resX, in int resY) {
@@ -242,7 +241,6 @@ class GlowPass : Pass {
 
   private:
 }
-*/
 
 class ShaderPass : Pass {
   public:
