@@ -5,7 +5,7 @@ import grape.buffer;
 import grape.renderer;
 import grape.window;
 
-abstract class Filter {
+deprecated abstract class Filter {
   public:
     /**
      * Filterの初期化
@@ -32,7 +32,7 @@ abstract class Filter {
      *
      * 実際にポストエフェクトをかける関数です。
      * 引数部分で下記のように描画処理をすれば、ポストエフェクトがかかった状態で描画されます。
-     * 
+     *
      * Examples:
      * ---------------
      * Filter.filter({
@@ -129,7 +129,7 @@ abstract class Filter {
     Texture[] _textures;
 }
 
-class BlurFilter : Filter {
+deprecated class BlurFilter : Filter {
   public:
     this(in int w, in int h) {
       super(3, w, h);
@@ -161,7 +161,7 @@ class BlurFilter : Filter {
     GaussianRenderer _renderer;
 }
 
-class GlowFilter : Filter {
+deprecated class GlowFilter : Filter {
   public:
     this(in int w, in int h) {
       this(w, h, w, h);
@@ -181,7 +181,7 @@ class GlowFilter : Filter {
       create_filter(0, raw_render);
       _blurFilter.black_filter(raw_render);
 
-      create_filter(1, { 
+      create_filter(1, {
         glBlendFunc(GL_ONE, GL_ONE);
         render(0);
         _blurFilter.render();
