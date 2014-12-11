@@ -5,34 +5,33 @@ import derelict.opengl3.gl3;
 import std.math;
 import std.stdio;
 import std.traits;
+import std.conv;
+import std.algorithm;
+import std.array;
+import std.range;
 
 import grape.buffer;
 import grape.shader;
 import grape.window;
+import grape.scene;
+import grape.camera;
+import grape.mesh;
+import grape.geometry;
+import grape.material;
+import grape.filter;
+import grape.math;
 
 public import grape.image : ImageRenderer;
 public import grape.font : FontRenderer;
 
 class Renderer {
-  import grape.scene;
-  import grape.camera;
-  import grape.mesh;
-  import grape.geometry;
-  import grape.material;
-  import grape.filter;
-  import grape.math;
-  import std.conv;
-  import std.algorithm;
-  import std.array;
-  import std.range;
-
   public:
     this() {
       _ibo = new IBO;
       for (int i; i<MaxNumVBO; ++i) {
         _vboList ~= new VBO;
       }
-      
+
       _renderImplCaller["shader"] = (program, geometry, material, camera) { render_impl_shader(program, geometry, material, camera); };
       _renderImplCaller["color"] = (program, geometry, material, camera) { render_impl_color(program, geometry, material, camera); };
       _renderImplCaller["diffuse"] = (program, geometry, material, camera) { render_impl_diffuse(program, geometry, material, camera); };
@@ -130,7 +129,7 @@ class Renderer {
     void viewport(in int x, in int y, in int w, in int h) {
       glViewport(x, y, w, h);
     }
-    
+
   private:
     void render_impl_shader(ShaderProgram program, Geometry geometry, Material material, Camera camera) {
       float[] position;
@@ -217,7 +216,7 @@ class Renderer {
       auto wireframePtr = material.params["wireframe"].peek!(bool);
       bool wireframe = *wireframePtr;
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+      scope(exit) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
       auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
       _ibo.draw(*drawModePtr);
@@ -244,7 +243,7 @@ class Renderer {
       float[3] tmp = colorRGB[] / ColorMax;
       float[4] colorBase = tmp ~ 1.0;
       color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
-      
+
       // IBO Setting
       _ibo.create(geometry.indices);
 
@@ -263,7 +262,7 @@ class Renderer {
       auto wireframePtr = material.params["wireframe"].peek!(bool);
       bool wireframe = *wireframePtr;
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+      scope(exit) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
       auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
       _ibo.draw(*drawModePtr);
@@ -285,7 +284,7 @@ class Renderer {
       float[3] tmp = colorRGB[] / ColorMax;
       float[4] colorBase = tmp ~ 1.0;
       color = colorBase.cycle.take(colorBase.length * geometry.vertices.length).array;
-      
+
       // VBO: Normal
       foreach (vec3; geometry.normals) {
         normal ~= vec3.coord;
@@ -318,7 +317,7 @@ class Renderer {
       auto wireframePtr = material.params["wireframe"].peek!(bool);
       bool wireframe = *wireframePtr;
       if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      scope(exit) glPolygonMode( GL_FRONT_AND_BACK, GL_FILL); 
+      scope(exit) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
       auto drawModePtr = material.params["drawMode"].peek!(DrawMode);
       _ibo.draw(*drawModePtr);
@@ -385,11 +384,11 @@ deprecated abstract class Old_Renderer {
 
     /**
      * Uniform変数のセット
-     * 
+     *
      * name:    uniformの場所の名前
      * value:   セットする値
-     * type:     
-     * num:     
+     * type:
+     * num:
      */
     final void set_uniform(T)(in string name, in T value, in string type, in int num=1) {
       _program.use();
@@ -467,7 +466,7 @@ deprecated class FilterRenderer : Old_Renderer {
 
 /**
  * GaussBlur用のRenderer
- * 
+ *
  * ユーザーが使うことはまずないと思われる
  *
  * TODO:

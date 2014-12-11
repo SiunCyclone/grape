@@ -95,6 +95,8 @@ class Pass {
 
     Scene _scene;
     Camera _camera;
+    PlaneGeometry _geometry;
+    Mesh _screen;
 
   private:
     FBO _fbo;
@@ -120,7 +122,6 @@ class BlurPass : Pass {
   public:
     this(int width, int height, in float weight=50.0) {
       _widthBlurTexture = new Texture;
-      _widthBlurTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT, null, GL_RGBA);
 
       _scene = new Scene;
       _camera = new OrthographicCamera(-cast(float)width/height, cast(float)width/height, -1, 1, 1, 100);
@@ -145,6 +146,7 @@ class BlurPass : Pass {
 
     override void render(Renderer renderer, Texture writeTexture, Texture readTexture) {
       auto widthBlur = {
+        _widthBlurTexture.create(readTexture.w, readTexture.h, null, GL_RGBA);
         create_fbo(_widthBlurTexture);
         _material.set_param("map", readTexture);
         _material.set_uniform("type", 0);
@@ -225,21 +227,34 @@ class BlurPass : Pass {
       }
     };
 
-    PlaneGeometry _geometry;
     ShaderMaterial _material;
-    Mesh _screen;
     Texture _widthBlurTexture;
+    int _width, _height;
 }
 
 class GlowPass : Pass {
   public:
-    this(in int w, in int h, in int resX, in int resY) {
+    this(in int width, in int height, in int resX, in int resY) {
+      _blurPass = new BlurPass(width, height);
+      _blurTexture= new Texture;
+      _blurTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT, null, GL_RGBA);
     }
 
     override void render(Renderer renderer, Texture writeTexture, Texture readTexture) {
+      create_fbo(writeTexture);
+      _blurPass.render(renderer, _blurTexture, readTexture);
+
+      binded_scope({
+        glBlendFunc(GL_ONE, GL_ONE);
+        renderer.render(readTexture);
+        renderer.render(_blurTexture);
+      }, writeTexture.w, writeTexture.h);
     }
 
   private:
+    TextureMaterial _material;
+    BlurPass _blurPass;
+    Texture _blurTexture;
 }
 
 class ShaderPass : Pass {
