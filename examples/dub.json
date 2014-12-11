@@ -8,8 +8,8 @@
   ],
 
   "dependencies": {
-    "derelict:sdl2": "~master",
-    "derelict:opengl3": "~master"
+    "derelict-sdl2": ">=1.2.9",
+    "derelict-gl3": ">=1.0.10"
   },
 
   "configurations": [

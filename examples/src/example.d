@@ -4,7 +4,7 @@ void main() {
   Window window;
   Renderer renderer;
   Scene scene;
-  Camera camera;
+  PerspectiveCamera camera;
 
   int width = 640;
   int height = 480;
@@ -17,7 +17,7 @@ void main() {
       window = new Window("example", width, height);
       renderer = new Renderer;
       scene = new Scene;
-      camera = new Camera(0.1, 100);
+      camera = new PerspectiveCamera(45, float(width)/height, 1, 100);
       camera.look_at(Vec3(0, 0, 4), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
       Input.key_down(KEY_Q, {
@@ -58,5 +58,5 @@ void main() {
 
   init();
   animate();
-} 
+}
 
