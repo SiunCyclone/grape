@@ -48,7 +48,7 @@ class Renderer {
       foreach (name; names) {
         if (name == "polygon") glEnable(GL_POLYGON_SMOOTH);
         else if (name == "line") glEnable(GL_LINE_SMOOTH);
-        else writeln("Warning: " ~ name ~ " is not a smooth parameter's name. Check your enable_smooth()");
+        else writeln("Warning: " ~ name ~ " is not a smooth parameter's name. Check the args of the enable_smooth()");
       }
     }
 

@@ -17,7 +17,7 @@ void main() {
       window = new Window("example", width, height);
       renderer = new Renderer;
       scene = new Scene;
-      camera = new PerspectiveCamera(45, float(width)/height, 1, 100);
+      camera = new PerspectiveCamera(45, cast(float)width/height, 1, 100);
       camera.look_at(Vec3(0, 0, 4), Vec3(0, 0, 0), Vec3(0, 1, 0));
 
       Input.key_down(KEY_Q, {
